@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>RESERVE++: Reserve a Seat</title>
+</head>
+
+<body>
+	<div class="sidebar">
+		<div class="logo">RS++</div>
+	</div>
+
+	<main class="main-content">
+		<h1>Reserve a Seat</h1>
+		<p>Choose a lab and time that works for you</p>
+
+		<div class="seat-plan-container">
+			<h3>Select a seat (Multi-select enabled)</h3>
+			<div class="seat-grid" id="seatGrid">
+			</div>
+		</div>
+		<br>
+		<button id="openReserveBtn" class="btn-reserve" style="display: none;">Continue Reservation</button>
+	</main>
+
+	<aside class="reservations-panel">
+		<h3>My Reservations</h3>
+		<div id="reservationList"></div>
+	</aside>
+
+	<div id="modal" class="modal-overlay">
+		<div class="modal-content">
+			<h2 id="modalTitle">Gokongwei Hall</h2>
+			<p id="modalSeats">Selected Seats: None</p>
+
+			<select id="dateSelect">
+				<option value="" disabled selected>Select Date</option>
+				<option value="2026-02-10">Feb 10, 2026</option>
+				<option value="2026-02-11" disabled>Feb 11, 2026 (Fully Booked)</option>
+				<option value="2026-02-12">Feb 12, 2026</option>
+			</select>
+
+			<select id="timeSelect">
+				<option value="" disabled selected>Select Time Slot</option>
+				<option value="08:00 AM">08:00 AM</option>
+				<option value="10:00 AM" disabled style="color:red;">10:00 AM (Reserved)</option>
+				<option value="01:00 PM">01:00 PM</option>
+			</select>
+
+			<button id="confirmBtn" class="btn-reserve">Reserve</button>
+			<button onclick="closeModal()"
+				style="margin-top:10px; background:none; border:none; color:#888; cursor:pointer;">Cancel</button>
+		</div>
+	</div>
+</body>
+
+</html>
