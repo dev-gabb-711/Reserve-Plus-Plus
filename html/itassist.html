@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>RESERVE++: IT Assist</title>
+</head>
+
+<body>
+    <div class="assist-container">        
+        <!--NAVBAR-->
+        <nav class="sidebar">            
+			<ul class="nav-links">
+				<li><i class="icon-home"></i></li>
+				<li><i class="icon-monitor"></i></li>
+				<li><i class="icon-report"></i></li>
+				<li><i class="icon-bell"></i></li>
+			</ul>
+            <div class="logo">RS++</div>
+        </nav>
+        
+        <!--IT ASSIS HEADER-->
+        <header class="assist-header">
+            <h1>IT ASSIST</h1>
+            <p>Tell us what's wrong and we'll assist you shortly</p>
+            <input type="search" placeholder="Search for Labs here...">
+        </header>        
+
+        <!--MAIN FORM/TICKET SUBMISSION SECTION-->
+        <main class="ticket-container">   
+            <section class="ticket-textarea">
+                <!--[NOTE] for feedback: text area or form + textarea-->
+                <textarea rows="4" cols="50"></textarea>
+            </section>                     
+            <button type="submit">submit</button>
+            <button type="button">cancel</button>
+        </main>
+
+        <!--RIGHT PANEL-->
+        <aside class="assist-right-panel">
+            <section class="profile-card">
+				<img src="../img/def_avatar.jpg" alt="Profile">
+				<p>First Name Last Name</p>
+				<p>Lab user</p>
+			</section>
+
+            <section class="my-tickets">
+                <h2>My Tickets</h2>
+
+                <!--[NOTE] for research: dynamic cards-->
+                <div class="ticket-card">
+                    <h3>Room G203 • Seat 1</h3>
+                    <p>Pending</p>
+                </div>
+
+                <div class="ticket-card">
+                    <h3>Room A1103 • Seat 1</h3>
+                    <p>Resolved</p>
+                </div>
+
+                <button type="button">FAQ</button>
+            </section>
+        </aside>
+
+
+    </div>
+
+</body>
+
+</html>
