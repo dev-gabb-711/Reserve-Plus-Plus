@@ -32,7 +32,6 @@ body {
 }
 
 body {
-  background: var(--bg-dark);
   color: var(--text-white);
 }
 
@@ -47,8 +46,6 @@ body {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: var(--bg-gradient);
-  /* Subtle background pattern or noise could go here */
 }
 
 /* =========================
