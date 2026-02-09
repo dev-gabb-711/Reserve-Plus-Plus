@@ -2,70 +2,90 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>RESERVE++: IT Assist</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RESERVE++: IT Assist</title>
+    <!-- Bootstrap and Design Links -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <!-- All design here -->
+    <link rel="stylesheet" href="../css/itassist.css">
 </head>
 
 <body>
-    <div class="assist-container">        
-        <!--NAVBAR-->
-        <nav class="sidebar">            
-			<ul class="nav-links">
-				<li><i class="icon-home"></i></li>
-				<li><i class="icon-monitor"></i></li>
-				<li><i class="icon-report"></i></li>
-				<li><i class="icon-bell"></i></li>
-			</ul>
+    <div class="app-bg"></div>
+
+    <div class="assist-container">
+        <nav class="sidebar">
+            <ul class="nav-links">
+                <li><span class="material-symbols-rounded">home</span></li>
+                <li><span class="material-symbols-rounded">monitor</span></li>
+                <li><span class="material-symbols-rounded">report</span></li>
+                <li><span class="material-symbols-rounded">notifications</span></li>
+            </ul>
             <div class="logo">RS++</div>
         </nav>
-        
-        <!--IT ASSIS HEADER-->
-        <header class="assist-header">
-            <h1>IT ASSIST</h1>
-            <p>Tell us what's wrong and we'll assist you shortly</p>
-            <input type="search" placeholder="Search for Labs here...">
-        </header>        
 
-        <!--MAIN FORM/TICKET SUBMISSION SECTION-->
-        <main class="ticket-container">   
-            <section class="ticket-textarea">
-                <!--[NOTE] for feedback: text area or form + textarea-->
-                <textarea rows="4" cols="50"></textarea>
-            </section>                     
-            <button type="submit">submit</button>
-            <button type="button">cancel</button>
-        </main>
+        <div class="center-content">
+            <header class="assist-header">
+                <div class="header-text">
+                    <h1>IT ASSIST</h1>
+                    <p>Tell us what's wrong and we'll assist you shortly</p>
+                </div>
+                <div class="search-box">
+                    <span class="material-symbols-rounded">search</span>
+                    <input type="search" placeholder="Search for Labs here...">
+                </div>
+            </header>
 
-        <!--RIGHT PANEL-->
+            <main class="ticket-container">
+                <div class="ticket-textarea">
+                    <textarea placeholder="Type your issue here..."></textarea>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn-submit">Submit</button>
+                    <button type="button" class="btn-cancel">Cancel</button>
+                </div>
+            </main>
+        </div>
+
         <aside class="assist-right-panel">
             <section class="profile-card">
-				<img src="../img/def_avatar.jpg" alt="Profile">
-				<p>First Name Last Name</p>
-				<p>Lab user</p>
-			</section>
+                <img src="../img/def_avatar.jpg" alt="Profile">
+                <div class="profile-info">
+                    <p class="name">Gabby Martinez</p>
+                    <p class="role">Lab User</p>
+                </div>
+            </section>
 
             <section class="my-tickets">
                 <h2>My Tickets</h2>
 
-                <!--[NOTE] for research: dynamic cards-->
-                <div class="ticket-card">
-                    <h3>Room G203 • Seat 1</h3>
-                    <p>Pending</p>
+                <div class="ticket-card pending">
+                    <div class="status-pill"></div>
+                    <div class="ticket-info">
+                        <h3>Room G203 • Seat 1</h3>
+                        <p>Pending</p>
+                    </div>
                 </div>
 
-                <div class="ticket-card">
-                    <h3>Room A1103 • Seat 1</h3>
-                    <p>Resolved</p>
+                <div class="ticket-card resolved">
+                    <div class="status-pill"></div>
+                    <div class="ticket-info">
+                        <h3>Room A1103 • Seat 1</h3>
+                        <p>Resolved</p>
+                    </div>
                 </div>
-
-                <button type="button">FAQ</button>
             </section>
+            <button type="button" class="faq-btn">FAQ</button>
         </aside>
-
-
     </div>
-
 </body>
 
 </html>
