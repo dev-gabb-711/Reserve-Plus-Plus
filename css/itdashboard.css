@@ -144,7 +144,7 @@ body {
     color: white;
 }
 
-/* The Grid Layout for Tickets */
+
 .tickets-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -153,7 +153,6 @@ body {
     padding-bottom: 40px;
 }
 
-/* The Individual Ticket Card */
 .ticket-card {
     background: linear-gradient(135deg, #4b2ea2 0%, #b36e4d 100%);
     border-radius: 20px;
