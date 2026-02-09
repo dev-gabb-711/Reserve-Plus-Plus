@@ -1,21 +1,28 @@
 /* =========================
    Base + Background
 ========================= */
-:root{
+:root {
   --bg-1: #0b0c10;
   --panel: rgba(140, 120, 160, 0.35);
   --panel-2: rgba(140, 120, 160, 0.28);
   --panel-solid: rgba(120, 98, 138, 0.55);
   --white: #ffffff;
-  --muted: rgba(255,255,255,0.72);
-  --muted2: rgba(255,255,255,0.55);
-  --stroke: rgba(255,255,255,0.18);
-  --shadow: 0 18px 40px rgba(0,0,0,0.35);
+  --muted: rgba(255, 255, 255, 0.72);
+  --muted2: rgba(255, 255, 255, 0.55);
+  --stroke: rgba(255, 255, 255, 0.18);
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
 }
 
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-body{
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
   margin: 0;
   font-family: "DM Sans", -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   color: var(--white);
@@ -24,12 +31,12 @@ body{
   position: relative;
 }
 
-.app-bg{
+.app-bg {
   position: fixed;
   inset: 0;
   z-index: 0;
   background-image:
-    linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.35)),
+    linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.35)),
     url("../img/background.png");
 
   background-size: cover;
@@ -40,15 +47,15 @@ body{
   transform: scale(1.05);
 }
 
-.app-bg::after{
-  content:"";
-  position:absolute;
+.app-bg::after {
+  content: "";
+  position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.15);
+  background: rgba(0, 0, 0, 0.15);
 }
 
 
-.landing-wrap{
+.landing-wrap {
   min-height: 100vh;
   position: relative;
   z-index: 1;
@@ -58,13 +65,13 @@ body{
   padding-right: 40px;
 }
 
-.landing-hero{
+.landing-hero {
   width: min(980px, 92vw);
   transform: translateY(-20px);
   text-align: left;
 }
 
-.hero-logo{
+.hero-logo {
   width: min(1100px, 96vw);
   max-width: 1100px;
   height: auto;
@@ -73,22 +80,22 @@ body{
   transform: translateX(-130px) translateY(70px);
 }
 
-.hero-tagline{
+.hero-tagline {
   margin: 24px 0 34px;
   letter-spacing: 20px;
   font-size: 20px;
   font-weight: 600;
-  color: rgba(255,255,255,0.85);
+  color: rgba(255, 255, 255, 0.85);
   transform: translateY(-20px);
 }
 
-.hero-cta{
+.hero-cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 58px;
   padding: 0 42px;
-  font-size: 17px; 
+  font-size: 17px;
   border-radius: 999px;
   text-decoration: none;
 
@@ -96,24 +103,143 @@ body{
   font-weight: 500;
   letter-spacing: 2px;
 
-  background: linear-gradient(
-    90deg,
-    #8b5cf6 0%,
-    #d946ef 45%,
-    #f97316 100%
-  );
+  background: linear-gradient(90deg,
+      #8b5cf6 0%,
+      #d946ef 45%,
+      #f97316 100%);
 
   box-shadow:
-    0 10px 24px rgba(139,92,246,0.25),
-    0 0 28px rgba(217,70,239,0.18);
+    0 10px 24px rgba(139, 92, 246, 0.25),
+    0 0 28px rgba(217, 70, 239, 0.18);
 
   transition: transform 0.15s ease, filter 0.2s ease, box-shadow 0.2s ease;
 }
 
-.hero-cta:hover{
+.hero-cta:hover {
   transform: translateY(-1px);
   filter: brightness(1.08);
   box-shadow:
-    0 14px 30px rgba(139,92,246,0.32),
-    0 0 34px rgba(249,115,22,0.22);
+    0 14px 30px rgba(139, 92, 246, 0.32),
+    0 0 34px rgba(249, 115, 22, 0.22);
+}
+
+/**************************
+DASHBOARD CSS
+**************************/
+
+/* Dashboard Layout Grid */
+.dashboard-container {
+  display: grid;
+  grid-template-columns: 80px 1fr 320px;
+  height: 100vh;
+  gap: 20px;
+  padding: 20px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Glassmorphism base */
+.glass-panel {
+  background: var(--panel-2);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--stroke);
+  border-radius: 24px;
+  padding: 20px;
+}
+
+/* Labs Horizontal Scroll */
+.card-row {
+  display: flex;
+  overflow-x: auto;
+  gap: 15px;
+  padding-bottom: 10px;
+  scrollbar-width: thin;
+}
+
+.lab-card {
+  min-width: 280px;
+  height: 160px;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-end;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Building Colors from your searchresults.css */
+.lab-card.bld-a {
+  background-color: rgba(80, 220, 140, 0.3);
+  border: 1px solid #50dc8c;
+}
+
+.lab-card.bld-g {
+  background-color: rgba(255, 70, 70, 0.3);
+  border: 1px solid #ff4646;
+}
+
+/* IT Assist Section */
+.it-assist {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.it-assist textarea {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 15px;
+  padding: 15px;
+  height: 100%;
+  resize: none;
+  font-family: inherit;
+}
+
+.send-btn {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  background: #6e45e2;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+
+/* Calendar Reservation Indicator */
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.has-res {
+  background: #ff4646;
+  /* The red indicator in your image */
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+/* Reservations list markers */
+.res-item {
+  background: rgba(255, 255, 255, 0.1);
+  margin-bottom: 10px;
+  padding: 10px 15px;
+  border-radius: 12px;
+  border-left: 5px solid transparent;
+}
+
+.red-tag {
+  border-left-color: #ff4646;
+}
+
+.purple-tag {
+  border-left-color: #8b5cf6;
 }
