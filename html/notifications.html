@@ -18,12 +18,10 @@
 
 <body>
 <div class="app-bg"></div>
-
 <div class="page-wrap">
 
   <!-- Sidebar -->
   <aside class="side-nav">
-
   <div class="side-icons">
 
     <button class="side-btn">
@@ -41,19 +39,16 @@
     <button class="side-btn active">
       <span class="material-symbols-rounded">notifications</span>
     </button>
-
   </div>
 
   <div class="side-brand">
-    <div class="brand-mark">RS<span>++</span></div>
+    <img src="../img/logo.png" class="brand-logo" alt="Logo">
   </div>
-
 </aside>
 
 
 <!-- Main -->
 <main class="main-area">
-
   <div class="top-row">
 
     <div>
@@ -79,7 +74,6 @@
 
   <!-- MAIN BOX -->
   <div class="notif-shell">
-
     <div class="content-grid">
 
       <!-- LEFT PANEL -->
@@ -119,7 +113,6 @@
           <button id="removeBtn" class="btn-soft">
             Remove
           </button>
-
           <button id="cancelBtn" class="btn-soft">
             Cancel
           </button>
@@ -134,8 +127,7 @@
 <!-- JAVASCRIPT (Para lang may makita ako kunwari)  -->
 <script>
 
-
-// Avatar generator
+// Avatar generator (Replace with real pictures)
 function makeAvatar(color)
 {
   return `
@@ -190,9 +182,7 @@ const detailTitle = document.getElementById("detailTitle");
 const detailRole = document.getElementById("detailRole");
 const detailBody = document.getElementById("detailBody");
 
-
 const searchInput = document.getElementById("searchInput");
-
 
 // Render notifications
 function renderNotifications(list)

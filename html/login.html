@@ -1,33 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>RESERVE++: Log In</title>
-	<link rel="stylesheet" href="../css/auth.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reserve++ | Log In</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/login.css">
 </head>
 
 <body>
-	<div class="auth-container">
-		<div class="form-side">
-			<h1>Log In</h1>
-			<form>
-				<input type="text" placeholder="Username/Email" class="input-field"> <br />
-				<input type="password" placeholder="Password" class="input-field">
+  <div class="app-bg"></div>
 
-				<a href="#" class="helper-link forgot-password">Forgot Password?</a>
+  <main class="auth-wrap">
+    <section class="auth-card">
 
-				<button type="submit" class="submit-btn">Log In</button>
-			</form>
-			<a href="signup.html" class="helper-link switch-page">Not yet a member? Sign up now</a>
-		</div>
+      <!-- LEFT: FORM -->
+      <div class="auth-left">
+        <h1 class="auth-title">Log In</h1>
 
-		<div class="visual-side">
-			<div class="logo-tag">RS++</div>
-			<!-- Actual image/logo/graphic here -->
-		</div>
-	</div>
+        <form class="auth-form" action="#" method="post">
+          <label class="field">
+            <span class="sr-only">Username/Email</span>
+            <input type="text" placeholder="Username/Email" required>
+          </label>
+
+          <label class="field">
+            <span class="sr-only">Password</span>
+            <input type="password" placeholder="Password" required>
+          </label>
+
+          <a class="auth-link" href="./forgot.html">Forgot Password</a>
+
+          <button class="btn-grad" type="submit">Log in</button>
+
+          <a class="auth-link bottom" href="./signup.html">Not yet a member? Sign up now</a>
+        </form>
+      </div>
+
+      <!-- RIGHT: IMAGE -->
+      <div class="auth-right">
+        <img src="../img/rightimg.png" alt="Computer Lab" class="auth-img">
+      </div>
+    </section>
+  </main>
 </body>
-
 </html>

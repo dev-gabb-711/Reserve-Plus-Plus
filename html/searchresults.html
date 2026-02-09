@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Results</title>
+
+  <!-- Bootstrap and Design Links -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+  <!-- All design here -->
+  <link rel="stylesheet" href="../css/searchresults.css">
+</head>
+
+<body>
+<div class="app-bg"></div>
+<div class="page-wrap">
+
+  <!-- Sidebar -->
+  <aside class="side-nav">
+  <div class="side-icons">
+
+    <button class="side-btn">
+      <span class="material-symbols-rounded">home</span>
+    </button>
+
+    <button class="side-btn">
+      <span class="material-symbols-rounded">computer</span>
+    </button>
+
+    <button class="side-btn">
+      <span class="material-symbols-rounded">event_seat</span>
+    </button>
+
+    <button class="side-btn">
+      <span class="material-symbols-rounded">notifications</span>
+    </button>
+  </div>
+
+  <div class="side-brand">
+    <img src="../img/logo.png" class="brand-logo" alt="Logo">
+  </div>
+</aside>
+
+
+<!-- Main -->
+    <main class="main-area">
+
+      <div class="top-row">
+        <div>
+          <h1 class="page-title">Showing Results</h1>
+          <p class="page-subtitle">Find available seats in real time</p>
+        </div>
+
+        <div class="search-wrap">
+          <div class="search-pill">
+            <span class="search-ico">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"></path>
+              </svg>
+            </span>
+            <input id="searchInput" type="text" placeholder="Search for labs here..." />
+          </div>
+        </div>
+      </div>
+
+      <section class="result-shell">
+        <div class="result-head">
+          <button class="filter-btn" id="filterBtn" title="Filters">
+            <span class="material-symbols-rounded">tune</span>
+          </button>
+
+          <div class="filter-panel" id="filterPanel" aria-hidden="true">
+            <div class="filter-grid">
+              <label class="filter-field">
+                <span>Building</span>
+                <select id="buildingFilter">
+                  <option value="">All</option>
+                  <option value="G">Gokongwei Hall (G)</option>
+                  <option value="A">Br. Andrew Hall (A)</option>
+                </select>
+              </label>
+
+              <label class="filter-field">
+                <span>Room (e.g., 203)</span>
+                <input id="roomFilter" type="text" placeholder="203" />
+              </label>
+
+              <label class="filter-field">
+                <span>Date</span>
+                <input id="dateFilter" type="date" />
+              </label>
+
+              <label class="filter-field">
+                <span>Sort</span>
+                <select id="sortFilter">
+                  <option value="soonest">Soonest</option>
+                  <option value="room">Room</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="filter-actions">
+              <button class="btn-soft" id="clearFilters">Clear</button>
+              <button class="btn-soft" id="applyFilters">Apply</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-list" id="resultList"></div>
+        <p class="result-empty" id="emptyState" hidden>No matching results.</p>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+// Hardcoded sample results (Para lang may makita ako, pasabi na lang if need ilagay sa separate file or something)
+const DATA = [
+  { buildingCode: "G", building: "Gokongwei Hall", room: "G203", seat: 1, date: "2026-02-27", time: "04:15" },
+  { buildingCode: "G", building: "Gokongwei Hall", room: "G203", seat: 7, date: "2026-02-27", time: "08:30" },
+  { buildingCode: "G", building: "Gokongwei Hall", room: "G301", seat: 2, date: "2026-02-28", time: "10:00" },
+  { buildingCode: "G", building: "Gokongwei Hall", room: "G302", seat: 6, date: "2026-02-28", time: "13:00" },
+  { buildingCode: "G", building: "Gokongwei Hall", room: "G401", seat: 9, date: "2026-03-01", time: "09:00" },
+
+  { buildingCode: "A", building: "Br. Andrew Hall", room: "A1103", seat: 1, date: "2026-02-27", time: "11:15" },
+  { buildingCode: "A", building: "Br. Andrew Hall", room: "A1103", seat: 4, date: "2026-02-27", time: "15:30" },
+  { buildingCode: "A", building: "Br. Andrew Hall", room: "A1201", seat: 3, date: "2026-02-28", time: "08:00" },
+  { buildingCode: "A", building: "Br. Andrew Hall", room: "A1202", seat: 8, date: "2026-03-01", time: "14:45" },
+  { buildingCode: "A", building: "Br. Andrew Hall", room: "A1304", seat: 5, date: "2026-03-02", time: "16:00" },
+];
+
+const el = (id) => document.getElementById(id);
+
+const resultList = el("resultList");
+const emptyState = el("emptyState");
+
+const searchInput = el("searchInput");
+const buildingFilter = el("buildingFilter");
+const roomFilter = el("roomFilter");
+const dateFilter = el("dateFilter");
+const sortFilter = el("sortFilter");
+
+const filterBtn = el("filterBtn");
+const filterPanel = el("filterPanel");
+const clearFilters = el("clearFilters");
+const applyFilters = el("applyFilters");
+
+let current = [...DATA];
+
+function fmtDate(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  const m = d.toLocaleString(undefined, { month: "short" });
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${m} ${day}`;
+}
+
+function getSearchQuery() {
+  return (searchInput.value || "").trim().toLowerCase();
+}
+
+function matchesSearch(item, q) {
+  if (!q) return true;
+  const hay = [
+    item.building,
+    item.buildingCode,
+    item.room,
+    String(item.seat),
+    item.date,
+    item.time
+  ].join(" ").toLowerCase();
+  return hay.includes(q);
+}
+
+function applyAllFilters() {
+  const q = getSearchQuery();
+  const b = buildingFilter.value;
+  const r = (roomFilter.value || "").trim();
+  const d = dateFilter.value;
+
+  let filtered = DATA.filter(item => {
+    if (!matchesSearch(item, q)) return false;
+
+    if (b && item.buildingCode !== b) return false;
+
+    if (r) {
+      const rr = r.toUpperCase();
+      // allow typing "203" or "G203"/"A1103"
+      const roomDigits = item.room.replace(/[A-Z]/g, "");
+      if (!(item.room.includes(rr) || roomDigits.includes(rr))) return false;
+    }
+
+    if (d && item.date !== d) return false;
+
+    return true;
+  });
+
+  // Sort
+  const sort = sortFilter.value;
+  if (sort === "room") {
+    filtered.sort((a, b) => a.room.localeCompare(b.room) || a.seat - b.seat);
+  } else {
+    // soonest: by date then time
+    filtered.sort((a, b) => {
+      const at = `${a.date}T${a.time}:00`;
+      const bt = `${b.date}T${b.time}:00`;
+      return at.localeCompare(bt);
+    });
+  }
+
+  current = filtered;
+  render();
+}
+
+function render() {
+  resultList.innerHTML = "";
+
+  if (!current.length) {
+    emptyState.hidden = false;
+    return;
+  }
+  emptyState.hidden = true;
+
+  current.forEach(item => {
+    const barClass = item.buildingCode === "G" ? "bld-g" : "bld-a";
+    const title = `Room ${item.room} • Seat ${item.seat}`;
+    const meta = `${fmtDate(item.date)} | ${item.time} • ${item.building}`;
+
+    const card = document.createElement("div");
+    card.className = "result-item";
+    card.innerHTML = `
+        <div class="building-bar ${barClass}" title="${item.building}"></div>
+        <div class="result-main">
+        <div class="result-title">${title}</div>
+        <div class="result-meta">${meta}</div>
+        </div>
+    `;
+
+    resultList.appendChild(card);
+  });
+}
+
+/* Filter panel toggle */
+filterBtn.addEventListener("click", () => {
+  filterPanel.classList.toggle("open");
+  filterPanel.setAttribute("aria-hidden", String(!filterPanel.classList.contains("open")));
+});
+
+/* Close filter panel when clicking outside */
+document.addEventListener("click", (e) => {
+  const inside = filterPanel.contains(e.target) || filterBtn.contains(e.target);
+  if (!inside) {
+    filterPanel.classList.remove("open");
+    filterPanel.setAttribute("aria-hidden", "true");
+  }
+});
+
+/* Live search */
+searchInput.addEventListener("input", applyAllFilters);
+
+/* Buttons */
+applyFilters.addEventListener("click", () => {
+  applyAllFilters();
+  filterPanel.classList.remove("open");
+  filterPanel.setAttribute("aria-hidden", "true");
+});
+
+clearFilters.addEventListener("click", () => {
+  buildingFilter.value = "";
+  roomFilter.value = "";
+  dateFilter.value = "";
+  sortFilter.value = "soonest";
+  searchInput.value = "";
+  applyAllFilters();
+});
+
+applyAllFilters();
+  </script>
+</body>
+</html>

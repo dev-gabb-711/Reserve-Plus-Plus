@@ -5,44 +5,102 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>RESERVE++: Profile</title>
+
+    <link rel="stylesheet" href="../css/profile.css">
+    <!--icons stylesheet-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <!--fonts stylesheet-->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+
 </head>
 
 <body>
+    <div class="app-bg"></div>
+
     <div class="profile-container">
+
         <!--NAVBAR-->
-        <nav class="sidebar">            
-			<ul class="nav-links">
-				<li><i class="icon-home"></i></li>
-				<li><i class="icon-monitor"></i></li>
-				<li><i class="icon-report"></i></li>
-				<li><i class="icon-bell"></i></li>
-			</ul>
-            <div class="logo">RS++</div>
+        <nav class="side-nav">
+            <div class="side-icons">
+
+                <button class="side-btn">
+                <span class="material-symbols-rounded">home</span>
+                </button>
+
+                <button class="side-btn">
+                <span class="material-symbols-rounded">computer</span>
+                </button>
+
+                <button class="side-btn">
+                <span class="material-symbols-rounded">event_seat</span>
+                </button>
+
+                <button class="side-btn active">
+                <span class="material-symbols-rounded">notifications</span>
+                </button>
+            </div>
+
+            <div class="side-brand">
+                <img src="../img/logo.png" class="brand-logo" alt="Logo">
+            </div>
         </nav>
-
-        <header class="profile-header">
-            <h1>My Profile</h1>
-            <p>Welcome to your account center</p>
-            <input type="search" placeholder="Search for Labs here...">            
-        </header>
-
+     
         <main class="profile-main">
-            <section class="profile-settings">
-                <img src="../img/def_avatar.jpg" alt="Profile"><br>
-                <button type="button">Delete Account</button><br>
-                <button type="button">Edit Profile</button>
+
+            <!--HEADER/SEARCH SECTION-->
+            <section class="profile-header">
+
+                <div class="header-text">
+                    <h1 id="title">My Profile</h1>
+                    <p id="subtitle">Welcome to your account center</p>
+                </div>
+
+
+                <div class="search-wrap">
+                    <div class="search-pill">
+                        <span class="search-ico">
+
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <circle cx="11" cy="11" r="7"></circle>
+                                <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+                            </svg>
+
+                        </span>
+
+                        <input type="text" id="searchInput" placeholder="Search notification...">
+                    </div>
+                </div>  
+
             </section>
+                
+            <!--MAIN PROFILE SETTING SECTION-->
 
-            <section class="account-info">
-                <h1>FirstName LastName</h1>
-                <h2>Lab User</h2>
+            <!-- main box -->
+            <section class="profile-shell">
+                <div class="content-grid">
+                    <!-- left section -->
+                    <div class="profile-settings">
+                        <img class="profile-picture" src="../img/def_avatar.jpg" alt="Profile"><br>
+                        <button id="delete-button" class="btn-hollow" type="button">Delete Account</button><br>
+                        <button id="edit-button" class="btn-hollow" type="button">Edit Profile</button>
+                    </div>
 
-                <h4>User Email</h4>
-                <p>sample.email@dlsu.edu.ph</p>
+                    <!-- right section -->
+                    <div class="account-info">
+                        <h1>FirstName LastName</h1>
+                        <h2>Lab User</h2>
 
-                <h4>Password</h4>
-                <p>*************</p>
-            </section>
+                        <h4>User Email</h4>
+                        <p>sample.email@dlsu.edu.ph</p>
+
+                        <h4>Password</h4>
+                        <p>*************</p>
+                    </div>
+                </div>
+                
+            </div>
+            
         </main>
 
 
