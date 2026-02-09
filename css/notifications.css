@@ -372,7 +372,6 @@ body{
 .notif-item{
   border-radius: 18px;
   padding: 12px 12px;
-
   display: grid;
   grid-template-columns: 52px 1fr;
   gap: 12px;
