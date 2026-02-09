@@ -82,7 +82,7 @@ body{
   border-radius: 999px;
   border: none;
   outline: none;
-  background: rgba(120, 98, 138, 0.18);
+  background: #e0d6e6;
   padding: 0 18px;
   font-weight: 600;
   color: #15151a;
@@ -168,5 +168,22 @@ body{
   }
   .auth-right{
     height: 260px;
+  }
+}
+
+.field-row{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.auth-link.bottom.center{
+  justify-self: center;
+  margin-top: 6px;
+}
+
+@media (max-width: 520px){
+  .field-row{
+    grid-template-columns: 1fr;
   }
 }
