@@ -1,179 +1,496 @@
 /* =========================
-   Base + Background
+   Variables & Reset
 ========================= */
 :root {
-  --bg-1: #0b0c10;
-  --panel: rgba(140, 120, 160, 0.35);
-  --panel-2: rgba(140, 120, 160, 0.28);
-  --panel-solid: rgba(120, 98, 138, 0.55);
-  --white: #ffffff;
-  --muted: rgba(255, 255, 255, 0.72);
-  --muted2: rgba(255, 255, 255, 0.55);
-  --stroke: rgba(255, 255, 255, 0.18);
-  --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  /* Color Palette from Image */
+  --panel-bg: rgba(45, 20, 60, 0.6);
+  /* Deep purple transparency */
+  --panel-border: rgba(255, 255, 255, 0.1);
+  --text-white: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.6);
+  background: url("../img/background.png");
+  background-size: cover;
+
+  /* Accents */
+  --accent-purple: #8b5cf6;
+  --accent-red: #ff4757;
+  --accent-glow: #a855f7;
+  --icon-purple: #7c3aed;
 }
 
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
 html,
 body {
   height: 100%;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
 }
 
 body {
-  margin: 0;
-  font-family: "DM Sans", -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: var(--white);
-  background: var(--bg-1);
-  overflow-x: hidden;
-  position: relative;
+  background: var(--bg-dark);
+  color: var(--text-white);
 }
 
+.side-logo {
+  width: 150px;
+  height: 100px;
+
+}
+
+/* Background Effect */
 .app-bg {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background-image:
-    linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.35)),
-    url("../img/background.png");
-
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  filter: blur(20px);
-  transform: scale(1.05);
+  background: var(--bg-gradient);
+  /* Subtle background pattern or noise could go here */
 }
 
-.app-bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.15);
-}
-
-
-
-
-/**************************
-DASHBOARD CSS
-**************************/
-
-/* Dashboard Layout Grid */
+/* =========================
+   Main Layout Grid
+========================= */
 .dashboard-container {
+  position: relative;
+  z-index: 1;
   display: grid;
-  grid-template-columns: 80px 1fr 320px;
+  /* Exact 3-column structure */
+  grid-template-columns: 70px 1fr 320px;
+  grid-template-areas: "sidebar main right";
   height: 100vh;
-  gap: 20px;
-  padding: 20px;
-  position: relative;
-  z-index: 10;
+  gap: 30px;
+  padding: 30px;
 }
 
-/* Glassmorphism base */
+/* Common Glass Panel Style */
 .glass-panel {
-  background: var(--panel-2);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--stroke);
+  background: var(--panel-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
+  border: 1px solid var(--panel-border);
   padding: 20px;
 }
 
-/* Labs Horizontal Scroll */
-.card-row {
+/* =========================
+   Column 1: Sidebar
+========================= */
+.sidebar {
+  grid-area: sidebar;
   display: flex;
-  overflow-x: auto;
-  gap: 15px;
-  padding-bottom: 10px;
-  scrollbar-width: thin;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  /* Pushes logo to bottom */
+  padding: 20px 0;
 }
 
-.lab-card {
-  min-width: 280px;
-  height: 160px;
-  border-radius: 20px;
-  padding: 20px;
+.nav-links {
+  list-style: none;
   display: flex;
-  align-items: flex-end;
-  background-size: cover;
-  background-position: center;
-  position: relative;
-  overflow: hidden;
+  flex-direction: column;
+  gap: 25px;
 }
 
-/* Building Colors from your searchresults.css */
-.lab-card.bld-a {
-  background-color: rgba(80, 220, 140, 0.3);
-  border: 1px solid #50dc8c;
+.nav-links li i {
+  font-size: 28px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.lab-card.bld-g {
-  background-color: rgba(255, 70, 70, 0.3);
-  border: 1px solid #ff4646;
+.nav-links li.active i,
+.nav-links li:hover i {
+  color: var(--text-white);
 }
 
-/* IT Assist Section */
-.it-assist {
-  position: relative;
+.sidebar-logo {
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: 1px;
+  /* Glowing Text Effect */
+  text-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* =========================
+   Column 2: Main Content
+========================= */
+.main-content {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  overflow-y: auto;
+  /* Allows scrolling if content gets too tall */
+  scrollbar-width: none;
+  /* Hide scrollbar FF */
+}
+
+.main-content::-webkit-scrollbar {
+  display: none;
+  /* Hide scrollbar Chrome/Safari */
+}
+
+/* Header Section */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.header-text h1 {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 5px;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.header-text p {
+  color: var(--text-muted);
+}
+
+/* Search Pill */
+.search-wrap {
+  background: var(--text-white);
+  border-radius: 30px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  width: 350px;
+}
+
+.search-icon {
+  color: var(--icon-purple);
+  margin-right: 10px;
+}
+
+.search-wrap input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+}
+
+.search-wrap input::placeholder {
+  color: #9ca3af;
+}
+
+/* Hero Banner & Horizontal Scroll */
+.hero-banner {
+  /* Gradient background like the image */
+  background: linear-gradient(to right, rgba(88, 28, 135, 0.8), rgba(46, 16, 101, 0.8)), url('https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3') center/cover;
+  padding: 25px;
+  min-height: 280px;
   display: flex;
   flex-direction: column;
 }
 
-.it-assist textarea {
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  border-radius: 15px;
+.hero-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.filter-icon {
+  cursor: pointer;
+}
+
+/* The scrolling container */
+.card-scroll-container {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  /* Space for scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-purple) transparent;
+}
+
+/* Individual Lab Card Style */
+.lab-card {
+  min-width: 240px;
+  height: 130px;
+  background: rgba(45, 20, 60, 0.9);
+  /* Darker card bg */
+  border-radius: 16px;
   padding: 15px;
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+  overflow: hidden;
+}
+
+/* The colored accent bar on the left */
+.lab-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+}
+
+.lab-card.accent-red::before {
+  background: var(--accent-red);
+}
+
+.lab-card.accent-purple::before {
+  background: var(--accent-purple);
+}
+
+.lab-info h4 {
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.lab-info p {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Bottom Grid */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  flex-grow: 1;
+}
+
+/* Notifications List */
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.notif-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.notif-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.notif-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* IT Assist Box */
+.theme-purple {
+  background: linear-gradient(135deg, rgba(100, 50, 140, 0.7), rgba(60, 30, 90, 0.7));
+}
+
+.textarea-container {
+  margin-top: 15px;
+  background: var(--text-white);
+  border-radius: 16px;
+  padding: 5px;
+  height: 140px;
+  position: relative;
+}
+
+.textarea-container textarea {
+  width: 100%;
   height: 100%;
+  border: none;
+  outline: none;
+  padding: 15px;
   resize: none;
   font-family: inherit;
 }
 
 .send-btn {
   position: absolute;
-  bottom: 30px;
-  right: 30px;
-  background: #6e45e2;
-  color: white;
+  bottom: 10px;
+  right: 10px;
+  background: var(--icon-purple);
   border: none;
-  border-radius: 50%;
   width: 40px;
   height: 40px;
+  border-radius: 12px;
+  /* Squircle shape */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transform: rotate(-20deg);
+  /* Tilted icon like image */
+}
+
+/* =========================
+   Column 3: Right Panel
+========================= */
+.right-panel {
+  grid-area: right;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Profile Section */
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.uni-logo {
+  width: 60px;
+  height: 60px;
+  filter: brightness(1.2);
+}
+
+.profile-text h3 {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.profile-text p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.edit-btn {
+  background: transparent;
+  border: 1px solid var(--text-muted);
+  color: var(--text-white);
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 12px;
   cursor: pointer;
 }
 
-/* Calendar Reservation Indicator */
+/* Reservations Section */
+.reservations-section h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.res-card {
+  display: flex;
+  align-items: stretch;
+  background: rgba(60, 30, 80, 0.5);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.res-accent-bar {
+  width: 8px;
+  flex-shrink: 0;
+}
+
+.red-accent .res-accent-bar {
+  background: var(--accent-red);
+}
+
+.purple-accent .res-accent-bar {
+  background: var(--accent-purple);
+}
+
+.res-info {
+  padding: 12px 15px;
+}
+
+.res-room {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.res-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Calendar Section (Exact match to image) */
+.calendar {
+  padding: 25px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.cal-nav button {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* Calendar Grids */
+.calendar-weekdays,
 .calendar-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  /* 7 columns for days */
   text-align: center;
-  gap: 10px;
+}
+
+.calendar-weekdays span {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.calendar-days span {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  position: relative;
 }
 
-.has-res {
-  background: #ff4646;
-  /* The red indicator in your image */
+/* The current day red circle */
+.calendar-days span.current-date {
   color: white;
+  font-weight: 700;
+}
+
+.calendar-days span.current-date::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: var(--accent-red);
   border-radius: 50%;
-  font-weight: bold;
+  z-index: -1;
 }
 
-/* Reservations list markers */
-.res-item {
+/* Hover effect for other days */
+.calendar-days span:not(.empty):not(.current-date):hover::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
   background: rgba(255, 255, 255, 0.1);
-  margin-bottom: 10px;
-  padding: 10px 15px;
-  border-radius: 12px;
-  border-left: 5px solid transparent;
-}
-
-.red-tag {
-  border-left-color: #ff4646;
-}
-
-.purple-tag {
-  border-left-color: #8b5cf6;
+  border-radius: 50%;
+  z-index: -1;
 }
