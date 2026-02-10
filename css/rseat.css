@@ -1,310 +1,198 @@
-/* =========================
-   Variables & Reset
-========================= */
+/* Dashboard Variable Alignment */
+:root {
+  --panel-bg: rgba(45, 20, 60, 0.6);
+  --panel-border: rgba(255, 255, 255, 0.1);
+  --accent-orange: #ff6b4a;
+  --accent-purple: #8b5cf6;
+  --text-white: #ffffff;
+}
 
-:root{
-    /* Base colors */
-    --bg-1: #0b0c10;
-    --white: #ffffff;
-    --muted: rgba(255,255,255,0.72);
-    --muted2: rgba(255,255,255,0.55);
-    --stroke: rgba(255,255,255,0.18);
-    --shadow: 0 18px 40px rgba(0,0,0,0.35);
+body {
+  color: var(--white);
+  background: var(--bg-1);
+  font-family: "DM Sans", -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  overflow: hidden;
+}
 
-    /* Panels */
-    --panel: rgba(140, 120, 160, 0.35);
-    --panel-2: rgba(140, 120, 160, 0.28);
-    --panel-solid: rgba(120, 98, 138, 0.55);
-    --panel-bg: rgba(45, 20, 60, 0.6);
-    --panel-border: rgba(255, 255, 255, 0.1);
+.app-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.35)), url("../img/background.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(20px);
+  transform: scale(1.05);
+}
 
-    /* Text */
-    --text-white: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.6);
-
-    /* Accents */
-    --accent-purple: #8b5cf6;
-    --accent-red: #ff4757;
-    --accent-glow: #a855f7;
-    --icon-purple: #7c3aed;
+.dashboard-container {
+  display: grid;
+  grid-template-columns: 80px 1fr 320px;
+  grid-template-areas: "sidebar main right";
+  height: 100vh;
+  padding: 25px;
+  gap: 25px;
+  position: relative;
+  z-index: 2;
 }
 
 .glass-panel {
   background: var(--panel-bg);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--panel-border);
+  border-radius: 24px;
   padding: 20px;
 }
 
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-body{
-    margin: 0;
-    font-family: "DM Sans", -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    color: var(--white);
-    background: var(--bg-1);
-    overflow-x: hidden;
-    position: relative;
-}
-
-.app-bg{
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    background-image:
-    linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.35)),
-    url("../img/background.png");
-
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-
-    filter: blur(20px);
-    transform: scale(1.05);
-}
-
-.app-bg::after{
-    content:"";
-    position:absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.15);
-}
-
-/* =========================
-   Main Layout Grid
-========================= */
-.reservation-container {
-    min-height: 100vh;
-    display: grid;
-    grid-template-areas: "sidebar main right";
-    grid-template-columns: 96px 1fr 320px; 
-    position: relative;
-    z-index: 1;
-}
-
-.reserve-main{
-    grid-area: main;
-    padding: 40px 38px;
-    width: 100%;
-    margin: 0 auto;
-}
-
-.reserve-header {
+/* Banner GK (Image Match) */
+.banner-gk {
+  background: linear-gradient(to right, rgba(88, 28, 135, 0.8), rgba(46, 16, 101, 0.8)), url('../img/topbox.png') center/cover;
+  min-height: 160px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
 }
 
-.header-text h1 {
-  font-size: 36px;
+.banner-next-btn {
+  background: white;
+  color: black;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.room-pill {
+  border: 1px solid white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  margin-right: 8px;
+  font-size: 12px;
+}
+
+.room-pill.active {
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+}
+
+/* Seat Grid (Monitors) */
+.seat-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 15px;
+  justify-items: center;
+}
+
+.seat {
+  text-align: center;
+  cursor: pointer;
+  transition: 0.3s;
+  color: white;
+}
+
+.seat i {
+  font-size: 45px;
+  display: block;
+  font-variation-settings: 'FILL' 1;
+}
+
+.seat span {
+  font-size: 10px;
   font-weight: 700;
-  margin-bottom: 5px;
-  text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  margin-top: -5px;
+  display: block;
 }
 
-.header-text p {
-  color: var(--text-muted);
+.seat.reserved {
+  opacity: 0.3;
+  cursor: not-allowed;
+  color: #888;
 }
 
-.reserve-banner{
-    background: linear-gradient(to right, rgba(92, 6, 78, 0.8), rgba(56, 9, 50, 0.8)), url('https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3') center/cover;
-    border-radius: 20px;
-    padding: 10px;
-    height: 150px;
+.seat.selected {
+  color: var(--accent-orange);
+  filter: drop-shadow(0 0 10px rgba(255, 107, 74, 0.6));
 }
 
-.building-name{
-    display: flex;
-    justify-content: flex-start;
-    margin-left: 20px;
-}
-
-#next{        
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    margin-top: 22px;
-    margin-left: 10px;
-}
-
-.reserve-selection{
-    background: rgba(255,255,255,0.06);
-    border-radius: 22px;
-    margin-top: 15px;    
-}
-
-
-/* =========================
-   Side Bar Layout
-========================= */
-.side-nav{
-    grid-area: sidebar;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    padding-left: 25px;
-    display: flex;
-    flex-direction: column;
-}
-
-.side-icons{
-    margin: auto 0;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.side-btn{
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    border: none;
-    background: transparent;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    transition: transform 0.12s ease, opacity 0.12s ease;
-}
-
-.material-symbols-rounded{
-    font-size: 30px;
-    color: rgba(255,255,255,0.9);
-
-    font-variation-settings:
-        "FILL" 1,
-        "wght" 500,
-        "GRAD" 0,
-        "opsz" 24;
-
-    filter:
-        drop-shadow(0 0 4px rgba(255,255,255,0.35))
-        drop-shadow(0 0 10px rgba(255,255,255,0.18));
-    transition: filter 0.2s ease, transform 0.12s ease;
-}
-.side-btn:hover{
-    filter:
-        drop-shadow(0 0 6px rgba(255,255,255,0.6))
-        drop-shadow(0 0 16px rgba(255,255,255,0.35));
-}
-.side-btn.active{
-    background: transparent;
-    box-shadow: none;
-    position: relative;
-}
-.side-btn.active::after{
-    content: "";
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 18px;
-    height: 4px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.95);
-}
-
-.side-brand{
-    display: grid;
-    place-items: center;
-    padding-bottom: 10px;
-}
-.brand-logo{
-    width: 100px;
-    height: auto;
-    opacity: 0.9;
-    transform: translateX(-12px);
-}
-
-/* Search Pill */
-.search-wrap {
-  background: var(--text-white);
-  border-radius: 30px;
-  padding: 10px 20px;
-  display: flex;
-  align-items: center;
-  width: 300px;
-  height: 40px;
-}
-
-.search-icon {
-  color: var(--icon-purple);
-  margin-right: 10px;
-}
-
-.search-wrap input {
-  border: none;
-  outline: none;
+/* Edit Section (Image Match) */
+.btn-edit-option {
   width: 100%;
-  font-size: 14px;
-}
-
-.search-wrap input::placeholder {
-  color: #9ca3af;
-}
-
-/* =========================
-   Right Panel Layout
-========================= */
-
-.right-panel {
-    background: rgba(255,255,255,0.06);
-    grid-area: right;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    margin: 15px;
-    border-radius: 20px;
-
-}
-
-/* Reservations Section */
-.reservations-section h3 {
-  font-size: 16px;
-  margin-bottom: 15px;
-}
-
-.res-card {
-  display: flex;
-  align-items: stretch;
-  background: rgba(60, 30, 80, 0.5);
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-
-.res-accent-bar {
-  width: 8px;
-  flex-shrink: 0;
-}
-
-.red-accent .res-accent-bar {
-  background: var(--accent-red);
-}
-
-.purple-accent .res-accent-bar {
-  background: var(--accent-purple);
-}
-
-.res-info {
-  padding: 12px 15px;
-}
-
-.res-room {
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  padding: 10px;
+  border-radius: 20px;
   font-size: 13px;
-  margin-bottom: 4px;
 }
 
-.res-time {
+.btn-confirm-action {
+  flex: 1;
+  padding: 8px;
+  border-radius: 20px;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.btn-confirm-action.confirm {
+  background: var(--accent-orange);
+  color: white;
+}
+
+.btn-confirm-action.cancel {
+  background: #555;
+  color: white;
+}
+
+/* Modal Styles */
+.custom-light-modal {
+  background: white;
+  border-radius: 30px;
+  color: #333;
+}
+
+.modal-select-input {
+  width: 100%;
+  background: #f0f0f0;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.time-slots-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.time-chip {
+  background: #f0f0f0;
+  padding: 8px;
+  border-radius: 8px;
   font-size: 11px;
-  color: var(--text-muted);
+  text-align: center;
+  cursor: pointer;
 }
 
-.edit-reservations{
-    background: rgba(255,255,255,0.06);
-    border-radius: 16px ;
+.time-chip.selected {
+  background: var(--accent-orange);
+  color: white;
 }
 
+.btn-orange-full {
+  background: linear-gradient(to right, #ff8c4a, #ff5f4a);
+  border: none;
+  color: white;
+  width: 100%;
+  padding: 15px;
+  border-radius: 30px;
+  font-weight: 700;
+}
 
-
+.text-orange {
+  color: var(--accent-orange);
+}
