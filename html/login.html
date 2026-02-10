@@ -25,7 +25,7 @@
         <form class="auth-form" action="#" method="post">
           <label class="field">
             <span class="sr-only">Username/Email</span>
-            <input type="text" placeholder="Username/Email" required>
+            <input type="text" placeholder="Username/Email" id="username" required>
           </label>
 
           <label class="field">
@@ -47,5 +47,25 @@
       </div>
     </section>
   </main>
+
+<!--username student goes to student dash board, admin goes to it dashboard-->
+<script>
+    const form = document.querySelector('.auth-form');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault(); // for now, prevents actual input submission since the log in is based purely on username
+
+        // Get username
+        const username = document.getElementById('username').value.trim().toLowerCase();
+
+        if (username === 'admin') {
+            location.href = './admindashboard.html';
+        } else {
+            // Anything else goes to student dashboard
+            location.href = './dashboard.html';
+        }
+    });
+</script>
+
 </body>
 </html>
