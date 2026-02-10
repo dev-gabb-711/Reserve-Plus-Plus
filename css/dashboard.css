@@ -637,6 +637,11 @@ body{
   transition:transform 0.12s ease,background 0.18s ease;
 }
 
+.edit-btn:hover{
+  background:rgba(255,255,255,0.12);
+  border-color:rgba(255,255,255,0.12);
+}
+
 .right-title{
   margin-top:6px;
   font-weight:500;

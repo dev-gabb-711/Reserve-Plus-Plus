@@ -1,109 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>RESERVE++: Profile</title>
-
-    <link rel="stylesheet" href="../css/profile.css">
-    <!--icons stylesheet-->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <!--fonts stylesheet-->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">         
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RESERVE++ | Profile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link rel="stylesheet" href="../css/profile.css">
 </head>
 
 <body>
-    <div class="app-bg"></div>
+<div class="app-bg"></div>
+<div class="page-wrap">
 
-    <div class="profile-container">
+  <aside class="side-nav">
+    <div class="side-icons">
+      <button class="side-btn" type="button" onclick="location.href='dashboard.html'"><span class="material-symbols-rounded">home</span></button>
+      <button class="side-btn" type="button" onclick="location.href='rseat.html'"><span class="material-symbols-rounded">computer</span></button>
+      <button class="side-btn" type="button" onclick="location.href='itassist.html'"><span class="material-symbols-rounded">report</span></button>
+      <button class="side-btn" type="button" onclick="location.href='notifications.html'"><span class="material-symbols-rounded">notifications</span></button>
+    </div>
+    <div class="side-brand">
+      <img src="../img/logo.png" class="brand-logo" alt="Logo">
+    </div>
+  </aside>
 
-        <!--NAVBAR-->
-        <nav class="side-nav">
-            <div class="side-icons">
+  <main class="main-area">
+    <div class="top-row">
+      <div>
+        <h1 class="page-title">My Profile</h1>
+        <p class="page-subtitle">Welcome to your account center</p>
+      </div>
 
-                <button class="side-btn">
-                <span class="material-symbols-rounded">home</span>
-                </button>
-
-                <button class="side-btn">
-                <span class="material-symbols-rounded">computer</span>
-                </button>
-
-                <button class="side-btn">
-                <span class="material-symbols-rounded">report</span>
-                </button>
-
-                <button class="side-btn active">
-                <span class="material-symbols-rounded">notifications</span>
-                </button>
-            </div>
-
-            <div class="side-brand">
-                <img src="../img/logo.png" class="brand-logo" alt="Logo">
-            </div>
-        </nav>
-     
-        <main class="profile-main">
-
-            <!--HEADER/SEARCH SECTION-->
-            <section class="profile-header">
-
-                <div class="header-text">
-                    <h1 id="title">My Profile</h1>
-                    <p id="subtitle">Welcome to your account center</p>
-                </div>
-
-
-                <div class="search-wrap">
-                    <div class="search-pill">
-                        <span class="search-ico">
-
-                            <svg viewBox="0 0 24 24" fill="none">
-                                <circle cx="11" cy="11" r="7"></circle>
-                                <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
-                            </svg>
-
-                        </span>
-
-                        <input type="text" id="searchInput" placeholder="Search notification...">
-                    </div>
-                </div>  
-
-            </section>
-                
-            <!--MAIN PROFILE SETTING SECTION-->
-
-            <!-- main box -->
-            <section class="profile-shell">
-                <div class="content-grid">
-                    <!-- left section -->
-                    <div class="profile-settings">
-                        <img class="profile-picture" src="../img/def_avatar.jpg" alt="Profile"><br>
-                        <button id="delete-button" class="btn-hollow" type="button">Delete Account</button><br>
-                        <button id="edit-button" class="btn-hollow" type="button">Edit Profile</button>
-                    </div>
-
-                    <!-- right section -->
-                    <div class="account-info">
-                        <h1>FirstName LastName</h1>
-                        <h2>Lab User</h2>
-
-                        <h4>User Email</h4>
-                        <p>sample.email@dlsu.edu.ph</p>
-
-                        <h4>Password</h4>
-                        <p>*************</p>
-                    </div>
-                </div>
-                
-            </div>
-            
-        </main>
-
-
+      <div class="search-wrap">
+        <div class="search-pill">
+          <span class="search-ico">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="11" cy="11" r="7"></circle>
+              <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+            </svg>
+          </span>
+          <input type="text" id="searchInput" placeholder="Search for Labs here...">
+        </div>
+      </div>
     </div>
 
+    <div class="profile-shell">
+      <div class="profile-grid">
+
+        <div class="profile-left">
+          <img id="avatarPreview" class="profile-avatar" src="../img/def_avatar.jpg" alt="Profile">
+          <div id="leftViewActions" class="left-actions">
+            <button id="deleteBtn" class="btn-outline" type="button">Delete Account</button>
+            <button id="editBtn" class="btn-outline" type="button">Edit Profile</button>
+          </div>
+          <div id="leftEditActions" class="left-actions is-hidden">
+            <label class="btn-outline file-btn" for="avatarFile">Edit Profile Picture</label>
+            <input id="avatarFile" class="file-input" type="file" accept="image/*">
+          </div>
+        </div>
+
+        <div class="profile-right">
+          <div id="viewMode" class="mode">
+            <div class="p-name" id="viewName">Gabrielle Martinez</div>
+            <div class="p-role" id="viewRole">Lab User</div>
+
+            <div class="field">
+              <div class="label">User Email</div>
+              <div class="value" id="viewEmail">ItzGabbyMartinez@dlsu.edu.ph</div>
+            </div>
+
+            <div class="field">
+              <div class="label">Password</div>
+              <div class="value" id="viewPass">****************</div>
+            </div>
+          </div>
+
+          <form id="editMode" class="mode is-hidden" autocomplete="off">
+            <input class="edit-input name" id="nameInput" type="text" value="Gabrielle Martinez">
+            <div class="p-role">Lab User</div>
+
+            <div class="field">
+              <div class="label">User Email</div>
+              <input class="edit-input" id="emailInput" type="email" value="ItzGabbyMartinez@dlsu.edu.ph">
+            </div>
+
+            <div class="field">
+              <div class="label">Password</div>
+              <input class="edit-input" id="passInput" type="password" value="passwordpassword">
+            </div>
+
+            <div class="edit-actions">
+              <button id="saveBtn" class="btn-outline wide" type="button">Save Changes</button>
+              <button id="cancelBtn" class="btn-outline wide" type="button">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+const editBtn = document.getElementById("editBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+const saveBtn = document.getElementById("saveBtn");
+
+const viewMode = document.getElementById("viewMode");
+const editMode = document.getElementById("editMode");
+const leftViewActions = document.getElementById("leftViewActions");
+const leftEditActions = document.getElementById("leftEditActions");
+
+const viewName = document.getElementById("viewName");
+const viewEmail = document.getElementById("viewEmail");
+const viewPass = document.getElementById("viewPass");
+
+const nameInput = document.getElementById("nameInput");
+const emailInput = document.getElementById("emailInput");
+const passInput = document.getElementById("passInput");
+
+const avatarFile = document.getElementById("avatarFile");
+const avatarPreview = document.getElementById("avatarPreview");
+
+function setEdit(isEdit){
+  viewMode.classList.toggle("is-hidden", isEdit);
+  editMode.classList.toggle("is-hidden", !isEdit);
+  leftViewActions.classList.toggle("is-hidden", isEdit);
+  leftEditActions.classList.toggle("is-hidden", !isEdit);
+}
+
+editBtn.onclick = () => setEdit(true);
+
+cancelBtn.onclick = () => {
+  nameInput.value = viewName.textContent;
+  emailInput.value = viewEmail.textContent;
+  passInput.value = "passwordpassword";
+  setEdit(false);
+};
+
+saveBtn.onclick = () => {
+  viewName.textContent = nameInput.value.trim() || "User";
+  viewEmail.textContent = emailInput.value.trim() || "sample.email@dlsu.edu.ph";
+  viewPass.textContent = "****************";
+  setEdit(false);
+};
+
+avatarFile.onchange = (e) => {
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  const url = URL.createObjectURL(file);
+  avatarPreview.src = url;
+};
+</script>
 </body>
 </html>
