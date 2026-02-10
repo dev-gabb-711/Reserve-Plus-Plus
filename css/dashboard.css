@@ -8,8 +8,6 @@
   --panel-border: rgba(255, 255, 255, 0.1);
   --text-white: #ffffff;
   --text-muted: rgba(255, 255, 255, 0.6);
-  background: url("../img/background.png");
-  background-size: cover;
 
   /* Accents */
   --accent-purple: #8b5cf6;
@@ -46,6 +44,12 @@ body {
   position: fixed;
   inset: 0;
   z-index: 0;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)),
+    url("../img/background.png");
+  background-size: cover;
+  background-position: center;
+  filter: blur(10px);
+  transform: scale(1.1);
 }
 
 /* =========================
@@ -179,7 +183,7 @@ body {
 /* Hero Banner & Horizontal Scroll */
 .hero-banner {
   /* Gradient background like the image */
-  background: linear-gradient(to right, rgba(88, 28, 135, 0.8), rgba(46, 16, 101, 0.8)), url('https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3') center/cover;
+  background: linear-gradient(to right, rgba(88, 28, 135, 0.8), rgba(46, 16, 101, 0.8)), url('../img/topbox.png') center/cover;
   padding: 25px;
   min-height: 280px;
   display: flex;
@@ -327,7 +331,6 @@ body {
   justify-content: center;
   color: white;
   cursor: pointer;
-  transform: rotate(-20deg);
   /* Tilted icon like image */
 }
 
