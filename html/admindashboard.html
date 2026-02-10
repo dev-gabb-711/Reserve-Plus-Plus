@@ -273,11 +273,18 @@
 
     function enableWheelHorizontalScroll(el) {
   el.addEventListener("wheel", (e) => {
-    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    const canScrollX = el.scrollWidth > el.clientWidth + 1;
+    const atTopBoxRoomScroll = e.target.closest(".room-scroll");
+    if (!canScrollX || atTopBoxRoomScroll) return;
+
+    const intentVertical = Math.abs(e.deltaY) > Math.abs(e.deltaX);
+    if (!intentVertical) return;
+
     e.preventDefault();
     el.scrollBy({ left: e.deltaY, behavior: "auto" });
   }, { passive: false });
 }
+
 
     renderHero();
     renderTickets();
