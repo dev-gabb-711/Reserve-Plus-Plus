@@ -5,31 +5,111 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>RESERVE++: Reserve a Seat</title>
+    <link rel="stylesheet" href="../css/rseat.css">
+    <!--icons stylesheet-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <!--fonts stylesheet-->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-	<div class="sidebar">
-		<div class="logo">RS++</div>
-	</div>
+    <div class="app-bg"></div>
 
-	<main class="main-content">
-		<h1>Reserve a Seat</h1>
-		<p>Choose a lab and time that works for you</p>
+    <div class="reservation-container">
+        <!--NAVBAR-->
+        <nav class="side-nav">
+            <div class="side-icons">
 
-		<div class="seat-plan-container">
-			<h3>Select a seat (Multi-select enabled)</h3>
-			<div class="seat-grid" id="seatGrid">
-			</div>
-		</div>
-		<br>
-		<button id="openReserveBtn" class="btn-reserve" style="display: none;">Continue Reservation</button>
-	</main>
+                <button class="side-btn">
+                <span class="material-symbols-rounded">home</span>
+                </button>
 
-	<aside class="reservations-panel">
-		<h3>My Reservations</h3>
-		<div id="reservationList"></div>
-	</aside>
+                <button class="side-btn">
+                <span class="material-symbols-rounded">computer</span>
+                </button>
 
+                <button class="side-btn">
+                <span class="material-symbols-rounded">report</span>
+                </button>
+
+                <button class="side-btn active">
+                <span class="material-symbols-rounded">notifications</span>
+                </button>
+            </div>
+
+            <div class="side-brand">
+                <img src="../img/logo.png" class="brand-logo" alt="Logo">
+            </div>
+        </nav>
+
+        <main class="reserve-main">
+            <!--HEADER-->
+            <header class="reserve-header">
+                <div class="header-text">
+                    <h1 id="title">Reserve a Seat</h1>
+                    <p id="subtitle">Choose a lab and time that works for you</p>
+                </div>
+
+                <div class="search-wrap">
+                    <i class="material-symbols-rounded search-icon">search</i>
+                    <input type="text" placeholder="Search for Labs here...">
+                </div>
+
+            </header>
+
+            <!--BANNER-->
+            <section class="reserve-banner">
+                <div class="building-name">
+                    <h2>GOKONGWEI HALL</h2>
+                    <button id="next" type="button">></button>
+                </div>
+
+                <div class="room-container">
+                    <!--FOR JS IMPLEMENTATION-->
+                </div>
+
+            </section>
+            
+            <!--SEAT SELECTION-->
+            <section class="glass-panel reserve-selection">
+
+            </section>
+        </main>
+        
+
+        <!--RIGHT PANEL-->
+        <!--duplicated dashboard style of displaying cards-->
+        <aside class="glass-panel right-panel">
+            <div class="reservations-section">
+                <h3>My Reservations</h3>
+                <div class="res-card red-accent">
+                <div class="res-accent-bar"></div>
+                <div class="res-info">
+                    <p class="res-room">Room G203 • Seat 1</p>
+                    <p class="res-time">Feb 27 | 4:15 AM</p>
+                </div>
+                </div>
+                <div class="res-card purple-accent">
+                <div class="res-accent-bar"></div>
+                <div class="res-info">
+                    <p class="res-room">Room A1103 • Seat 1</p>
+                    <p class="res-time">Feb 27 | 4:15 AM</p>
+                </div>
+                </div>
+            </div>
+
+            <!--EDIT RESERVATIONS-->
+            <section class="glass-panel edit-reservations">
+                <h3>Edit Reservations</h3>
+                <div class="edit-card">
+                    <!--FOR JS IMPLEMENTATION-->
+                </div>
+            </section>
+
+        </aside>    
+    </div>  
+
+    <!--FOR JS IMPLEMENTATION-->
 	<div id="modal" class="modal-overlay">
 		<div class="modal-content">
 			<h2 id="modalTitle">Gokongwei Hall</h2>
