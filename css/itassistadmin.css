@@ -103,6 +103,13 @@ body {
     text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
 }
 
+.brand-logo {
+    width: 100px;
+    height: auto;
+    opacity: 0.9;
+    transform: translateX(-12px);
+}
+
 /* Center Column */
 .center-content {
     display: flex;
@@ -111,7 +118,7 @@ body {
 }
 
 
-/* Reuse your existing :root and .app-bg from itassist.css */
+
 
 .dashboard-wrapper {
     display: grid;
