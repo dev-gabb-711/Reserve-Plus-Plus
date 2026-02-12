@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0">
   <link rel="stylesheet" href="../css/admindashboard.css">
 </head>
 
@@ -17,11 +19,15 @@
   <div class="page-wrap">
     <aside class="side-nav">
       <div class="side-icons">
-  <button class="side-btn active" type="button" onclick="location.href='admindashboard.html'"><span class="material-symbols-rounded">home</span></button>
-  <button class="side-btn" type="button" onclick="location.href='rseat.html'"><span class="material-symbols-rounded">computer</span></button>
-  <button class="side-btn" type="button" onclick="location.href='itassistadmin.html'"><span class="material-symbols-rounded">report</span></button>
-  <button class="side-btn" type="button" onclick="location.href='notifications.html'"><span class="material-symbols-rounded">notifications</span></button>
-</div>
+        <button class="side-btn active" type="button" onclick="location.href='admindashboard.html'"><span
+            class="material-symbols-rounded">home</span></button>
+        <button class="side-btn" type="button" onclick="location.href='rseat.html'"><span
+            class="material-symbols-rounded">computer</span></button>
+        <button class="side-btn" type="button" onclick="location.href='itassistadmin.html'"><span
+            class="material-symbols-rounded">report</span></button>
+        <button class="side-btn" type="button" onclick="location.href='notifications.html'"><span
+            class="material-symbols-rounded">notifications</span></button>
+      </div>
       <div class="side-brand">
         <img src="../img/logo.png" class="brand-logo" alt="Logo">
       </div>
@@ -57,7 +63,8 @@
           <div class="bottom-grid">
             <div class="panel post-panel">
               <div class="panel-title">Post an Announcement</div>
-              <textarea class="post-box" id="announceText" placeholder="Write something for students and staff..."></textarea>
+              <textarea class="post-box" id="announceText"
+                placeholder="Write something for students and staff..."></textarea>
               <div class="post-actions">
                 <button class="pill-btn" id="postBtn">Post</button>
                 <button class="pill-btn pill-ghost" id="clearBtn">Cancel</button>
@@ -79,8 +86,13 @@
               <div class="profile-meta">
                 <div class="profile-name">Gabby Martinez</div>
                 <div class="profile-role">Admin</div>
-                <button class="edit-btn" type="button" onclick="location.href='profile.html'">Edit Profile</button>
-
+                <div class="profile-actions">
+                  <button class="edit-btn" type="button" onclick="location.href='./profile.html'">Edit Profile</button>
+                  <button class="profile-icon-btn logout" type="button" data-bs-toggle="modal"
+                    data-bs-target="#logoutModal" aria-label="Log Out">
+                    <span class="material-symbols-rounded">logout</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -92,6 +104,25 @@
     </main>
   </div>
 
+  <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content"
+        style="background: #161618; border: 1px solid var(--stroke); border-radius: 20px; color: white;">
+        <div class="modal-body" style="padding: 30px; text-align: center;">
+          <h5 style="margin-bottom: 15px;">Confirm Logout</h5>
+          <p style="opacity: 0.7;">Are you sure you want to log out?</p>
+          <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+            <button type="button" class="btn" style="color: white; border: 1px solid var(--stroke);"
+              data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn" style="background: #ff3b3b; color: white;"
+              onclick="location.href='login.html'">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     function makeAvatar(color) {
       return `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100' height='100' rx='50' fill='${color}'/><circle cx='50' cy='40' r='15' fill='white'/><rect x='30' y='55' width='40' height='25' rx='12' fill='white'/></svg>`;
@@ -141,36 +172,36 @@
     ];
 
     const tickets = [
-  { id: 1, room: "A1103", seat: "Seat 1", issue: "PC Unresponsive", status: "Unresolved", priority: 1 },
-  { id: 2, room: "GK202", seat: "Seat 17", issue: "Keyboard missing", status: "Unresolved", priority: 2 },
-  { id: 3, room: "GK204", seat: "Seat 4", issue: "Monitor flickering", status: "Ongoing", priority: 3 }];
+      { id: 1, room: "A1103", seat: "Seat 1", issue: "PC Unresponsive", status: "Unresolved", priority: 1 },
+      { id: 2, room: "GK202", seat: "Seat 17", issue: "Keyboard missing", status: "Unresolved", priority: 2 },
+      { id: 3, room: "GK204", seat: "Seat 4", issue: "Monitor flickering", status: "Ongoing", priority: 3 }];
 
     const notifications = [
-  {
-    id: 1,
-    name: "IT Assist",
-    snippet: "PC Concern has been resolved",
-    avatar: makeAvatar("purple")
-  },
-  {
-    id: 2,
-    name: "IT Assist",
-    snippet: "Keyboard replaced in Room A1103 • Seat 4",
-    avatar: makeAvatar("purple")
-  },
-  {
-    id: 3,
-    name: "System",
-    snippet: "Scheduled maintenance tonight from 10:00 PM to 12:00 AM",
-    avatar: makeAvatar("indigo")
-  },
-  {
-    id: 4,
-    name: "Lab Admin",
-    snippet: "New assistance ticket filed for Room GK202 • Seat 17",
-    avatar: makeAvatar("teal")
-  }
-];
+      {
+        id: 1,
+        name: "IT Assist",
+        snippet: "PC Concern has been resolved",
+        avatar: makeAvatar("purple")
+      },
+      {
+        id: 2,
+        name: "IT Assist",
+        snippet: "Keyboard replaced in Room A1103 • Seat 4",
+        avatar: makeAvatar("purple")
+      },
+      {
+        id: 3,
+        name: "System",
+        snippet: "Scheduled maintenance tonight from 10:00 PM to 12:00 AM",
+        avatar: makeAvatar("indigo")
+      },
+      {
+        id: 4,
+        name: "Lab Admin",
+        snippet: "New assistance ticket filed for Room GK202 • Seat 17",
+        avatar: makeAvatar("teal")
+      }
+    ];
 
 
     function renderHero() {
@@ -205,7 +236,7 @@
     }
 
     function renderTickets() {
-  ticketTrack.innerHTML = tickets.map(ticket => `
+      ticketTrack.innerHTML = tickets.map(ticket => `
     <article class="ticket-card">
       <div class="ticket-bg"></div>
 
@@ -229,7 +260,7 @@
       </div>
     </article>
   `).join("");
-}
+    }
 
 
     function renderNotifications() {
@@ -273,18 +304,18 @@
     }
 
     function enableWheelHorizontalScroll(el) {
-  el.addEventListener("wheel", (e) => {
-    const canScrollX = el.scrollWidth > el.clientWidth + 1;
-    const atTopBoxRoomScroll = e.target.closest(".room-scroll");
-    if (!canScrollX || atTopBoxRoomScroll) return;
+      el.addEventListener("wheel", (e) => {
+        const canScrollX = el.scrollWidth > el.clientWidth + 1;
+        const atTopBoxRoomScroll = e.target.closest(".room-scroll");
+        if (!canScrollX || atTopBoxRoomScroll) return;
 
-    const intentVertical = Math.abs(e.deltaY) > Math.abs(e.deltaX);
-    if (!intentVertical) return;
+        const intentVertical = Math.abs(e.deltaY) > Math.abs(e.deltaX);
+        if (!intentVertical) return;
 
-    e.preventDefault();
-    el.scrollBy({ left: e.deltaY, behavior: "auto" });
-  }, { passive: false });
-}
+        e.preventDefault();
+        el.scrollBy({ left: e.deltaY, behavior: "auto" });
+      }, { passive: false });
+    }
 
 
     renderHero();
@@ -292,7 +323,8 @@
     renderNotifications();
     setupHeroScroll();
     enableWheelHorizontalScroll(heroTrack);
-enableWheelHorizontalScroll(ticketTrack);
+    enableWheelHorizontalScroll(ticketTrack);
   </script>
 </body>
+
 </html>
