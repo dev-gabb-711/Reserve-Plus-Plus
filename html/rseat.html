@@ -12,7 +12,7 @@
 <body>
   <div class="app-bg"></div>
 
-  <div class="layout">
+  <div class="page-wrap">
     <aside class="side-nav">
       <div class="side-icons">
         <button class="side-btn" type="button" onclick="location.href='dashboard.html'"><span class="material-symbols-rounded">home</span></button>
@@ -25,7 +25,7 @@
       </div>
     </aside>
 
-    <main class="main">
+    <main class="main-area">
       <header class="top-row">
         <div class="top-left">
           <h1 class="page-title">Reserve a Seat</h1>
@@ -67,12 +67,12 @@
             </div>
 
             <div class="seat-scroll">
-  <div class="seat-grid" id="seatContainer"></div>
-</div>
+              <div class="seat-grid" id="seatContainer"></div>
+            </div>
 
-<div class="seat-footer">
-  <button class="btn-proceed" id="btnOpenModal" disabled>Proceed to Reservation</button>
-</div>
+            <div class="seat-footer">
+              <button class="btn-proceed" id="btnOpenModal" disabled>Proceed to Reservation</button>
+            </div>
           </section>
         </div>
 
@@ -98,6 +98,7 @@
       </section>
     </main>
   </div>
+
 
   <!-- Modals -->
   <div class="modal fade" id="reservationModal" tabindex="-1">
