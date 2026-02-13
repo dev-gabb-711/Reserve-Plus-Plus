@@ -1,5 +1,9 @@
+/* =====================================================
+   Demo Data (Search Results)
+   - Hardcoded sample results for UI testing
+   - Replace with API/database data later
+   ===================================================== */
 
-// Hardcoded sample results (Para lang may makita ako, pasabi na lang if need ilagay sa separate file or something)
 const DATA = [
     { buildingCode: "G", building: "Gokongwei Hall", room: "G203", seat: 1, date: "2026-02-27", time: "04:15" },
     { buildingCode: "G", building: "Gokongwei Hall", room: "G203", seat: 7, date: "2026-02-27", time: "08:30" },
@@ -14,24 +18,47 @@ const DATA = [
     { buildingCode: "A", building: "Br. Andrew Hall", room: "A1304", seat: 5, date: "2026-03-02", time: "16:00" },
 ];
 
+
+/* =====================================================
+   DOM Helpers + References
+   ===================================================== */
+
+/** Short helper for getElementById */
 const el = (id) => document.getElementById(id);
 
+// Result containers
 const resultList = el("resultList");
 const emptyState = el("emptyState");
 
+// Search + filter inputs
 const searchInput = el("searchInput");
 const buildingFilter = el("buildingFilter");
 const roomFilter = el("roomFilter");
 const dateFilter = el("dateFilter");
 const sortFilter = el("sortFilter");
 
+// Filter panel controls
 const filterBtn = el("filterBtn");
 const filterPanel = el("filterPanel");
 const clearFilters = el("clearFilters");
 const applyFilters = el("applyFilters");
 
+
+/* =====================================================
+   State
+   - Holds the currently displayed (filtered/sorted) results
+   ===================================================== */
+
 let current = [...DATA];
 
+
+/* =====================================================
+   Formatting + Search Helpers
+   ===================================================== */
+
+/**
+ * Formats "YYYY-MM-DD" to a short readable label (e.g., "Feb 27").
+ */
 function fmtDate(dateStr) {
     const d = new Date(dateStr + "T00:00:00");
     const m = d.toLocaleString(undefined, { month: "short" });
@@ -39,23 +66,38 @@ function fmtDate(dateStr) {
     return `${m} ${day}`;
 }
 
+/** Returns the current search query in lowercase */
 function getSearchQuery() {
     return (searchInput.value || "").trim().toLowerCase();
 }
 
+/**
+ * Checks if a result matches the search query by scanning key fields.
+ */
 function matchesSearch(item, q) {
     if (!q) return true;
+
     const hay = [
-    item.building,
-    item.buildingCode,
-    item.room,
-    String(item.seat),
-    item.date,
-    item.time
+        item.building,
+        item.buildingCode,
+        item.room,
+        String(item.seat),
+        item.date,
+        item.time
     ].join(" ").toLowerCase();
+
     return hay.includes(q);
 }
 
+
+/* =====================================================
+   Filtering + Sorting Logic
+   ===================================================== */
+
+/**
+ * Applies all filters (search, building, room, date) and then sorts results.
+ * Updates `current` and triggers re-render.
+ */
 function applyAllFilters() {
     const q = getSearchQuery();
     const b = buildingFilter.value;
@@ -63,92 +105,118 @@ function applyAllFilters() {
     const d = dateFilter.value;
 
     let filtered = DATA.filter(item => {
-    if (!matchesSearch(item, q)) return false;
+        // Search match
+        if (!matchesSearch(item, q)) return false;
 
-    if (b && item.buildingCode !== b) return false;
+        // Building filter (A/G)
+        if (b && item.buildingCode !== b) return false;
 
-    if (r) {
-        const rr = r.toUpperCase();
-        // allow typing "203" or "G203"/"A1103"
-        const roomDigits = item.room.replace(/[A-Z]/g, "");
-        if (!(item.room.includes(rr) || roomDigits.includes(rr))) return false;
-    }
+        // Room filter (supports digits only like "203" or full codes like "G203")
+        if (r) {
+            const rr = r.toUpperCase();
+            const roomDigits = item.room.replace(/[A-Z]/g, "");
+            if (!(item.room.includes(rr) || roomDigits.includes(rr))) return false;
+        }
 
-    if (d && item.date !== d) return false;
+        // Date filter
+        if (d && item.date !== d) return false;
 
-    return true;
+        return true;
     });
 
-    // Sort
+    // Sorting
     const sort = sortFilter.value;
+
     if (sort === "room") {
-    filtered.sort((a, b) => a.room.localeCompare(b.room) || a.seat - b.seat);
+        filtered.sort((a, b) => a.room.localeCompare(b.room) || a.seat - b.seat);
     } else {
-    // soonest: by date then time
-    filtered.sort((a, b) => {
-        const at = `${a.date}T${a.time}:00`;
-        const bt = `${b.date}T${b.time}:00`;
-        return at.localeCompare(bt);
-    });
+        // Default: "soonest" (date then time)
+        filtered.sort((a, b) => {
+            const at = `${a.date}T${a.time}:00`;
+            const bt = `${b.date}T${b.time}:00`;
+            return at.localeCompare(bt);
+        });
     }
 
     current = filtered;
     render();
 }
 
+
+/* =====================================================
+   Rendering Results
+   ===================================================== */
+
+/**
+ * Renders the current results list.
+ * Shows empty state when no results are available.
+ */
 function render() {
     resultList.innerHTML = "";
 
     if (!current.length) {
-    emptyState.hidden = false;
-    return;
+        emptyState.hidden = false;
+        return;
     }
+
     emptyState.hidden = true;
 
     current.forEach(item => {
-    const barClass = item.buildingCode === "G" ? "bld-g" : "bld-a";
-    const title = `Room ${item.room} • Seat ${item.seat}`;
-    const meta = `${fmtDate(item.date)} | ${item.time} • ${item.building}`;
+        const barClass = item.buildingCode === "G" ? "bld-g" : "bld-a";
+        const title = `Room ${item.room} • Seat ${item.seat}`;
+        const meta = `${fmtDate(item.date)} | ${item.time} • ${item.building}`;
 
-    const card = document.createElement("div");
-    card.className = "result-item";
-    card.innerHTML = `
-    <div class="building-bar ${barClass}" title="${item.building}"></div>
-    <div class="result-main">
-    <div class="result-title">${title}</div>
-    <div class="result-meta">${meta}</div>
-    </div>
-`;
+        const card = document.createElement("div");
+        card.className = "result-item";
+        card.innerHTML = `
+            <div class="building-bar ${barClass}" title="${item.building}"></div>
+            <div class="result-main">
+                <div class="result-title">${title}</div>
+                <div class="result-meta">${meta}</div>
+            </div>
+        `;
 
-    resultList.appendChild(card);
+        resultList.appendChild(card);
     });
 }
 
-/* Filter panel toggle */
+
+/* =====================================================
+   Filter Panel UI Behavior
+   ===================================================== */
+
+/** Toggle filter panel */
 filterBtn.addEventListener("click", () => {
     filterPanel.classList.toggle("open");
     filterPanel.setAttribute("aria-hidden", String(!filterPanel.classList.contains("open")));
 });
 
-/* Close filter panel when clicking outside */
+/** Close filter panel when clicking outside */
 document.addEventListener("click", (e) => {
     const inside = filterPanel.contains(e.target) || filterBtn.contains(e.target);
+
     if (!inside) {
-    filterPanel.classList.remove("open");
-    filterPanel.setAttribute("aria-hidden", "true");
+        filterPanel.classList.remove("open");
+        filterPanel.setAttribute("aria-hidden", "true");
     }
 });
 
-/* Live search */
+
+/* =====================================================
+   Input + Button Handlers
+   ===================================================== */
+
+/** Live search (updates results as user types) */
 searchInput.addEventListener("input", applyAllFilters);
 
-/* Buttons */
+/** Apply filters button */
 applyFilters.addEventListener("click", () => {
     applyAllFilters();
     filterPanel.classList.remove("open");
     filterPanel.setAttribute("aria-hidden", "true");
 });
 
+/** Clear filters button */
 clearFilters.addEventListener("click", () => {
     buildingFilter.value = "";
     roomFilter.value = "";
@@ -158,15 +226,24 @@ clearFilters.addEventListener("click", () => {
     applyAllFilters();
 });
 
+
+/* =====================================================
+   Initial Load
+   ===================================================== */
+
 applyAllFilters();
 
-// function for keeping track of which dashboard to visit
-function goToDashboard() {
-        const role = localStorage.getItem('role');
 
-        if (role === 'admin') {
-            location.href = './admindashboard.html';
-        } else {
-            location.href = './dashboard.html';
-        }
+/* =====================================================
+   Dashboard Routing (Role-based Redirect)
+   ===================================================== */
+
+function goToDashboard() {
+    const role = localStorage.getItem('role');
+
+    if (role === 'admin') {
+        location.href = './admindashboard.html';
+    } else {
+        location.href = './dashboard.html';
+    }
 }

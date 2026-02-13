@@ -1,11 +1,20 @@
+/*================================================
+  COLORS + EFFECTS
+  ================================================ */
 :root{
   --bg-1: #0b0c10;
   --white: #fff;
   --shadow: 0 20px 55px rgba(0,0,0,0.35);
 }
 
+
+
+/*================================================
+  BASE
+  ================================================ */
 *{ box-sizing:border-box; }
 html, body{ height:100%; }
+
 body{
   margin:0;
   font-family:"DM Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -13,6 +22,7 @@ body{
   color: var(--white);
 }
 
+/*----------------Background Blur Layer------------------*/
 .app-bg{
   position: fixed;
   inset: 0;
@@ -25,6 +35,7 @@ body{
   filter: blur(18px);
   transform: scale(1.05);
 }
+
 .app-bg::after{
   content:"";
   position:absolute;
@@ -32,6 +43,11 @@ body{
   background: rgba(0,0,0,0.10);
 }
 
+
+
+/*================================================
+  AUTH LAYOUT
+  ================================================ */
 .auth-wrap{
   min-height: 100vh;
   display: grid;
@@ -41,6 +57,7 @@ body{
   z-index: 1;
 }
 
+/*----------------Auth Card Shell------------------*/
 .auth-card{
   width: min(1100px, 92vw);
   max-height: 620px;
@@ -53,7 +70,11 @@ body{
   grid-template-columns: 1.05fr 0.95fr;
 }
 
-/* LEFT */
+
+
+/*================================================
+  LEFT PANEL (FORM)
+  ================================================ */
 .auth-left{
   padding: clamp(32px, 4vw, 64px);
   display: flex;
@@ -63,6 +84,7 @@ body{
   color: #111;
 }
 
+/*----------------Title------------------*/
 .auth-title{
   margin: 0 0 26px;
   font-size: clamp(44px, 4vw, 64px);
@@ -70,12 +92,15 @@ body{
   text-align: center;
 }
 
+/*----------------Form Layout------------------*/
 .auth-form{
   display: grid;
   gap: 30px;
   width: 100%;
   max-width: 390px;
 }
+
+/*----------------Inputs------------------*/
 .field input{
   width: 100%;
   height: 52px;
@@ -92,6 +117,7 @@ body{
   color: rgba(0,0,0,0.55);
 }
 
+/*----------------Links------------------*/
 .auth-link{
   font-weight: 700;
   color: rgba(80, 60, 170, 0.95);
@@ -105,6 +131,7 @@ body{
   margin-top: 6px;
 }
 
+/*----------------Primary Button------------------*/
 .btn-grad{
   height: 54px;
   width: 210px;
@@ -112,17 +139,14 @@ body{
   border-radius: 999px;
   border: none;
   cursor: pointer;
-
   font-size: 18px;
   font-weight: 600;
   letter-spacing: 1px;
   color: #fff;
-
   background: linear-gradient(90deg, #8b5cf6 0%, #d946ef 45%, #f97316 100%);
   box-shadow:
     0 10px 24px rgba(139,92,246,0.25),
     0 0 28px rgba(217,70,239,0.18);
-
   transition: transform 0.15s ease, filter 0.2s ease;
 }
 
@@ -131,7 +155,11 @@ body{
   filter: brightness(1.08);
 }
 
-/* RIGHT IMAGE PANEL */
+
+
+/*================================================
+  RIGHT PANEL (IMAGE)
+  ================================================ */
 .auth-right{
   position: relative;
   background: transparent;
@@ -153,7 +181,11 @@ body{
   display: none;
 }
 
-/* accessibility helper */
+
+
+/*================================================
+  ACCESSIBILITY
+  ================================================ */
 .sr-only{
   position:absolute;
   width:1px;
@@ -165,7 +197,11 @@ body{
   border:0;
 }
 
-/* responsive: stack on small screens */
+
+
+/*================================================
+  RESPONSIVE
+  ================================================ */
 @media (max-width: 860px){
   .auth-card{
     height: auto;
@@ -176,6 +212,7 @@ body{
   }
 }
 
+/*----------------Two-Column Field Row------------------*/
 .field-row{
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -1,73 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!--========================= META + TITLE =========================-->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserve++ | Log In</title>
+  <title>RESERVE++ | Log In</title>
 
+  <!--========================= FONTS =========================-->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+  <!--========================= PAGE STYLES =========================-->
   <link rel="stylesheet" href="../css/login.css">
 </head>
 
 <body class="page page--login">
+
+  <!--========================= BACKGROUND LAYER =========================-->
   <div class="app-bg"></div>
 
+  <!--========================= AUTH WRAPPER =========================-->
   <main class="auth-wrap">
+
     <section class="auth-card">
 
-      <!-- LEFT: FORM -->
+      <!--========================= LEFT: LOGIN FORM =========================-->
       <div class="auth-left">
         <h1 class="auth-title">Log In</h1>
 
-        <form class="auth-form" action="#" method="post">
+        <form class="auth-form" id="loginForm" action="#" method="post">
+
+          <!------------------ Username / Email ------------------>
           <label class="field">
             <span class="sr-only">Username/Email</span>
-            <input type="text" placeholder="Username/Email" id="username" required>
+            <input 
+              type="text" 
+              id="username" 
+              placeholder="Username/Email" 
+              required
+            >
           </label>
 
+          <!------------------ Password ------------------>
           <label class="field">
             <span class="sr-only">Password</span>
-            <input type="password" placeholder="Password" required>
+            <input 
+              type="password" 
+              id="password"
+              placeholder="Password" 
+              required
+            >
           </label>
 
-          <a class="auth-link" href="./forgot.html">Forgot Password</a>
+          <!------------------ Forgot Password ------------------>
+          <a class="auth-link" href="./forgot.html">
+            Forgot Password
+          </a>
 
-          <button class="btn-grad" type="submit">Log in</button>
+          <!------------------ Submit Button ------------------>
+          <button class="btn-grad" type="submit">
+            Log In
+          </button>
 
-          <a class="auth-link bottom" href="./signup.html">Not yet a member? Sign up now</a>
+          <!------------------ Sign Up Link ------------------>
+          <a class="auth-link bottom" href="./signup.html">
+            Not yet a member? Sign up now
+          </a>
+
         </form>
       </div>
 
-      <!-- RIGHT: IMAGE -->
+      <!--========================= RIGHT: IMAGE PANEL =========================-->
       <div class="auth-right">
-        <img src="../img/rightimg.png" alt="Computer Lab" class="auth-img">
+        <img 
+          src="../img/rightimg.png" 
+          alt="Computer Laboratory" 
+          class="auth-img"
+        >
       </div>
+
     </section>
   </main>
 
-<!--username student goes to student dash board, admin goes to it dashboard-->
-<script>
-    const form = document.querySelector('.auth-form');
+  <!--========================= LOGIN SCRIPT =========================-->
+  <script>
+    const form = document.getElementById('loginForm');
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault(); // for now, prevents actual input submission since the log in is based purely on username
+    form.addEventListener('submit', function (e) {
+      e.preventDefault(); // Prevent actual submission (demo logic)
 
-        // Get username
-        const username = document.getElementById('username').value.trim().toLowerCase();
+      const username = document
+        .getElementById('username')
+        .value
+        .trim()
+        .toLowerCase();
 
-        if (username === 'admin') {
-            localStorage.setItem('role', 'admin');
-            location.href = './admindashboard.html';
-        } else {
-            // Anything else goes to student dashboard
-            localStorage.setItem('role', 'student');
-            location.href = './dashboard.html';
-        }
+      // Simple role-based redirect
+      if (username === 'admin') {
+        localStorage.setItem('role', 'admin');
+        location.href = './admindashboard.html';
+      } else {
+        localStorage.setItem('role', 'student');
+        location.href = './dashboard.html';
+      }
     });
-</script>
+  </script>
 
 </body>
 </html>

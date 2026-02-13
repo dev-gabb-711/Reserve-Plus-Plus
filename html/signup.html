@@ -1,34 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!--========================= META + TITLE =========================-->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reserve++ | Sign Up</title>
 
+  <!--========================= FONTS =========================-->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+  <!--========================= PAGE STYLES =========================-->
   <link rel="stylesheet" href="../css/login.css">
 </head>
 
 <body class="page page--signup">
+
+  <!--========================= BACKGROUND LAYER =========================-->
   <div class="app-bg"></div>
 
+  <!--========================= AUTH WRAPPER =========================-->
   <main class="auth-wrap">
     <section class="auth-card">
 
-      <!-- LEFT: SIGN UP FORM -->
+      <!--========================= LEFT: SIGN UP FORM =========================-->
       <div class="auth-left">
         <h1 class="auth-title">Sign Up</h1>
 
         <form class="auth-form" action="#" method="post">
 
+          <!-- Username / Email -->
           <label class="field">
             <span class="sr-only">Username/Email</span>
             <input type="text" placeholder="Username/Email" required>
           </label>
 
+          <!-- First + Last Name -->
           <div class="field-row">
             <label class="field">
               <span class="sr-only">First Name</span>
@@ -41,23 +49,30 @@
             </label>
           </div>
 
+          <!-- Password -->
           <label class="field">
             <span class="sr-only">Password</span>
             <input type="password" placeholder="Password" required>
           </label>
 
+          <!-- Submit Button -->
           <button class="btn-grad" type="submit">Sign Up</button>
 
-          <a class="auth-link bottom center" href="./login.html">Already have an account?</a>
+          <!-- Redirect Link -->
+          <a class="auth-link bottom center" href="./login.html">
+            Already have an account?
+          </a>
+
         </form>
       </div>
 
-      <!-- RIGHT: IMAGE -->
+      <!--========================= RIGHT: IMAGE PANEL =========================-->
       <div class="auth-right">
         <img src="../img/rightimg.png" alt="Computer Lab" class="auth-img">
       </div>
 
     </section>
   </main>
+
 </body>
 </html>

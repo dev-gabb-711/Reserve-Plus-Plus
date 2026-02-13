@@ -1,8 +1,6 @@
-
-
-/* =========================
-   Base + Background
-========================= */
+/*================================================
+  COLORS + EFFECTS
+  ================================================ */
 :root{
   --bg-1: #0b0c10;
   --panel: rgba(140, 120, 160, 0.35);
@@ -15,8 +13,14 @@
   --shadow: 0 18px 40px rgba(0,0,0,0.35);
 }
 
+
+
+/*================================================
+  BASE
+  ================================================ */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
+
 body{
   margin: 0;
   font-family: "DM Sans", -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -26,6 +30,7 @@ body{
   position: relative;
 }
 
+/*----------------Background Blur Layer------------------*/
 .app-bg{
   position: fixed;
   inset: 0;
@@ -33,11 +38,9 @@ body{
   background-image:
     linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.35)),
     url("../img/background.png");
-
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
   filter: blur(20px);
   transform: scale(1.05);
 }
@@ -49,9 +52,11 @@ body{
   background: rgba(0,0,0,0.15);
 }
 
-/* =========================
-   Layout
-========================= */
+
+
+/*================================================
+  LAYOUT
+  ================================================ */
 .page-wrap{
   min-height: 100vh;
   display: grid;
@@ -60,6 +65,11 @@ body{
   z-index: 1;
 }
 
+
+
+/*================================================
+  SIDEBAR
+  ================================================ */
 .side-nav{
   position: sticky;
   top: 0;
@@ -76,6 +86,7 @@ body{
   gap: 18px;
 }
 
+/*----------------Sidebar Buttons------------------*/
 .side-btn{
   width: 48px;
   height: 48px;
@@ -88,31 +99,33 @@ body{
   transition: transform 0.12s ease, opacity 0.12s ease;
 }
 
+/*----------------Material Icons (Global)------------------*/
 .material-symbols-rounded{
   font-size: 30px;
   color: rgba(255,255,255,0.9);
-
   font-variation-settings:
     "FILL" 1,
     "wght" 500,
     "GRAD" 0,
     "opsz" 24;
-
   filter:
     drop-shadow(0 0 4px rgba(255,255,255,0.35))
     drop-shadow(0 0 10px rgba(255,255,255,0.18));
   transition: filter 0.2s ease, transform 0.12s ease;
 }
+
 .side-btn:hover{
   filter:
     drop-shadow(0 0 6px rgba(255,255,255,0.6))
     drop-shadow(0 0 16px rgba(255,255,255,0.35));
 }
+
 .side-btn.active{
   background: transparent;
   box-shadow: none;
   position: relative;
 }
+
 .side-btn.active::after{
   content: "";
   position: absolute;
@@ -125,11 +138,13 @@ body{
   background: rgba(255,255,255,0.95);
 }
 
+/*----------------Sidebar Brand Logo------------------*/
 .side-brand{
   display: grid;
   place-items: center;
   padding-bottom: 10px;
 }
+
 .brand-logo{
   width: 100px;
   height: auto;
@@ -137,6 +152,11 @@ body{
   transform: translateX(-12px);
 }
 
+
+
+/*================================================
+  MAIN HEADER
+  ================================================ */
 .main-area{
   padding: 40px 38px;
   max-width: 1400px;
@@ -150,7 +170,6 @@ body{
   justify-content: space-between;
   gap: 22px;
   margin-bottom: 26px;
-
 }
 
 .page-title{
@@ -165,18 +184,20 @@ body{
     drop-shadow(0 0 4px rgba(255,255,255,0.35))
     drop-shadow(0 0 10px rgba(255,255,255,0.18));
 }
+
 .page-subtitle{
   margin: 10px 0 0 0;
   color: var(--muted);
   font-weight: 500;
 }
 
-/* Search pill */
+/*----------------Search Bar------------------*/
 .search-wrap{
   min-width: 280px;
   width: min(420px, 40vw);
   margin-top: 10px;
 }
+
 .search-pill{
   width: 100%;
   height: 44px;
@@ -187,6 +208,7 @@ body{
   padding: 0 14px 0 12px;
   box-shadow: 0 14px 28px rgba(0,0,0,0.25);
 }
+
 .search-ico svg{
   width: 22px;
   height: 22px;
@@ -195,6 +217,7 @@ body{
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
 .search-pill input{
   border: 0;
   outline: none;
@@ -205,15 +228,16 @@ body{
   font-weight: 600;
   color: rgba(40,40,50,0.85);
 }
+
 .search-pill input::placeholder{
   color: rgba(120, 80, 150, 0.55);
 }
 
 
-/* =========================
-   Main Panels
-   ========================= */
 
+/*================================================
+  NOTIFICATIONS PANELS
+  ================================================ */
 .notif-shell{
   width: 100%;
   border-radius: 28px;
@@ -225,6 +249,7 @@ body{
   box-shadow: var(--shadow);
 }
 
+/*----------------Panels Layout------------------*/
 .content-grid{
   display: flex;
   gap: 5px;
@@ -238,7 +263,7 @@ body{
   box-shadow: none;
 }
 
-/* Left Inner Box */
+/*----------------Left List Panel------------------*/
 .list-panel{
   width: 380px;
   padding: 1px;
@@ -260,17 +285,7 @@ body{
   padding: 0;
 }
 
-/* Right inner box */
-.detail-panel{
-  flex: 1;
-  padding: 18px;
-  background: var(--panel-2);
-
-  display: flex;
-  flex-direction: column;
-  min-height: 420px;
-}
-
+/*----------------Right Detail Panel------------------*/
 .detail-panel{
   flex: 1;
   padding: 22px;
@@ -282,11 +297,13 @@ body{
   min-height: 440px;
 }
 
+/*----------------Detail Header------------------*/
 .detail-head{
   display: flex;
   align-items: center;
   gap: 14px;
 }
+
 .detail-avatar{
   width: 64px;
   height: 64px;
@@ -294,6 +311,7 @@ body{
   object-fit: cover;
   background: rgba(255,255,255,0.12);
 }
+
 .detail-title{
   font-size: 22px;
   font-weight: 800;
@@ -301,18 +319,22 @@ body{
   color: rgba(255,255,255,0.95);
   margin: 0;
 }
+
 .detail-role{
   margin-top: 1px;
   font-size: 15px;
   font-weight: 600;
   color: rgba(255,255,255,0.80);
 }
+
+/*----------------Detail Body------------------*/
 .detail-divider{
   height: 1px;
   width: 100%;
   background: rgba(255,255,255,0.22);
   margin: 14px 0 16px;
 }
+
 .detail-body{
   color: rgba(255,255,255,0.95);
   font-size: 18px;
@@ -321,12 +343,15 @@ body{
   overflow: auto;
   padding-right: 6px;
 }
+
+/*----------------Detail Actions------------------*/
 .detail-actions{
   display: flex;
   justify-content: flex-end;
   gap: 14px;
   margin-top: 16px;
 }
+
 .btn-soft{
   border-radius: 999px;
   padding: 10px 20px;
@@ -337,38 +362,37 @@ body{
   font-weight: 700;
   letter-spacing: 0.3px;
   cursor: pointer;
-
   transition:
     background 0.18s ease,
     color 0.18s ease,
     box-shadow 0.18s ease,
     transform 0.12s ease;
 }
+
 .btn-soft:hover{
   background: rgba(255,255,255,0.92);
   color: rgba(30,30,40,0.9);
   box-shadow:
     0 8px 18px rgba(0,0,0,0.25),
     inset 0 1px 0 rgba(255,255,255,0.8);
-
   transform: translateY(-1px);
 }
 
-
-/* custom scrollbar (Di ko pa alam kung gumagana, kulang sa notif data pa eh) */
+/*----------------Custom Scrollbar------------------*/
 .notif-list::-webkit-scrollbar{ width: 10px; }
+
 .notif-list::-webkit-scrollbar-thumb{
   background: rgba(255,255,255,0.12);
   border-radius: 999px;
 }
+
 .notif-list::-webkit-scrollbar-track{ background: transparent; }
 
-/* responsive */
-@media (max-width: 900px){
-  .content-grid{ flex-direction: column; }
-  .list-panel{ width: 100%; }
-}
 
+
+/*================================================
+  NOTIFICATION ITEMS
+  ================================================ */
 .notif-item{
   border-radius: 18px;
   padding: 12px 12px;
@@ -401,3 +425,12 @@ body{
   object-fit: cover;
 }
 
+
+
+/*================================================
+  RESPONSIVE
+  ================================================ */
+@media (max-width: 900px){
+  .content-grid{ flex-direction: column; }
+  .list-panel{ width: 100%; }
+}

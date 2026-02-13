@@ -1,3 +1,6 @@
+/*================================================
+  COLORS + EFFECTS
+  ================================================ */
 :root{
   --bg-1:#0b0c10;
   --panel:rgba(140,120,160,.35);
@@ -7,8 +10,14 @@
   --shadow:0 18px 40px rgba(0,0,0,.35);
 }
 
+
+
+/*================================================
+  BASE
+  ================================================ */
 *{box-sizing:border-box;}
 html,body{height:100%;}
+
 body{
   margin:0;
   font-family:"DM Sans",-apple-system,Segoe UI,Roboto,Arial,sans-serif;
@@ -18,6 +27,7 @@ body{
   position:relative;
 }
 
+/*----------------Background Blur Layer------------------*/
 .app-bg{
   position:fixed;
   inset:0;
@@ -31,6 +41,11 @@ body{
 }
 .app-bg::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.15);}
 
+
+
+/*================================================
+  LAYOUT
+  ================================================ */
 .page-wrap{
   min-height:100vh;
   display:grid;
@@ -39,6 +54,11 @@ body{
   z-index:1;
 }
 
+
+
+/*================================================
+  SIDEBAR
+  ================================================ */
 .side-nav{
   position:sticky;
   top:0;
@@ -53,6 +73,8 @@ body{
   flex-direction:column;
   gap:18px;
 }
+
+/*----------------Sidebar Buttons------------------*/
 .side-btn{
   width:48px;
   height:48px;
@@ -64,6 +86,8 @@ body{
   cursor:pointer;
   transition:transform .12s ease,opacity .12s ease;
 }
+
+/*----------------Material Icons (Global)------------------*/
 .material-symbols-rounded{
   font-size:30px;
   color:rgba(255,255,255,.9);
@@ -71,10 +95,13 @@ body{
   filter:drop-shadow(0 0 4px rgba(255,255,255,.35)) drop-shadow(0 0 10px rgba(255,255,255,.18));
   transition:filter .2s ease,transform .12s ease;
 }
+
 .side-btn:hover{
   filter:drop-shadow(0 0 6px rgba(255,255,255,.6)) drop-shadow(0 0 16px rgba(255,255,255,.35));
 }
+
 .side-btn.active{background:transparent;box-shadow:none;position:relative;}
+
 .side-btn.active::after{
   content:"";
   position:absolute;
@@ -86,9 +113,16 @@ body{
   border-radius:999px;
   background:rgba(255,255,255,.95);
 }
+
+/*----------------Sidebar Brand Logo------------------*/
 .side-brand{display:grid;place-items:center;padding-bottom:10px;}
 .brand-logo{width:100px;height:auto;opacity:.9;transform:translateX(-12px);}
 
+
+
+/*================================================
+  MAIN HEADER
+  ================================================ */
 .main-area{
   padding:40px 38px;
   max-width:1400px;
@@ -116,7 +150,9 @@ body{
 }
 .page-subtitle{margin:10px 0 0 0;color:var(--muted);font-weight:500;}
 
+/*----------------Search Bar------------------*/
 .search-wrap{min-width:280px;width:min(420px,40vw);margin-top:10px;}
+
 .search-pill{
   width:100%;
   height:44px;
@@ -127,6 +163,7 @@ body{
   padding:0 14px 0 12px;
   box-shadow:0 14px 28px rgba(0,0,0,.25);
 }
+
 .search-ico svg{
   width:22px;
   height:22px;
@@ -135,6 +172,7 @@ body{
   stroke-linecap:round;
   stroke-linejoin:round;
 }
+
 .search-pill input{
   border:0;
   outline:none;
@@ -145,9 +183,14 @@ body{
   font-weight:600;
   color:rgba(40,40,50,.85);
 }
+
 .search-pill input::placeholder{color:rgba(120,80,150,.55);}
 
-/* Profile main box */
+
+
+/*================================================
+  PROFILE SHELL + GRID
+  ================================================ */
 .profile-shell{
   width:100%;
   border-radius:28px;
@@ -167,6 +210,11 @@ body{
   min-height:560px;
 }
 
+
+
+/*================================================
+  PROFILE LEFT (AVATAR + ACTIONS)
+  ================================================ */
 .profile-left{
   display:grid;
   place-items:center;
@@ -189,6 +237,11 @@ body{
   width:260px;
 }
 
+
+
+/*================================================
+  PROFILE RIGHT (DETAILS + EDIT MODE)
+  ================================================ */
 .profile-right{
   display:flex;
   flex-direction:column;
@@ -196,6 +249,7 @@ body{
   padding:36px 38px;
 }
 
+/*----------------Name + Role------------------*/
 .p-name{
   font-size:44px;
   font-weight:800;
@@ -211,13 +265,16 @@ body{
   color:rgba(255,255,255,.92);
 }
 
+/*----------------Fields------------------*/
 .field{margin-top:34px;}
+
 .label{
   font-size:22px;
   font-weight:800;
   letter-spacing:2px;
   color:rgba(255,255,255,.95);
 }
+
 .value{
   margin-top:10px;
   font-size:22px;
@@ -225,6 +282,7 @@ body{
   color:rgba(255,255,255,.95);
 }
 
+/*----------------Buttons------------------*/
 .btn-outline{
   border-radius:2px;
   border:1.5px solid rgba(255,255,255,.65);
@@ -235,6 +293,7 @@ body{
   cursor:pointer;
   transition:background .18s ease,color .18s ease,box-shadow .18s ease,transform .12s ease;
 }
+
 .btn-outline:hover{
   background:rgba(255,255,255,.92);
   color:rgba(30,30,40,.9);
@@ -242,9 +301,11 @@ body{
   transform:translateY(-1px);
 }
 
+/*----------------Mode Toggle Helpers------------------*/
 .mode{width:100%;}
 .is-hidden{display:none!important;}
 
+/*----------------Edit Inputs------------------*/
 .edit-input{
   width:min(560px,100%);
   border:none;
@@ -255,28 +316,37 @@ body{
   font-weight:800;
   border-radius:2px;
 }
+
 .edit-input.name{
   font-size:44px;
   letter-spacing:3px;
   padding:8px 12px;
 }
+
 .edit-input:not(.name){
   font-size:20px;
   font-weight:800;
   letter-spacing:1px;
 }
 
+/*----------------Edit Action Buttons------------------*/
 .edit-actions{
   display:flex;
   justify-content:flex-end;
   gap:22px;
   margin-top:46px;
 }
+
 .btn-outline.wide{width:240px;text-align:center;}
 
 .file-input{display:none;}
 .file-btn{text-align:center;display:block;}
 
+
+
+/*================================================
+  RESPONSIVE
+  ================================================ */
 @media (max-width: 1100px){
   .profile-grid{grid-template-columns:1fr;gap:18px;}
   .profile-right{padding:28px 18px;}
@@ -286,58 +356,27 @@ body{
 }
 
 
-/* Extra adjustments to override the sizes, ayusin to para di nakahiwalay, tinatamad lang ako HAHAAH */
-/* Reduce overall shell height */
-.profile-shell{
-  padding: 18px;
-}
 
-/* Tighten grid + reduce visual weight */
+/*================================================
+  SIZE OVERRIDES
+  ================================================ */
+.profile-shell{padding: 18px;}
+
 .profile-grid{
   min-height: 420px;
   grid-template-columns: 420px 1fr;
 }
 
-/* Smaller avatar */
-.profile-avatar{
-  width: 240px;
-  height: 240px;
-}
+.profile-avatar{width: 240px;height: 240px;}
 
-/* Reduce left column spacing */
-.profile-left{
-  gap: 14px;
-  padding: 18px 14px;
-}
+.profile-left{gap: 14px;padding: 18px 14px;}
 
-/* Reduce name + role sizes */
-.p-name{
-  font-size: 32px;
-  letter-spacing: 2px;
-}
+.p-name{font-size: 32px;letter-spacing: 2px;}
+.p-role{font-size: 20px;letter-spacing: 2px;}
 
-.p-role{
-  font-size: 20px;
-  letter-spacing: 2px;
-}
+.label{font-size: 16px;letter-spacing: 1px;}
+.value{font-size: 16px;}
 
-/* Reduce labels + values */
-.label{
-  font-size: 16px;
-  letter-spacing: 1px;
-}
+.btn-outline{padding: 8px 12px;font-size: 14px;}
 
-.value{
-  font-size: 16px;
-}
-
-/* Buttons smaller */
-.btn-outline{
-  padding: 8px 12px;
-  font-size: 14px;
-}
-
-.left-actions{
-  width: 220px;
-  gap: 12px;
-}
+.left-actions{width: 220px;gap: 12px;}

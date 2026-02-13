@@ -1,114 +1,276 @@
-document.addEventListener('DOMContentLoaded', () => {
-	initLabScroller();
-	initCalendar();
-});
+/* =====================================================
+   DOM References
+   ===================================================== */
 
-// =========================
-// 1. Populate Lab Scroller
-// =========================
-function initLabScroller() {
-	const container = document.getElementById('lab-scroll-container');
+const labGrid = document.getElementById("lab-room-grid");
 
-	// Sample Data (10 labs)
-	const labsData = [
-		{ room: "Room A1103 • Seat 1", bld: "Br. Andrew Gonzalez Hall", accent: "accent-red" },
-		{ room: "Room G203 • Seat 4", bld: "Gokongwei Hall", accent: "accent-purple" },
-		{ room: "Room A1105 • Seat 12", bld: "Br. Andrew Gonzalez Hall", accent: "accent-red" },
-		{ room: "Room LS214 • Seat 2", bld: "St. La Salle Hall", accent: "accent-purple" },
-		{ room: "Room V301 • Seat 8", bld: "Velasco Hall", accent: "accent-red" },
-		{ room: "Room G305 • Seat 1", bld: "Gokongwei Hall", accent: "accent-purple" },
-		{ room: "Room A1402 • Seat 5", bld: "Br. Andrew Gonzalez Hall", accent: "accent-red" },
-		{ room: "Room Y401 • Seat 3", bld: "Yuchengco Hall", accent: "accent-purple" },
-		{ room: "Room J202 • Seat 7", bld: "St. Joseph Hall", accent: "accent-red" },
-		{ room: "Room A1103 • Seat 9", bld: "Br. Andrew Gonzalez Hall", accent: "accent-purple" },
-	];
+/* Optional Search + Filter UI (disabled for now)
+const labSearch = document.getElementById("labSearch");
+const filterBtn = document.getElementById("filterBtn");
+const filterPop = document.getElementById("filterPop");
+const applyFilters = document.getElementById("applyFilters");
+const filterChecks = Array.from(filterPop.querySelectorAll("input[type='checkbox']"));
+*/
 
-	// Generate HTML for each card
-	labsData.forEach(lab => {
-		const card = document.createElement('div');
-		card.className = `lab-card ${lab.accent}`;
-		card.innerHTML = `
-            <div class="lab-info">
-                <h4>${lab.room}</h4>
-                <p>${lab.bld}</p>
+const reservationList = document.getElementById("reservationList");
+const calGrid = document.getElementById("calendar-days-grid");
+const prevBtn = document.getElementById("prev-month");
+const nextBtn = document.getElementById("next-month");
+const calMonthLabel = document.getElementById("calMonthLabel");
+
+
+/* =====================================================
+   Static Data (Demo / Placeholder Content)
+   ===================================================== */
+
+const labsToday = [
+    { room: "Room A1103 • Seat 1", building: "Br. Andrew Gonzalez Hall", bldgKey: "andrew" },
+    { room: "Room A1103 • Seat 12", building: "Br. Andrew Gonzalez Hall", bldgKey: "andrew" },
+    { room: "Room A1103 • Seat 4", building: "Br. Andrew Gonzalez Hall", bldgKey: "andrew" },
+    { room: "Room G203 • Seat 1", building: "Gokongwei Hall", bldgKey: "gokongwei" },
+    { room: "Room GK202 • Seat 17", building: "Gokongwei Hall", bldgKey: "gokongwei" },
+    { room: "Room GK204 • Seat 4", building: "Gokongwei Hall", bldgKey: "gokongwei" }
+];
+
+const reservations = [
+    { room: "Room G203 • Seat 1", building: "Gokongwei Hall", bldgKey: "gokongwei", dateISO: "2026-02-27", timeLabel: "Feb 27 | 4:15 AM" },
+    { room: "Room A1103 • Seat 1", building: "Br. Andrew Gonzalez Hall", bldgKey: "andrew", dateISO: "2026-02-27", timeLabel: "Feb 27 | 4:15 AM" },
+    { room: "Room A1103 • Seat 1", building: "Br. Andrew Gonzalez Hall", bldgKey: "andrew", dateISO: "2026-02-15", timeLabel: "Feb 27 | 4:15 AM" }
+];
+
+
+/* =====================================================
+   State (Active Filters + Calendar View)
+   ===================================================== */
+
+let activeBuildingFilters = new Set(["andrew", "gokongwei"]);
+let viewDate = new Date();
+
+
+/* =====================================================
+   Lab Rendering
+   ===================================================== */
+
+/* Optional search query helper (disabled for now)
+function getQuery() {
+    return (labSearch.value || "").trim().toLowerCase();
+}
+*/
+
+/**
+ * Renders lab cards into the "Labs Today" grid.
+ * (Filtering/search is currently commented out, but kept for future use.)
+ */
+function renderLabs() {
+    /* Search + filter logic (disabled for now)
+    const q = getQuery();
+    const filtered = labsToday.filter(item => {
+        if (!activeBuildingFilters.has(item.bldgKey)) return false;
+        if (!q) return true;
+        return (item.room + " " + item.building).toLowerCase().includes(q);
+    });
+    */
+
+    labGrid.innerHTML = labsToday.map(item => `
+        <div class="lab-room" data-bldg="${item.bldgKey}">
+            <span class="lab-pill bldg-${item.bldgKey}"></span>
+            <div class="lab-meta">
+                <div class="lab-name">${item.room}</div>
+                <div class="lab-sub">${item.building}</div>
+            </div>
+        </div>
+    `).join("");
+}
+
+/* Checkbox syncing for filter popup (disabled for now)
+function syncChecks() {
+    filterChecks.forEach(c => c.checked = activeBuildingFilters.has(c.value));
+}
+*/
+
+
+/* =====================================================
+   Date Utilities
+   ===================================================== */
+
+/** Pads a number to 2 digits (e.g., 2 -> "02") */
+function pad2(n) {
+    return String(n).padStart(2, "0");
+}
+
+/** Converts a Date object into an ISO-like YYYY-MM-DD string */
+function toISODateKey(d) {
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+/** Converts JS day index (Sun=0..Sat=6) into Monday-first index (Mon=0..Sun=6) */
+function mondayIndex(jsDay) {
+    return (jsDay + 6) % 7;
+}
+
+
+/* =====================================================
+   Reservation Mapping + Rendering
+   ===================================================== */
+
+/**
+ * Creates a map of dateISO -> Set(buildingKeys)
+ * Used to mark calendar days with reservations and building color.
+ */
+function buildReservationMap() {
+    const map = new Map();
+
+    reservations.forEach(r => {
+        if (!map.has(r.dateISO)) map.set(r.dateISO, new Set());
+        map.get(r.dateISO).add(r.bldgKey);
+    });
+
+    return map;
+}
+
+/**
+ * Renders reservation cards in the sidebar/list.
+ * Color accents are based on building key.
+ */
+function renderReservations() {
+    reservationList.innerHTML = reservations.map(r => {
+        const accentClass = r.bldgKey === "andrew" ? "green-accent" : "red-accent";
+
+        return `
+            <div class="res-card ${accentClass}">
+                <div class="res-accent-bar"></div>
+                <div class="res-info">
+                    <div class="res-room">${r.room}</div>
+                    <div class="res-time">${r.timeLabel}</div>
+                </div>
             </div>
         `;
-		container.appendChild(card);
-	});
+    }).join("");
 }
 
 
-// =========================
-// 2. Functional Calendar
-// =========================
-let currentDate = new Date();
+/* =====================================================
+   Calendar Rendering
+   ===================================================== */
 
-function initCalendar() {
-	renderCalendar();
-
-	// Event Listeners for Prev/Next buttons
-	document.getElementById('prev-month').addEventListener('click', () => {
-		currentDate.setMonth(currentDate.getMonth() - 1);
-		renderCalendar();
-	});
-
-	document.getElementById('next-month').addEventListener('click', () => {
-		currentDate.setMonth(currentDate.getMonth() + 1);
-		renderCalendar();
-	});
-}
-
+/**
+ * Renders the calendar grid for the month currently stored in viewDate.
+ * - Highlights today's date
+ * - Marks dates with reservations (single or multi-building)
+ */
 function renderCalendar() {
-	const year = currentDate.getFullYear();
-	const month = currentDate.getMonth();
+    const resMap = buildReservationMap();
+    const todayKey = toISODateKey(new Date());
 
-	const monthYearText = document.getElementById('current-month-year');
-	const daysGrid = document.getElementById('calendar-days-grid');
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
 
-	// Update Header text (e.g., "February 2026")
-	const monthNames = ["January", "February", "March", "April", "May", "June",
-		"July", "August", "September", "October", "November", "December"
-	];
-	monthYearText.innerText = `${monthNames[month]} ${year}`;
+    // Calendar header label (e.g., "February 2026")
+    calMonthLabel.textContent = viewDate.toLocaleString(undefined, {
+        month: "long",
+        year: "numeric"
+    });
 
-	// Calculations for grid generation
-	// 1. Get day of week the 1st falls on (0=Sun, 1=Mon... 6=Sat). 
-	//    We adjust so 0=Mon to match our grid layout.
-	let firstDayIndex = new Date(year, month, 1).getDay();
-	firstDayIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+    // Month boundaries and grid padding calculation
+    const first = new Date(year, month, 1);
+    const last = new Date(year, month + 1, 0);
+    const startPad = mondayIndex(first.getDay());
+    const daysInMonth = last.getDate();
 
-	// 2. Get total days in current month
-	const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
+    // Build cell metadata for calendar rendering
+    const cells = [];
+    for (let i = 0; i < startPad; i++) cells.push({ empty: true });
 
-	// Get today's actual date for highlighting
-	const today = new Date();
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateObj = new Date(year, month, d);
+        const key = toISODateKey(dateObj);
+        cells.push({ empty: false, day: d, key });
+    }
 
-	let daysHTML = "";
+    // Pad the remaining cells so the grid ends on a full week row
+    while (cells.length % 7 !== 0) cells.push({ empty: true });
 
-	// Add empty spans for days before the 1st of the month
-	for (let i = 0; i < firstDayIndex; i++) {
-		daysHTML += `<span class="empty"></span>`;
-	}
+    // Render calendar HTML
+    calGrid.innerHTML = cells.map(c => {
+        if (c.empty) return `<span class="empty"></span>`;
 
-	// Add actual dates
-	for (let i = 1; i <= lastDateOfMonth; i++) {
-		// Check if this date is officially "Today"
-		const isToday = (i === today.getDate() && month === today.getMonth() && year === today.getFullYear());
-		const activeClass = isToday ? 'current-date' : '';
+        const classes = [];
 
-		daysHTML += `<span class="${activeClass}">${i}</span>`;
-	}
+        // Highlight today's date
+        if (c.key === todayKey) classes.push("today");
 
-	daysGrid.innerHTML = daysHTML;
-}
+        // Mark reserved dates and apply building-based classes
+        const bset = resMap.get(c.key);
+        if (bset && bset.size) {
+            classes.push("has-res");
 
-// function for keeping track of which dashboard to visit
-function goToDashboard() {
-        const role = localStorage.getItem('role');
-
-        if (role === 'admin') {
-            location.href = './admindashboard.html';
-        } else {
-            location.href = './dashboard.html';
+            if (bset.size > 1) {
+                classes.push("multi");
+            } else {
+                classes.push(bset.has("andrew") ? "bldg-andrew" : "bldg-gokongwei");
+            }
         }
+
+        return `<span class="${classes.join(" ")}" data-date="${c.key}">${c.day}</span>`;
+    }).join("");
 }
+
+
+/* =====================================================
+   Filter Popup Logic (disabled for now)
+   ===================================================== */
+
+/*
+filterBtn.addEventListener("click", () => {
+    syncChecks();
+    filterPop.classList.toggle("show");
+});
+
+applyFilters.addEventListener("click", () => {
+    activeBuildingFilters = new Set(
+        filterChecks.filter(c => c.checked).map(c => c.value)
+    );
+    renderLabs();
+    filterPop.classList.remove("show");
+});
+*/
+
+
+/* =====================================================
+   Global Click Handler (Popup Dismiss)
+   ===================================================== */
+
+/**
+ * Closes the filter popup when clicking outside the action area.
+ * NOTE: This assumes filterPop exists/enabled; keep disabled if filterPop is commented out.
+ */
+document.addEventListener("click", (e) => {
+    const within = e.target.closest(".hero-actions");
+    if (!within) filterPop.classList.remove("show");
+});
+
+// labSearch.addEventListener("input", renderLabs);
+
+
+/* =====================================================
+   Calendar Navigation Controls
+   ===================================================== */
+
+prevBtn.addEventListener("click", () => {
+    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
+    renderCalendar();
+});
+
+nextBtn.addEventListener("click", () => {
+    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
+    renderCalendar();
+});
+
+
+/* =====================================================
+   Initial Render
+   ===================================================== */
+
+renderLabs();
+renderReservations();
+renderCalendar();

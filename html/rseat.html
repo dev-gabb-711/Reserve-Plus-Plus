@@ -1,31 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!--========================= META + TITLE =========================-->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RESERVE++ | Reserve a Seat</title>
+
+  <!--========================= VENDORS + FONTS =========================-->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!--========================= PAGE STYLES =========================-->
   <link rel="stylesheet" href="../css/rseat.css">
 </head>
+
 <body class="page page--rseat">
+  <!--========================= BACKGROUND LAYER =========================-->
   <div class="app-bg"></div>
 
+  <!--========================= PAGE WRAPPER =========================-->
   <div class="page-wrap">
+
+    <!--========================= SIDEBAR NAV =========================-->
     <aside class="side-nav">
       <div class="side-icons">
-        <button class="side-btn" type="button" onclick="goToDashboard()"><span class="material-symbols-rounded">home</span></button>
-        <button class="side-btn active" type="button" onclick="location.href='rseat.html'"><span class="material-symbols-rounded">computer</span></button>
-        <button class="side-btn" type="button" onclick="location.href='itassist.html'"><span class="material-symbols-rounded">report</span></button>
-        <button class="side-btn" type="button" onclick="location.href='notifications.html'"><span class="material-symbols-rounded">notifications</span></button>
+        <button class="side-btn" type="button" onclick="goToDashboard()">
+          <span class="material-symbols-rounded">home</span>
+        </button>
+
+        <button class="side-btn active" type="button" onclick="location.href='rseat.html'">
+          <span class="material-symbols-rounded">computer</span>
+        </button>
+
+        <button class="side-btn" type="button" onclick="location.href='itassist.html'">
+          <span class="material-symbols-rounded">report</span>
+        </button>
+
+        <button class="side-btn" type="button" onclick="location.href='notifications.html'">
+          <span class="material-symbols-rounded">notifications</span>
+        </button>
       </div>
+
       <div class="side-brand">
         <img src="../img/logo.png" class="brand-logo" alt="Logo">
       </div>
     </aside>
 
+    <!--========================= MAIN CONTENT =========================-->
     <main class="main-area">
+
+      <!--========================= HEADER (TITLE + SEARCH) =========================-->
       <header class="top-row">
         <div class="top-left">
           <h1 class="page-title">Reserve a Seat</h1>
@@ -38,21 +63,31 @@
         </div>
       </header>
 
+      <!--========================= CONTENT GRID =========================-->
       <section class="content-grid">
+
+        <!--========================= LEFT COLUMN =========================-->
         <div class="left-col">
+
+          <!--========================= HERO (BUILDING + LAB TABS) =========================-->
           <section class="hero glass" id="heroBg">
             <div class="hero-overlay">
               <div class="hero-head">
                 <h2 id="currentBuildingName">Gokongwei Hall</h2>
-                <button id="switchBuildingBtn" class="hero-next" type="button">
+
+                <button id="switchBuildingBtn" class="hero-next" type="button" aria-label="Switch Building">
                   <span class="material-symbols-rounded">chevron_right</span>
                 </button>
               </div>
+
               <div class="hero-tabs" id="labNavBar"></div>
             </div>
           </section>
 
+          <!--========================= SEAT SELECTION PANEL =========================-->
           <section class="seat-panel glass">
+
+            <!--========================= PANEL HEADER =========================-->
             <div class="seat-head">
               <div>
                 <div class="seat-title">Select a seat</div>
@@ -66,29 +101,39 @@
               </div>
             </div>
 
+            <!--========================= SEAT GRID =========================-->
             <div class="seat-scroll">
               <div class="seat-grid" id="seatContainer"></div>
             </div>
 
+            <!--========================= PANEL FOOTER =========================-->
             <div class="seat-footer">
-              <button class="btn-proceed" id="btnOpenModal" disabled>Proceed to Reservation</button>
+              <button class="btn-proceed" id="btnOpenModal" type="button" disabled>
+                Proceed to Reservation
+              </button>
             </div>
           </section>
         </div>
 
+        <!--========================= RIGHT COLUMN =========================-->
         <aside class="right-col">
+
+          <!--========================= MY RESERVATIONS =========================-->
           <div class="glass card">
             <h3 class="card-title">My Reservations</h3>
             <div id="activeResContainer" class="res-list"></div>
           </div>
 
+          <!--========================= EDIT RESERVATIONS =========================-->
           <div class="glass card">
             <h3 class="card-title">Edit Reservations</h3>
             <p class="edit-desc">Select a reservation to edit</p>
+
             <button class="btn-outline" id="openEditFlow" type="button">
               <span class="material-symbols-rounded">event_repeat</span>
-              Change Date & Time
+              Change Date &amp; Time
             </button>
+
             <div class="btn-row">
               <button class="btn-ghost" id="btnConfirmEdit" type="button">Confirm</button>
               <button class="btn-ghost" id="btnCancelEdit" type="button">Cancel</button>
@@ -99,99 +144,126 @@
     </main>
   </div>
 
+  <!--========================= MODALS =========================-->
 
-  <!-- Modals -->
+  <!--========================= RESERVATION PICKER MODAL =========================-->
   <div class="modal fade" id="reservationModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content glass-modal">
         <div class="modal-header border-0">
           <div>
             <h4 class="fw-bold mb-0" id="modalTitle">Gokongwei Hall</h4>
-            <p class="text-white-50 small mb-0" id="modalSub">GK201 • Select Date & Time</p>
+            <p class="text-white-50 small mb-0" id="modalSub">GK201 • Select Date &amp; Time</p>
           </div>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+
         <div class="modal-body">
           <div class="row g-4">
             <div class="col-md-7">
               <label class="input-label">Select Date</label>
               <div class="calendar-widget" id="calendarEl" style="min-height:340px;"></div>
             </div>
+
             <div class="col-md-5">
               <label class="input-label">Select Time Slot</label>
               <div class="time-slot-container" id="timeSlotGrid" style="max-height:340px;"></div>
             </div>
           </div>
         </div>
+
         <div class="modal-footer border-0">
-          <button class="btn-proceed w-100" id="finalConfirm" type="button">Confirm Reservation</button>
+          <button class="btn-proceed w-100" id="finalConfirm" type="button">
+            Confirm Reservation
+          </button>
         </div>
       </div>
     </div>
   </div>
 
+  <!--========================= CONFIRM CANCEL MODAL =========================-->
   <div class="modal fade" id="confirmCancelModal" tabindex="-1">
     <div class="modal-dialog modal-sm modal-dialog-centered">
       <div class="modal-content glass-modal text-center p-4">
         <h5 class="fw-bold text-white mb-3">Cancel Reservation?</h5>
         <p class="text-white-50 small mb-4">This action cannot be undone.</p>
+
         <div class="d-flex gap-2">
           <button type="button" class="btn-ghost w-100" data-bs-dismiss="modal">Keep It</button>
-          <button type="button" class="btn-ghost w-100" id="executeDelete" style="background:#ff4a4a!important;">Yes, Cancel</button>
+          <button type="button" class="btn-ghost w-100" id="executeDelete" style="background:#ff4a4a!important;">
+            Yes, Cancel
+          </button>
         </div>
       </div>
     </div>
   </div>
 
+  <!--========================= SUMMARY MODAL =========================-->
   <div class="modal fade" id="summaryModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content glass-modal p-3">
         <div class="modal-header border-0">
           <h4 class="fw-bold text-white mb-0">Review Reservation</h4>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+
         <div class="modal-body text-white">
           <div class="p-3 rounded mb-3" style="background:rgba(255,255,255,0.05);border-left:4px solid #ff6b4a;">
             <p class="mb-2"><span class="text-white-50">Location:</span> <span id="sumBld" class="fw-bold"></span></p>
-            <p class="mb-2"><span class="text-white-50">Lab & Seat:</span> <span id="sumLabSeat" class="fw-bold"></span></p>
+            <p class="mb-2"><span class="text-white-50">Lab &amp; Seat:</span> <span id="sumLabSeat" class="fw-bold"></span></p>
             <p class="mb-2"><span class="text-white-50">Date:</span> <span id="sumDate" class="fw-bold"></span></p>
             <p class="mb-0"><span class="text-white-50">Time:</span> <span id="sumTime" class="fw-bold"></span></p>
           </div>
-          <p class="small text-white-50 text-center mb-0">Please ensure all details are correct before proceeding.</p>
+
+          <p class="small text-white-50 text-center mb-0">
+            Please ensure all details are correct before proceeding.
+          </p>
         </div>
+
         <div class="modal-footer border-0">
-          <button class="btn-ghost w-100" id="btnFinalSubmit" type="button">Finalize Reservation</button>
+          <button class="btn-ghost w-100" id="btnFinalSubmit" type="button">
+            Finalize Reservation
+          </button>
         </div>
       </div>
     </div>
   </div>
 
+  <!--========================= SUCCESS MODAL =========================-->
   <div class="modal fade" id="successModal" tabindex="-1">
     <div class="modal-dialog modal-sm modal-dialog-centered">
       <div class="modal-content glass-modal text-center p-4" style="border:1px solid rgba(46,204,113,0.3);">
         <div class="mb-3">
           <span class="material-symbols-rounded" style="font-size:80px;color:#2ecc71;display:block;">check_circle</span>
         </div>
+
         <h4 class="fw-bold text-white">Confirmed!</h4>
         <p class="text-white-50 small mb-4">Your seat has been successfully reserved.</p>
-        <button type="button" class="btn-ghost w-100" data-bs-dismiss="modal" style="background:#2ecc71!important;">Great!</button>
+
+        <button type="button" class="btn-ghost w-100" data-bs-dismiss="modal" style="background:#2ecc71!important;">
+          Great!
+        </button>
       </div>
     </div>
   </div>
 
+  <!--========================= CANCEL SUCCESS MODAL =========================-->
   <div class="modal fade" id="cancelSuccessModal" tabindex="-1">
     <div class="modal-dialog modal-sm modal-dialog-centered">
       <div class="modal-content glass-modal text-center p-4" style="border:1px solid rgba(255,107,74,0.3);">
         <div class="mb-3">
           <span class="material-symbols-rounded" style="font-size:80px;color:#ff6b4a;display:block;">delete_forever</span>
         </div>
+
         <h4 class="fw-bold text-white">Canceled</h4>
         <p class="text-white-50 small mb-4">Your reservation has been removed.</p>
+
         <button type="button" class="btn-ghost w-100" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
 
+  <!--========================= SCRIPTS =========================-->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../js/rseat.js"></script>
   <script src="../js/search.js"></script>
