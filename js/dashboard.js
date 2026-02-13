@@ -6,11 +6,12 @@ const labGrid = document.getElementById("lab-room-grid");
 
 /* Optional Search + Filter UI (disabled for now)
 const labSearch = document.getElementById("labSearch");
+*/
+
 const filterBtn = document.getElementById("filterBtn");
 const filterPop = document.getElementById("filterPop");
 const applyFilters = document.getElementById("applyFilters");
 const filterChecks = Array.from(filterPop.querySelectorAll("input[type='checkbox']"));
-*/
 
 const reservationList = document.getElementById("reservationList");
 const calGrid = document.getElementById("calendar-days-grid");
@@ -71,7 +72,11 @@ function renderLabs() {
     });
     */
 
-    labGrid.innerHTML = labsToday.map(item => `
+    const filtered = labsToday.filter(item =>
+        activeBuildingFilters.has(item.bldgKey)
+    );
+
+    labGrid.innerHTML = filtered.map(item => `
         <div class="lab-room" data-bldg="${item.bldgKey}">
             <span class="lab-pill bldg-${item.bldgKey}"></span>
             <div class="lab-meta">
@@ -82,12 +87,9 @@ function renderLabs() {
     `).join("");
 }
 
-/* Checkbox syncing for filter popup (disabled for now)
 function syncChecks() {
     filterChecks.forEach(c => c.checked = activeBuildingFilters.has(c.value));
 }
-*/
-
 
 /* =====================================================
    Date Utilities
@@ -220,7 +222,7 @@ function renderCalendar() {
    Filter Popup Logic (disabled for now)
    ===================================================== */
 
-/*
+   
 filterBtn.addEventListener("click", () => {
     syncChecks();
     filterPop.classList.toggle("show");
@@ -233,7 +235,6 @@ applyFilters.addEventListener("click", () => {
     renderLabs();
     filterPop.classList.remove("show");
 });
-*/
 
 
 /* =====================================================
