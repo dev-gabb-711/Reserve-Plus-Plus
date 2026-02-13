@@ -58,11 +58,59 @@ let selectedID = null;
    DOM References
    ===================================================== */
 const notifList = document.getElementById("notifList");
+
+const detailHead = document.getElementById("detailHead");
 const detailAvatar = document.getElementById("detailAvatar");
 const detailTitle = document.getElementById("detailTitle");
 const detailRole = document.getElementById("detailRole");
+
+const detailDivider = document.getElementById("detailDivider");
 const detailBody = document.getElementById("detailBody");
+const detailActions = document.getElementById("detailActions");
+
 const searchInput = document.getElementById("searchInput");
+const removeBtn = document.getElementById("removeBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+
+
+/* =====================================================
+   Detail Panel States
+   ===================================================== */
+
+/**
+ * Resets the right panel into a true "empty" state.
+ * - No header, no divider, no buttons, no avatar
+ * - Only shows the empty message
+ */
+function showEmptyDetail() {
+  selectedID = null;
+
+  detailHead.classList.add("is-hidden");
+  detailDivider.classList.add("is-hidden");
+  detailActions.classList.add("is-hidden");
+
+  detailBody.classList.add("is-empty");
+  detailBody.innerText = "Your notifications will appear here";
+}
+
+/**
+ * Loads a notification into the right panel.
+ * - Restores header, divider, and buttons
+ */
+function showDetail(n) {
+  selectedID = n.id;
+
+  detailHead.classList.remove("is-hidden");
+  detailDivider.classList.remove("is-hidden");
+  detailActions.classList.remove("is-hidden");
+
+  detailBody.classList.remove("is-empty");
+
+  detailAvatar.src = n.avatar;
+  detailTitle.innerText = n.name;
+  detailRole.innerText = n.role;
+  detailBody.innerText = n.body;
+}
 
 
 /* =====================================================
@@ -78,7 +126,6 @@ function renderNotifications(list) {
 
   list.forEach(function (n) {
     const item = document.createElement("div");
-
     item.className = "notif-item" + (n.id === selectedID ? " active" : "");
 
     item.innerHTML = `
@@ -89,7 +136,6 @@ function renderNotifications(list) {
       </div>
     `;
 
-    // Select item and re-render list to apply active state
     item.onclick = function () {
       selectNotification(n.id);
       renderNotifications(list);
@@ -111,12 +157,7 @@ function selectNotification(id) {
   const n = notifications.find(x => x.id === id);
   if (!n) return;
 
-  selectedID = id;
-
-  detailAvatar.src = n.avatar;
-  detailTitle.innerText = n.name;
-  detailRole.innerText = n.role;
-  detailBody.innerText = n.body;
+  showDetail(n);
 }
 
 
@@ -125,31 +166,23 @@ function selectNotification(id) {
    ===================================================== */
 
 /**
- * Removes the currently selected notification from the list.
+ * Removes the currently selected notification from the list,
+ * then returns to the empty detail state.
  */
-document.getElementById("removeBtn").onclick = function () {
+removeBtn.onclick = function () {
   if (selectedID == null) return;
 
   notifications = notifications.filter(x => x.id !== selectedID);
-
-  // Optional: clear details after removing
-  selectedID = null;
-  detailTitle.innerText = "Notifications";
-  detailRole.innerText = "";
-  detailBody.innerText = "Select a notification";
-
   renderNotifications(notifications);
+
+  showEmptyDetail();
 };
 
 /**
- * Clears selection and resets the detail panel.
+ * Clears selection and resets the detail panel to empty state.
  */
-document.getElementById("cancelBtn").onclick = function () {
-  selectedID = null;
-
-  detailTitle.innerText = "Notifications";
-  detailRole.innerText = "";
-  detailBody.innerText = "Select a notification";
+cancelBtn.onclick = function () {
+  showEmptyDetail();
 };
 
 
@@ -177,6 +210,7 @@ searchInput.oninput = function () {
    ===================================================== */
 
 renderNotifications(notifications);
+showEmptyDetail();
 
 
 /* =====================================================

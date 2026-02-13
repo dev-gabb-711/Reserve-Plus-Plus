@@ -389,6 +389,18 @@ body{
 .notif-list::-webkit-scrollbar-track{ background: transparent; }
 
 
+.is-hidden{
+  display:none !important;
+}
+
+.detail-body.is-empty{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100%;
+  opacity:.85;
+}
+
 
 /*================================================
   NOTIFICATION ITEMS
