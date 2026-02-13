@@ -111,3 +111,17 @@ avatarFile.onchange = (e) => {
   const url = URL.createObjectURL(file);
   avatarPreview.src = url;
 };
+
+/* =====================================================
+   Dashboard Routing (Role-based Redirect)
+   ===================================================== */
+
+function goToDashboard() {
+    const role = localStorage.getItem('role');
+
+    if (role === 'admin') {
+        location.href = './admindashboard.html';
+    } else {
+        location.href = './dashboard.html';
+    }
+}
