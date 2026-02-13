@@ -43,12 +43,12 @@ body {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background-image:
-    radial-gradient(900px 500px at 25% 20%, rgba(255, 122, 69, 0.22), transparent 55%),
-    radial-gradient(900px 500px at 78% 25%, rgba(168, 85, 247, 0.22), transparent 55%),
-    radial-gradient(700px 500px at 65% 85%, rgba(255, 90, 74, 0.14), transparent 55%),
-    linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.75));
-  filter: saturate(1.1);
+  background-image: linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.35)), url("../img/background.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(20px);
+  transform: scale(1.05);
 }
 
 
