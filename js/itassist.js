@@ -198,3 +198,32 @@ function goToDashboard() {
         location.href = './dashboard.html';
     }
 }
+
+/* =====================================================
+    Controls the Navigation of Faq Modal
+   ===================================================== */
+
+/**
+ * Let's the user click and scroll through the faq modal
+ * that contains FAQs
+ */
+
+function openFaqModal() {
+    const modal = document.getElementById("faqModal");
+    modal.style.display = "flex";
+    document.body.style.overflow = "hidden";
+}
+
+function closeFaqModal() {
+    const modal = document.getElementById("faqModal");
+    modal.style.display = "none";
+    document.body.style.overflow = "auto";
+}
+
+window.onclick = function (event) {
+    const modal = document.getElementById("faqModal");
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+
+}

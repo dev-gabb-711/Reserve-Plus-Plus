@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <!--========================= META + LINKS =========================-->
   <meta charset="UTF-8">
@@ -11,7 +12,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0">
 
   <!--========================= PAGE STYLES =========================-->
   <link rel="stylesheet" href="../css/itassist.css">
@@ -102,13 +104,17 @@
               <div class="section-title">Common Laboratory Concerns</div>
 
               <div class="concern-chips" id="concernChips">
-                <button type="button" class="chip" data-concern="PC Unresponsive / Frozen">PC Unresponsive / Frozen</button>
+                <button type="button" class="chip" data-concern="PC Unresponsive / Frozen">PC Unresponsive /
+                  Frozen</button>
                 <button type="button" class="chip" data-concern="No Internet Connection">No Internet Connection</button>
-                <button type="button" class="chip" data-concern="Keyboard / Mouse Not Working">Keyboard / Mouse Not Working</button>
+                <button type="button" class="chip" data-concern="Keyboard / Mouse Not Working">Keyboard / Mouse Not
+                  Working</button>
                 <button type="button" class="chip" data-concern="Monitor No Display">Monitor No Display</button>
-                <button type="button" class="chip" data-concern="Cannot Log In (Account Issue)">Cannot Log In (Account Issue)</button>
+                <button type="button" class="chip" data-concern="Cannot Log In (Account Issue)">Cannot Log In (Account
+                  Issue)</button>
                 <button type="button" class="chip" data-concern="Software/App Crashing">Software/App Crashing</button>
-                <button type="button" class="chip" data-concern="Audio / Headphone Jack Issue">Audio / Headphone Jack Issue</button>
+                <button type="button" class="chip" data-concern="Audio / Headphone Jack Issue">Audio / Headphone Jack
+                  Issue</button>
               </div>
 
               <!--========================= DESCRIPTION TEXTAREA =========================-->
@@ -153,8 +159,28 @@
 
           <!--========================= FAQ BUTTON =========================-->
           <div class="glass card">
-            <button type="button" class="btn btn-outline-light btn-outline w-100">FAQ</button>
-          </div>
+            <button type="button" onclick="openFaqModal()" class="btn btn-outline-light btn-outline w-100">
+              FAQ
+            </button>
+            <div id="faqModal" class="modal">
+              <div class="modal-content">
+                <span class="close" onclick="closeFaqModal()">&times;</span>
+
+                <h4>Frequently Asked Questions</h4>
+
+                <p><strong>Q: Can students use the computer laboratory without a class?</strong></p>
+                <p> <em>A:Yes, during open hours! Please check the schedule on this dashboard to reserve a free slot in
+                    advance. Walk-ins are currently not allowed to ensure everyone gets a spot.</em></p>
+
+                <p><strong>Q: Is food and drinks allowed inside the lab?</strong></p>
+                <p><em>A: No. Food and drinks are strictly prohibited.</em></p>
+
+                <p><strong>Q: What should I do if a computer is not working?</strong></p>
+                <p><em>A: Don't worry! Please flag down a lab assistant immediately or use the "Report Issue" button on
+                    your dashboard so we can fix it right away.</em></p>
+
+              </div>
+            </div>
 
         </aside>
       </section>
@@ -165,4 +191,5 @@
   <script src="../js/itassist.js"></script>
   <script src="../js/search.js"></script>
 </body>
+
 </html>
