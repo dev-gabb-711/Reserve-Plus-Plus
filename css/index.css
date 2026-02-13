@@ -1,6 +1,6 @@
-/* =========================
-   Base + Background
-========================= */
+/*================================================
+  COLORS + EFFECTS
+  ================================================ */
 :root {
   --bg-1: #0b0c10;
   --panel: rgba(140, 120, 160, 0.35);
@@ -13,6 +13,11 @@
   --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
 }
 
+
+
+/*================================================
+  BASE
+  ================================================ */
 * {
   box-sizing: border-box;
 }
@@ -31,6 +36,7 @@ body {
   position: relative;
 }
 
+/*----------------Background Blur Layer------------------*/
 .app-bg {
   position: fixed;
   inset: 0;
@@ -38,11 +44,9 @@ body {
   background-image:
     linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.35)),
     url("../img/background.png");
-
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
   filter: blur(20px);
   transform: scale(1.05);
 }
@@ -55,6 +59,10 @@ body {
 }
 
 
+
+/*================================================
+  LANDING LAYOUT
+  ================================================ */
 .landing-wrap {
   min-height: 100vh;
   position: relative;
@@ -71,6 +79,12 @@ body {
   text-align: left;
 }
 
+
+
+/*================================================
+  HERO CONTENT
+  ================================================ */
+/*----------------Hero Logo------------------*/
 .hero-logo {
   width: min(1100px, 96vw);
   max-width: 1100px;
@@ -80,6 +94,7 @@ body {
   transform: translateX(-130px) translateY(70px);
 }
 
+/*----------------Hero Tagline------------------*/
 .hero-tagline {
   margin: 24px 0 34px;
   letter-spacing: 20px;
@@ -89,6 +104,7 @@ body {
   transform: translateY(-20px);
 }
 
+/*----------------Hero CTA Button------------------*/
 .hero-cta {
   display: inline-flex;
   align-items: center;
@@ -98,20 +114,13 @@ body {
   font-size: 17px;
   border-radius: 999px;
   text-decoration: none;
-
   color: #fff;
   font-weight: 500;
   letter-spacing: 2px;
-
-  background: linear-gradient(90deg,
-      #8b5cf6 0%,
-      #d946ef 45%,
-      #f97316 100%);
-
+  background: linear-gradient(90deg, #8b5cf6 0%, #d946ef 45%, #f97316 100%);
   box-shadow:
     0 10px 24px rgba(139, 92, 246, 0.25),
     0 0 28px rgba(217, 70, 239, 0.18);
-
   transition: transform 0.15s ease, filter 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -122,4 +131,3 @@ body {
     0 14px 30px rgba(139, 92, 246, 0.32),
     0 0 34px rgba(249, 115, 22, 0.22);
 }
-

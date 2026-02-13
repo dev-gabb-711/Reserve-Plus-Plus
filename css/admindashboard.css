@@ -1,3 +1,6 @@
+/*================================================
+  COLORS + EFFECTS
+  ================================================ */
 :root {
   --bg-1: #0b0c10;
   --panel: rgba(140, 120, 160, 0.35);
@@ -10,6 +13,11 @@
   --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
 }
 
+
+
+/*================================================
+  BASE
+  ================================================ */
 * {
   box-sizing: border-box;
 }
@@ -28,6 +36,7 @@ body {
   position: relative;
 }
 
+/*----------------Background Blur Layer------------------*/
 .app-bg {
   position: fixed;
   inset: 0;
@@ -47,10 +56,11 @@ body {
   background: rgba(0, 0, 0, 0.15);
 }
 
-/* =========================
-   Layout
-========================= */
 
+
+/*================================================
+  LAYOUT
+  ================================================ */
 .page-wrap {
   min-height: 100vh;
   display: grid;
@@ -59,10 +69,11 @@ body {
   z-index: 1;
 }
 
-/* =========================
-   Sidebar
-========================= */
 
+
+/*================================================
+  SIDEBAR
+  ================================================ */
 .side-nav {
   position: sticky;
   top: 0;
@@ -79,6 +90,7 @@ body {
   gap: 18px;
 }
 
+/*----------------Sidebar Buttons------------------*/
 .side-btn {
   width: 48px;
   height: 48px;
@@ -93,6 +105,7 @@ body {
   line-height: 0;
 }
 
+/*----------------Material Icons (Global)------------------*/
 .material-symbols-rounded {
   font-size: 30px;
   color: rgba(255, 255, 255, 0.9);
@@ -123,6 +136,7 @@ body {
   background: rgba(255, 255, 255, 0.95);
 }
 
+/*----------------Sidebar Brand Logo------------------*/
 .side-brand {
   display: grid;
   place-items: center;
@@ -136,10 +150,11 @@ body {
   transform: translateX(-12px);
 }
 
-/* =========================
-   Main Header
-========================= */
 
+
+/*================================================
+  MAIN HEADER
+  ================================================ */
 .main-area {
   padding: 34px 38px;
   max-width: 1480px;
@@ -177,6 +192,7 @@ body {
   font-weight: 500;
 }
 
+/*----------------Search Bar------------------*/
 .search-wrap {
   width: 420px;
   max-width: 46vw;
@@ -218,10 +234,11 @@ body {
   color: rgba(120, 80, 150, 0.55);
 }
 
-/* =========================
-   Dashboard Grid
-========================= */
 
+
+/*================================================
+  DASHBOARD GRID
+  ================================================ */
 .dash-grid {
   flex: 1;
   min-height: 0;
@@ -263,10 +280,11 @@ body {
   overflow: hidden;
 }
 
-/* =========================
-   Hero Carousel
-========================= */
 
+
+/*================================================
+  HERO CAROUSEL
+  ================================================ */
 .hero-shell {
   position: relative;
   border-radius: 28px;
@@ -382,6 +400,7 @@ body {
   filter: drop-shadow(0 10px 26px rgba(0, 0, 0, 0.55));
 }
 
+/*----------------Rooms List------------------*/
 .room-scroll {
   flex: 1;
   min-height: 0;
@@ -414,6 +433,7 @@ body {
   -webkit-backdrop-filter: blur(8px);
 }
 
+/*----------------Room Status Indicators------------------*/
 .pill-dot {
   width: 10px;
   height: 44px;
@@ -431,6 +451,7 @@ body {
   box-shadow: 0 10px 24px rgba(80, 255, 120, 0.14);
 }
 
+/*----------------Room Text------------------*/
 .room-meta {
   min-width: 0;
 }
@@ -447,10 +468,11 @@ body {
   color: rgba(255, 255, 255, 0.78);
 }
 
-/* =========================
-   Bottom Section
-========================= */
 
+
+/*================================================
+  BOTTOM SECTION (2 BOXES)
+  ================================================ */
 .bottom-grid {
   min-height: 0;
   display: grid;
@@ -471,6 +493,7 @@ body {
   min-height: 0;
 }
 
+/*----------------Post Box------------------*/
 .post-panel {
   padding: 18px;
   display: flex;
@@ -506,6 +529,7 @@ body {
   font-weight: 500;
 }
 
+/*----------------Post Buttons------------------*/
 .post-actions {
   display: flex;
   gap: 12px;
@@ -536,10 +560,11 @@ body {
   box-shadow: none;
 }
 
-/* =========================
-   Tickets Carousel
-========================= */
 
+
+/*================================================
+  TICKETS CAROUSEL
+  ================================================ */
 .ticket-shell {
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.06);
@@ -553,6 +578,7 @@ body {
   position: relative;
 }
 
+/*----------------Tickets Track------------------*/
 .ticket-track {
   height: 100%;
   min-height: 0;
@@ -590,6 +616,7 @@ body {
   z-index: 0;
 }
 
+/*----------------Ticket Content------------------*/
 .ticket-content {
   position: relative;
   z-index: 1;
@@ -647,6 +674,7 @@ body {
   font-weight: 500;
 }
 
+/*----------------Ticket Footer Button------------------*/
 .ticket-foot {
   flex: 0 0 auto;
   display: flex;
@@ -672,10 +700,11 @@ body {
   filter: saturate(1.05) brightness(1.02);
 }
 
-/* =========================
-   Right Profile + Notifications
-========================= */
 
+
+/*================================================
+  PROFILE + NOTIFICATIONS
+  ================================================ */
 .profile-card {
   border-radius: 28px;
   padding: 18px;
@@ -691,6 +720,7 @@ body {
   overflow: hidden;
 }
 
+/*----------------Profile Header------------------*/
 .profile-row {
   display: flex;
   gap: 14px;
@@ -734,6 +764,7 @@ body {
   margin-top: 1px;
 }
 
+/*----------------Edit Profile Button------------------*/
 .edit-btn {
   margin-top: 10px;
   width: max-content;
@@ -749,15 +780,51 @@ body {
 }
 
 .edit-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.10);
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-.edit-btn:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.10);
+/*----------------Logout Button------------------*/
+.profile-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
+.profile-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  background: rgba(0, 0, 0, 0.10);
+  color: rgba(255, 255, 255, 0.92);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.18s ease, border-color 0.18s ease;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+}
+
+.profile-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.profile-icon-btn.logout:hover {
+  background: rgba(255, 60, 60, 0.25);
+  border-color: rgba(255, 60, 60, 0.5);
+}
+
+.profile-icon-btn .material-symbols-rounded {
+  font-size: 20px;
+}
+
+/*----------------Notifications List------------------*/
 .notif-title {
   margin-top: 50px;
   font-weight: 600;
@@ -826,10 +893,11 @@ body {
   max-width: 240px;
 }
 
-/* =========================
-   Responsive
-========================= */
 
+
+/*================================================
+  RESPONSIVE
+  ================================================ */
 @media (max-width:1200px) {
   .main-area {
     height: auto;
@@ -882,43 +950,4 @@ body {
   .room-grid {
     grid-template-columns: 1fr;
   }
-}
-
-
-.profile-actions {
-  margin-top: 10px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.profile-icon-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  border: 1.5px solid rgba(255, 255, 255, 0.55);
-  background: rgba(0, 0, 0, 0.10);
-  color: rgba(255, 255, 255, 0.92);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition: transform 0.12s ease, background 0.18s ease, border-color 0.18s ease;
-  padding: 0;
-  margin: 0;
-  line-height: 1;
-}
-
-.profile-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translateY(-2px);
-}
-
-.profile-icon-btn.logout:hover {
-  background: rgba(255, 60, 60, 0.25);
-  border-color: rgba(255, 60, 60, 0.5);
-}
-
-.profile-icon-btn .material-symbols-rounded {
-  font-size: 20px;
 }

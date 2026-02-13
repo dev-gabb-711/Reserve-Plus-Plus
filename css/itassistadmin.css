@@ -1,248 +1,325 @@
-:root {
-  --bg-1: #0b0c10;
-  --panel: rgba(140, 120, 160, .35);
-  --panel-2: rgba(140, 120, 160, .28);
-  --white: #fff;
-  --muted: rgba(255, 255, 255, .72);
-  --shadow: 0 18px 40px rgba(0, 0, 0, .35);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: "DM Sans", -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: var(--white);
-  background: var(--bg-1);
-  overflow: hidden;
-  position: relative;
-}
-
-.app-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background-image: linear-gradient(rgba(0, 0, 0, .25), rgba(0, 0, 0, .35)), url("../img/background.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  filter: blur(20px);
-  transform: scale(1.05);
-}
-
-.app-bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, .15);
-}
-
-.page-wrap {
-  height: 100vh;
-  display: grid;
-  grid-template-columns: 96px 1fr;
-  position: relative;
-  z-index: 1;
-}
-
-.side-nav {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  padding-left: 25px;
-  display: flex;
-  flex-direction: column;
-}
-
-.side-icons {
-  margin: auto 0;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.side-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  border: none;
-  background: transparent;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition: transform .12s ease, opacity .12s ease;
-}
-
-.material-symbols-rounded {
-  font-size: 30px;
-  color: rgba(255, 255, 255, .9);
-  font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24;
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, .35)) drop-shadow(0 0 10px rgba(255, 255, 255, .18));
-}
-
-.side-btn:hover {
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, .6)) drop-shadow(0 0 16px rgba(255, 255, 255, .35));
-}
-
-.side-btn.active {
-  position: relative;
-}
-
-.side-btn.active::after {
-  content: "";
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 18px;
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, .95);
-}
-
-/* Center Column */
-.center-content {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
+/*================================================
+  COLORS + EFFECTS
+  ================================================ */
+:root{
+  --bg-1:#0b0c10;
+  --white:#ffffff;
+  --muted:rgba(255,255,255,0.72);
+  --stroke:rgba(255,255,255,0.18);
+  --shadow:0 18px 40px rgba(0,0,0,0.35);
+  --shell:rgba(255,255,255,0.06);
+  --shell2:rgba(255,255,255,0.08);
 }
 
 
-/* Reuse your existing :root and .app-bg from itassist.css */
 
-.dashboard-wrapper {
-  display: grid;
-  grid-template-columns: 100px 1fr;
-  /* Sidebar and main content area */
-  height: 100vh;
-  gap: 20px;
-  padding: 30px;
-  position: relative;
-  z-index: 1;
+/*================================================
+  BASE
+  ================================================ */
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  font-family:"DM Sans",-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--white);
+  background:var(--bg-1);
+  overflow:hidden; 
+  position:relative;
 }
 
-.center-content {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
+/*----------------Background Blur Layer------------------*/
+.app-bg{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.35)),
+    url("../img/background.png");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  filter:blur(20px);
+  transform:scale(1.05);
 }
 
-.tickets-shell {
-  flex: 1;
-  border-radius: 28px;
-  padding: 18px;
-  background: rgba(255, 255, 255, .06);
-  border: 1px solid rgba(255, 255, 255, .10);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: var(--shadow);
-  overflow: hidden;
+.app-bg::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.15);
 }
 
-.tickets-scroll {
-  height: 100%;
-  overflow: auto;
-  padding: 6px 18px 18px;
+
+
+/*================================================
+  PAGE LAYOUT
+  ================================================ */
+.page-wrap{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:96px 1fr;
+  position:relative;
+  z-index:1;
 }
 
-/* invisible scrollbar - or baka gusto niyo visible siya pero naka minimalistic style ganern?*/
-.tickets-scroll::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+
+
+/*================================================
+  SIDEBAR
+  ================================================ */
+.side-nav{
+  position:sticky;
+  top:0;
+  height:100vh;
+  padding-left:25px;
+  display:flex;
+  flex-direction:column;
 }
 
-.tickets-scroll {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+.side-icons{
+  margin:auto 0;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
 }
 
-.ticket-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(280px, 1fr));
-  gap: 18px;
-  padding: 10px;
+/*----------------Sidebar Buttons------------------*/
+.side-btn{
+  width:48px;
+  height:48px;
+  border-radius:12px;
+  border:none;
+  background:transparent;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  transition:transform 0.12s ease, opacity 0.12s ease;
 }
 
-.ticket-card {
-  border-radius: 22px;
-  padding: 22px 24px;
-  background: linear-gradient(90deg, rgba(110, 70, 190, .65), rgba(210, 120, 70, .55));
-  border: 1px solid rgba(255, 255, 255, .10);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, .25);
-  min-height: 220px;
-  display: flex;
-  flex-direction: column;
+/*----------------Material Icons (Global)------------------*/
+.material-symbols-rounded{
+  font-size:30px;
+  color:rgba(255,255,255,0.9);
+  font-variation-settings:"FILL" 1,"wght" 500,"GRAD" 0,"opsz" 24;
+  filter:
+    drop-shadow(0 0 4px rgba(255,255,255,0.35))
+    drop-shadow(0 0 10px rgba(255,255,255,0.18));
 }
 
-.t-title {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: .4px;
+.side-btn:hover{
+  filter:
+    drop-shadow(0 0 6px rgba(255,255,255,0.6))
+    drop-shadow(0 0 16px rgba(255,255,255,0.35));
 }
 
-.t-sub {
-  margin-top: 2px;
-  font-size: 16px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, .65);
+.side-btn.active{ position:relative; }
+
+.side-btn.active::after{
+  content:"";
+  position:absolute;
+  bottom:-10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:18px;
+  height:4px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.95);
 }
 
-.ticket-line {
-  height: 2px;
-  width: 100%;
-  background: rgba(255, 255, 255, .35);
-  border-radius: 999px;
-  margin: 14px 0 18px;
+/*----------------Sidebar Brand Logo------------------*/
+.side-brand{
+  display:grid;
+  place-items:center;
+  padding-bottom:10px;
 }
 
-.ticket-body {
-  font-size: 18px;
-  line-height: 1.25;
-  color: rgba(255, 255, 255, .95);
-  flex: 1;
+.brand-logo{
+  width:100px;
+  height:auto;
+  opacity:0.9;
+  transform:translateX(-12px);
 }
 
-.ticket-body .k {
-  font-weight: 900;
+
+
+/*================================================
+  MAIN COLUMN + HEADER
+  ================================================ */
+.main-area{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  padding:40px 38px;
+  max-width:1400px;
+  width:100%;
+  margin:0 auto;
 }
 
-.ticket-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 14px;
+.top-row{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:22px;
+  margin-bottom:22px;
 }
 
-.pill-btn {
-  border: none;
-  border-radius: 999px;
-  padding: 8px 18px;
-  font-weight: 800;
-  letter-spacing: .4px;
-  color: #fff;
-  background: linear-gradient(90deg, rgba(150, 90, 255, .9), rgba(255, 140, 90, .9));
-  box-shadow: 0 10px 22px rgba(0, 0, 0, .25);
-  cursor: pointer;
+.page-title{
+  margin:0;
+  font-size:clamp(38px, 4vw, 64px);
+  font-weight:700;
+  letter-spacing:5px;
+  filter:
+    drop-shadow(0 0 4px rgba(255,255,255,0.35))
+    drop-shadow(0 0 10px rgba(255,255,255,0.18));
 }
 
-@media (max-width: 1180px) {
-  .ticket-grid {
-    grid-template-columns: repeat(2, minmax(260px, 1fr));
-  }
+.page-subtitle{
+  margin:10px 0 0;
+  color:var(--muted);
+  font-weight:500;
 }
 
-@media (max-width: 820px) {
-  .main-area {
-    padding: 30px 20px;
-  }
+/*----------------Filter Button------------------*/
+.filter-btn{
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.14);
+  background:rgba(255,255,255,0.08);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  transition:transform 0.12s ease, background 0.18s ease;
+}
 
-  .ticket-grid {
-    grid-template-columns: 1fr;
-  }
+.filter-btn .material-symbols-rounded{
+  font-size:26px;
+  filter:none;
+}
+
+.filter-btn:hover{
+  background:rgba(255,255,255,0.12);
+  transform:translateY(-1px);
+}
+
+
+
+/*================================================
+  TICKETS SHELL
+  ================================================ */
+.tickets-shell{
+  flex:1;
+  min-height:0;           
+  border-radius:28px;
+  padding:18px;
+  background:var(--shell);
+  border:1px solid rgba(255,255,255,0.10);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+/*----------------Tickets Scroll Area------------------*/
+.tickets-scroll{
+  height:100%;
+  min-height:0;
+  overflow:auto;
+  padding:6px 18px 18px;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
+.tickets-scroll::-webkit-scrollbar{ width:0; height:0; }
+
+
+
+/*================================================
+  TICKET GRID + CARDS
+  ================================================ */
+.ticket-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+  gap:18px;
+}
+
+.ticket-card{
+  border-radius:22px;
+  padding:22px 24px;
+  background:linear-gradient(90deg, rgba(110, 70, 190, .65), rgba(210, 120, 70, .55));
+  border:1px solid rgba(255,255,255,0.10);
+  box-shadow:0 18px 40px rgba(0,0,0,0.25);
+  min-height:220px;
+  display:flex;
+  flex-direction:column;
+}
+
+/*----------------Ticket Text------------------*/
+.t-title{
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:.4px;
+}
+
+.t-sub{
+  margin-top:2px;
+  font-size:16px;
+  font-weight:700;
+  color:rgba(255,255,255,0.65);
+}
+
+.ticket-line{
+  height:2px;
+  width:100%;
+  background:rgba(255,255,255,0.35);
+  border-radius:999px;
+  margin:14px 0 18px;
+}
+
+.ticket-body{
+  font-size:18px;
+  line-height:1.25;
+  color:rgba(255,255,255,0.95);
+  flex:1;
+}
+
+.ticket-body .k{ font-weight:900; }
+
+.ticket-actions{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:14px;
+}
+
+/*----------------Resolved Button------------------*/
+.pill-btn{
+  border:none;
+  border-radius:999px;
+  padding:8px 18px;
+  font-weight:800;
+  letter-spacing:.4px;
+  color:#fff;
+  background:linear-gradient(90deg, rgba(150, 90, 255, .9), rgba(255, 140, 90, .9));
+  box-shadow:0 10px 22px rgba(0,0,0,0.25);
+  cursor:pointer;
+  transition:transform 0.12s ease, filter 0.18s ease;
+}
+
+.pill-btn:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.05);
+}
+
+
+
+/*================================================
+  RESPONSIVE
+  ================================================ */
+@media (max-width: 900px){
+  body{ overflow:auto; }
+  .page-wrap{ grid-template-columns: 76px 1fr; }
+  .main-area{ height:auto; overflow:visible; padding:28px 18px; }
+  .tickets-shell{ min-height:520px; }
 }

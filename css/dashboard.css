@@ -1,3 +1,6 @@
+/*================================================
+  COLORS + EFFECTS
+  ================================================ */
 :root {
   --bg-1: #0b0c10;
   --white: #fff;
@@ -10,6 +13,11 @@
   --green: rgba(80, 255, 120, 0.95);
 }
 
+
+
+/*================================================
+  BASE
+  ================================================ */
 * {
   box-sizing: border-box;
 }
@@ -27,6 +35,7 @@ body {
   overflow: hidden;
 }
 
+/*----------------Background Blur Layer------------------*/
 .app-bg {
   position: fixed;
   inset: 0;
@@ -39,6 +48,11 @@ body {
   transform: scale(1.05);
 }
 
+
+
+/*================================================
+  LAYOUT
+  ================================================ */
 .page-wrap {
   height: 100vh;
   /* single viewport wrapper */
@@ -48,8 +62,11 @@ body {
   z-index: 1;
 }
 
-/* Sidebar */
 
+
+/*================================================
+  SIDEBAR
+  ================================================ */
 .side-nav {
   position: sticky;
   top: 0;
@@ -66,6 +83,7 @@ body {
   gap: 18px;
 }
 
+/*----------------Sidebar Buttons------------------*/
 .side-btn {
   width: 48px;
   height: 48px;
@@ -80,6 +98,7 @@ body {
   transition: transform 0.12s ease, opacity 0.12s ease;
 }
 
+/*----------------Material Icons (Global)------------------*/
 .material-symbols-rounded {
   font-size: 30px;
   color: rgba(255, 255, 255, 0.9);
@@ -108,6 +127,7 @@ body {
   background: rgba(255, 255, 255, 0.95);
 }
 
+/*----------------Sidebar Brand Logo------------------*/
 .side-brand {
   display: grid;
   place-items: center;
@@ -121,17 +141,18 @@ body {
   transform: translateX(-12px);
 }
 
-/* Main layout */
 
+
+/*================================================
+  MAIN LAYOUT + HEADER
+  ================================================ */
 .main-area {
   padding: 34px 38px;
   max-width: 1480px;
   width: 100%;
   margin: 0 auto;
-
   display: flex;
   flex-direction: column;
-
   min-height: 0;
   overflow: hidden;
 }
@@ -139,11 +160,9 @@ body {
 .dash-grid {
   flex: 1;
   min-height: 0;
-
   display: grid;
   grid-template-columns: 1fr 360px;
   grid-template-rows: auto 1fr;
-
   gap: 22px;
 }
 
@@ -159,6 +178,7 @@ body {
   gap: 22px;
 }
 
+/*----------------Page Title------------------*/
 .page-title {
   margin: 0;
   font-size: clamp(38px, 4vw, 64px);
@@ -173,6 +193,7 @@ body {
   font-weight: 500;
 }
 
+/*----------------Search Bar------------------*/
 .search-wrap {
   width: 420px;
   max-width: 46vw;
@@ -214,14 +235,13 @@ body {
   color: rgba(120, 80, 150, 0.55);
 }
 
+/*----------------Dashboard Columns------------------*/
 .center-col {
   grid-column: 1/2;
   grid-row: 2/3;
   min-width: 0;
   min-height: 0;
-
   display: grid;
-
   grid-template-rows: clamp(240px, 34vh, 320px) minmax(0, 1fr);
   gap: 16px;
 }
@@ -232,8 +252,11 @@ body {
   min-height: 0;
 }
 
-/* Top box */
 
+
+/*================================================
+  HERO (TOP BOX)
+  ================================================ */
 .hero-shell {
   position: relative;
   min-height: 0;
@@ -282,6 +305,7 @@ body {
   filter: drop-shadow(0 10px 26px rgba(0, 0, 0, 0.55));
 }
 
+/*----------------Hero Actions------------------*/
 .hero-actions {
   position: relative;
   display: flex;
@@ -305,6 +329,7 @@ body {
   filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.35));
 }
 
+/*----------------Hero Scroll Area------------------*/
 .hero-scroll {
   flex: 1;
   min-height: 0;
@@ -320,8 +345,11 @@ body {
   height: 0;
 }
 
-/* Filter pop */
 
+
+/*================================================
+  FILTER POPUP
+  ================================================ */
 .filter-pop {
   position: absolute;
   top: 44px;
@@ -374,8 +402,11 @@ body {
   cursor: pointer;
 }
 
-/* Rooms list */
 
+
+/*================================================
+  ROOMS LIST
+  ================================================ */
 .lab-room-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -399,6 +430,7 @@ body {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
+/*----------------Room Color Bars------------------*/
 .lab-pill {
   width: 10px;
   height: 44px;
@@ -416,6 +448,7 @@ body {
   box-shadow: 0 10px 24px rgba(255, 60, 60, 0.18);
 }
 
+/*----------------Room Text------------------*/
 .lab-meta {
   min-width: 0;
   display: flex;
@@ -441,8 +474,11 @@ body {
   text-overflow: ellipsis;
 }
 
-/* Bottom grid */
 
+
+/*================================================
+  BOTTOM GRID
+  ================================================ */
 .bottom-grid {
   min-height: 0;
   display: grid;
@@ -468,8 +504,11 @@ body {
   color: rgba(255, 255, 255, 0.95);
 }
 
-/* Notifications */
 
+
+/*================================================
+  NOTIFICATIONS (BOTTOM LEFT)
+  ================================================ */
 .notif-panel {
   display: flex;
   flex-direction: column;
@@ -516,6 +555,7 @@ body {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
+/*----------------Notification Avatar + Text------------------*/
 .avatar {
   width: 46px;
   height: 46px;
@@ -542,8 +582,11 @@ body {
   max-width: 320px;
 }
 
-/* IT Assist */
 
+
+/*================================================
+  IT ASSIST (BOTTOM RIGHT)
+  ================================================ */
 .assist-panel {
   position: relative;
   background: linear-gradient(135deg, rgba(95, 45, 170, 0.55), rgba(255, 150, 110, 0.35));
@@ -558,6 +601,7 @@ body {
   position: relative;
 }
 
+/*----------------IT Assist Textarea------------------*/
 .assist-input {
   width: 100%;
   height: 100%;
@@ -575,6 +619,7 @@ body {
   color: rgba(120, 80, 150, 0.55);
 }
 
+/*----------------IT Assist Send Button------------------*/
 .assist-send {
   position: absolute;
   right: 18px;
@@ -602,8 +647,11 @@ body {
   filter: none;
 }
 
-/* Right panel */
 
+
+/*================================================
+  RIGHT PANEL (PROFILE + RESERVATIONS + CALENDAR)
+  ================================================ */
 .profile-card {
   border-radius: 28px;
   padding: 18px;
@@ -620,6 +668,7 @@ body {
   overflow: hidden;
 }
 
+/*----------------Profile Header------------------*/
 .profile-row {
   display: flex;
   gap: 14px;
@@ -663,6 +712,7 @@ body {
   margin-top: 2px;
 }
 
+/*----------------Edit Profile Button------------------*/
 .edit-btn {
   margin-top: 10px;
   width: max-content;
@@ -682,13 +732,54 @@ body {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
+/*----------------Logout Button------------------*/
+.profile-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.profile-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  background: rgba(0, 0, 0, 0.10);
+  color: rgba(255, 255, 255, 0.92);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.18s ease, border-color 0.18s ease;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+}
+
+.profile-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.profile-icon-btn.logout:hover {
+  background: rgba(255, 60, 60, 0.25);
+  border-color: rgba(255, 60, 60, 0.5);
+}
+
+.profile-icon-btn .material-symbols-rounded {
+  font-size: 20px;
+}
+
+
+/*================================================
+  RESERVATIONS LIST
+  ================================================ */
 .right-title {
   margin-top: 6px;
   font-weight: 500;
   letter-spacing: 0.2px;
 }
-
-/* Reservations */
 
 .res-list {
   max-height: clamp(170px, 22vh, 240px);
@@ -723,6 +814,7 @@ body {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
+/*----------------Reservation Accent Bars------------------*/
 .res-accent-bar {
   width: 10px;
   height: 44px;
@@ -740,6 +832,7 @@ body {
   box-shadow: 0 10px 24px rgba(255, 60, 60, 0.18);
 }
 
+/*----------------Reservation Text------------------*/
 .res-info {
   min-width: 0;
   display: flex;
@@ -768,8 +861,10 @@ body {
 }
 
 
-/* Calendar */
 
+/*================================================
+  CALENDAR
+  ================================================ */
 .calendar-card {
   margin-top: auto;
   border-radius: 22px;
@@ -802,6 +897,7 @@ body {
   padding: 0;
 }
 
+/*----------------Calendar Grid------------------*/
 .cal-week,
 .cal-days {
   display: grid;
@@ -858,6 +954,7 @@ body {
   z-index: -1;
 }
 
+/*----------------Calendar Reservation Highlights------------------*/
 .cal-days span.has-res {
   color: #fff;
 }
@@ -884,8 +981,11 @@ body {
   background: linear-gradient(135deg, rgba(80, 255, 120, 0.95), rgba(255, 60, 60, 0.95));
 }
 
-/* Responsive */
 
+
+/*================================================
+  RESPONSIVE
+  ================================================ */
 @media (max-width:1200px) {
   body {
     overflow: auto;
@@ -923,40 +1023,3 @@ body {
   }
 }
 
-.profile-actions {
-  margin-top: 10px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.profile-icon-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  border: 1.5px solid rgba(255, 255, 255, 0.55);
-  background: rgba(0, 0, 0, 0.10);
-  color: rgba(255, 255, 255, 0.92);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition: transform 0.12s ease, background 0.18s ease, border-color 0.18s ease;
-  padding: 0;
-  margin: 0;
-  line-height: 1;
-}
-
-.profile-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translateY(-2px);
-}
-
-.profile-icon-btn.logout:hover {
-  background: rgba(255, 60, 60, 0.25);
-  border-color: rgba(255, 60, 60, 0.5);
-}
-
-.profile-icon-btn .material-symbols-rounded {
-  font-size: 20px;
-}
