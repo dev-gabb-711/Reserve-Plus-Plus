@@ -2,163 +2,196 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RESERVE++: IT Assist</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RESERVE++: IT Assist</title>
+  <!-- Bootstrap and Design Links -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" />
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <link rel="stylesheet" href="../css/itassist.css">
+  <!-- All design here -->
+  <link rel="stylesheet" href="../css/itassist.css">
 </head>
 
 <body>
-    <div class="app-bg"></div>
+  <div class="app-bg"></div>
 
-<<<<<<< HEAD
-    <div class="page-wrap assist-container">
+  <div class="assist-container">
+    <nav class="sidebar">
+      <ul class="nav-links">
+        <li><span class="material-symbols-rounded" onclick="location.href='dashboard.html'">home</span></li>
+        <li><span class="material-symbols-rounded" onclick="location.href='rseat.html'">monitor</span></li>
+        <li><span class="material-symbols-rounded" onclick="location.href='itassist.html'">report</span></li>
+        <li><span class="material-symbols-rounded" onclick="location.href='notifications.html'">notifications</span>
+        </li>
+      </ul>
+      <div class="logo">RS++</div>
+    </nav>
 
-        <aside class="side-nav">
-            <div class="side-icons">
-                <button class="side-btn active">
-                    <span class="material-symbols-rounded">home</span>
-                </button>
-                <button class="side-btn">
-                    <span class="material-symbols-rounded">computer</span>
-                </button>
-                <button class="side-btn">
-                    <span class="material-symbols-rounded">event_seat</span>
-                </button>
-                <button class="side-btn">
-                    <span class="material-symbols-rounded">notifications</span>
-                </button>
-            </div>
-
-            <div class="side-brand">
-                <img src="../img/logo.png" class="brand-logo" alt="Logo">
-            </div>
-        </aside>
-=======
-    <div class="assist-container">
-        <nav class="sidebar">
-            <ul class="nav-links">
-                <li><span class="material-symbols-rounded" onclick="location.href='dashboard.html'">home</span></li>
-                <li><span class="material-symbols-rounded" onclick="location.href='rseat.html'">monitor</span></li>
-                <li><span class="material-symbols-rounded" onclick="location.href='itassist.html'">report</span></li>
-                <li><span class="material-symbols-rounded" onclick="location.href='notifications.html'">notifications</span></li>
-            </ul>
-            <div class="logo">RS++</div>
-        </nav>
->>>>>>> ce55c0943dd88045c2436dae4a93a8fb0b6f00d9
-
-        <div class="center-content">
-            <header class="assist-header">
-                <div class="header-text">
-                    <h1>IT ASSIST</h1>
-                    <p>Tell us what's wrong and we'll assist you shortly</p>
-                </div>
-                <div class="search-box">
-                    <span class="material-symbols-rounded">search</span>
-                    <input type="search" placeholder="Search for Labs here...">
-                </div>
-            </header>
-
-            <form class="ticket-container">
-                <div class="location-row">
-                    <div class="location-item building">
-                        <label for="building-select">Building Location:</label>
-                        <select name="building-code" id="building-select" class="form-select" required>
-                            <option value="" disabled selected>Select building...</option>
-                            <option value="LS">St. La Salle Hall</option>
-                            <option value="SJ">St. Joseph Hall</option>
-                            <option value="M">Miguel Hall</option>
-                            <option value="V">Velasco Hall</option>
-                            <option value="G">Gokongwei Hall</option>
-                            <option value="L">Mutien Marie Hall</option>
-                            <option value="Y">Don Enrique T. Yuchengco Hall</option>
-                            <option value="H">William Hall</option>
-                            <option value="A">Andrew Gonzalez Hall</option>
-                            <option value="B">Br. Connon Hall</option>
-                            <option value="STRC">Science & Technology Research Center</option>
-                            <option value="AG">Henry Sy Sr. Hall</option>
-                        </select>
-                    </div>
-
-                    <div class="location-item room">
-                        <label for="room-number">Room Number:</label>
-                        <input type="text" id="room-number" name="room" placeholder="e.g. G203" required>
-                    </div>
-
-                    <div class="location-item seat">
-                        <label for="seat-number">Seat Number:</label>
-                        <input type="number" id="seat-number" name="seat" min="1" max="50" placeholder="0" required>
-                    </div>
-                </div>
-
-                <div class="common-concerns">
-                    <h6>Common Laboratory Concerns</h6>
-                    <div class="concern-pills">
-                        <button type="button" class="btn-concern">PC Unresponsive / Frozen</button>
-                        <button type="button" class="btn-concern">No Internet Connection</button>
-                        <button type="button" class="btn-concern">Keyboard / Mouse Not Working</button>
-                        <button type="button" class="btn-concern">Monitor No Display</button>
-                        <button type="button" class="btn-concern">Cannot Log In (Account Issue)</button>
-                        <button type="button" class="btn-concern">Software/App Crashing</button>
-                        <button type="button" class="btn-concern">Audio / Headphone Jack Issue</button>
-                    </div>
-                </div>
-
-                <div class="ticket-textarea">
-                    <label for="issue-details">Describe your concern:</label>
-                    <textarea id="issue-details" name="details"
-                        placeholder="If your issue isn't in the options above, please type it below..."
-                        required></textarea>
-                </div>
-
-                <div class="button-group">
-                    <button type="submit" class="btn-submit">Submit Ticket</button>
-                    <button type="button" class="btn-cancel">Cancel</button>
-                </div>
-            </form>
-
+    <main class="main">
+      <header class="top-row">
+        <div class="top-left">
+          <h1 class="page-title">IT Assist</h1>
+          <p class="page-subtitle">Tell us what's wrong and we'll assist you shortly</p>
         </div>
+        <div class="search-pill">
+          <span class="material-symbols-rounded">search</span>
+          <input type="search" placeholder="Search for Labs here...">
+        </div>
+      </header>
+
+      <main class="ticket-container">
+        <div class="ticket-textarea">
+          <textarea placeholder="Type your issue here..."></textarea>
+        </div>
+        <div class="button-group">
+          <button type="submit" class="btn-submit">Submit</button>
+          <button type="button" class="btn-cancel">Cancel</button>
+        </div>
+      </main>
+  </div>
 
 
-        <aside class="assist-right-panel">
-            <section class="profile-card">
-                <img src="../img/def_avatar.jpg" alt="Profile">
-                <div class="profile-info">
-                    <p class="name">Gabby Martinez</p>
-                    <p class="role">Lab User</p>
-                </div>
-            </section>
-
-            <section class="my-tickets">
-                <h2>My Tickets</h2>
-
-                <div class="ticket-card pending">
-                    <div class="status-pill"></div>
-                    <div class="ticket-info">
-                        <h3>Room G203 • Seat 1</h3>
-                        <p>Pending</p>
-                    </div>
-                </div>
-
-                <div class="ticket-card resolved">
-                    <div class="status-pill"></div>
-                    <div class="ticket-info">
-                        <h3>Room A1103 • Seat 1</h3>
-                        <p>Resolved</p>
-                    </div>
-                </div>
-            </section>
-            <button type="button" class="faq-btn">FAQ</button>
-        </aside>
+  <aside class="right-col">
+    <div class="glass card">
+      <div class="profile-card">
+        <img src="../img/def_avatar.jpg" alt="Profile">
+        <div class="profile-info">
+          <p class="name">Gabby Martinez</p>
+          <p class="role">Lab User</p>
+        </div>
+      </div>
     </div>
+
+    <div class="glass card">
+      <h3 class="card-title">My Tickets</h3>
+
+      <!-- Scroll pane -->
+      <div class="tickets-pane" id="ticketsPane" aria-label="My Tickets"></div>
+    </div>
+
+    <div class="glass card">
+      <button type="button" class="btn btn-outline-light btn-outline w-100">FAQ</button>
+    </div>
+  </aside>
+  </section>
+  </main>
+  </div>
+
+  <script>
+    (function () {
+      const form = document.getElementById("ticketForm");
+      const chipsWrap = document.getElementById("concernChips");
+      const buildingEl = document.getElementById("building");
+      const roomEl = document.getElementById("room");
+      const seatEl = document.getElementById("seat");
+      const messageEl = document.getElementById("message");
+      const cancelBtn = document.getElementById("cancelBtn");
+      const ticketsPane = document.getElementById("ticketsPane");
+
+      let selectedConcern = "";
+
+      // Demo data (replace later with API response)
+      let tickets = [
+        { room: "G203", seat: 1, status: "Pending" },
+        { room: "A1103", seat: 1, status: "Resolved" },
+        { room: "A1103", seat: 1, status: "Resolved" },
+        { room: "A1103", seat: 1, status: "Resolved" },
+        { room: "A1103", seat: 1, status: "Resolved" },
+        { room: "A1103", seat: 1, status: "Resolved" },
+        { room: "A1103", seat: 1, status: "Resolved" },
+      ];
+
+      function statusToClass(status) {
+        const s = (status || "").toLowerCase();
+        if (s.includes("pending") || s.includes("open") || s.includes("waiting")) return "red";
+        if (s.includes("resolved") || s.includes("closed") || s.includes("done")) return "green";
+        return "purple";
+      }
+
+      function ticketCardHTML(t) {
+        const cls = statusToClass(t.status);
+        return `
+          <div class="mini-card ${cls}">
+            <div class="accent"></div>
+            <div class="info">
+              <strong>Room ${t.room} • Seat ${t.seat}</strong>
+              <p>${t.status}</p>
+            </div>
+          </div>
+        `.trim();
+      }
+
+      function renderTickets() {
+        if (!tickets || tickets.length === 0) {
+          ticketsPane.innerHTML = `<p class="mb-0" style="opacity:.75;">No tickets yet.</p>`;
+          return;
+        }
+        ticketsPane.innerHTML = tickets.map(ticketCardHTML).join("");
+      }
+
+      function clearChipSelection() {
+        selectedConcern = "";
+        chipsWrap.querySelectorAll(".chip.active").forEach(btn => btn.classList.remove("active"));
+      }
+
+      function resetForm() {
+        form.reset();
+        clearChipSelection();
+      }
+
+      // Chip click: select/deselect concern (does NOT require message)
+      chipsWrap.addEventListener("click", (e) => {
+        const btn = e.target.closest(".chip");
+        if (!btn) return;
+
+        const concern = btn.dataset.concern || btn.textContent.trim();
+        const isActive = btn.classList.contains("active");
+
+        chipsWrap.querySelectorAll(".chip.active").forEach(b => b.classList.remove("active"));
+
+        if (isActive) {
+          selectedConcern = "";
+        } else {
+          btn.classList.add("active");
+          selectedConcern = concern;
+        }
+      });
+
+      // Submit: allow (chip only) OR (message only) OR both
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const building = buildingEl.value.trim();
+        const room = roomEl.value.trim();
+        const seat = seatEl.value.trim();
+        const message = messageEl.value.trim();
+
+        // Minimal validation for location info (usually required)
+        if (!building || !room || seat === "") return;
+
+        // Must have at least a selected concern OR a message
+        if (!selectedConcern && !message) return;
+
+        // Create a new ticket (demo behavior)
+        tickets = [
+          { room: room.toUpperCase(), seat: Number(seat), status: "Pending" },
+          ...tickets
+        ];
+        renderTickets();
+        resetForm();
+      });
+
+      cancelBtn.addEventListener("click", () => resetForm());
+
+      // Initial render
+      renderTickets();
+    })();
+  </script>
 </body>
 
 </html>

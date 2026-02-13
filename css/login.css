@@ -43,12 +43,12 @@ body{
 
 .auth-card{
   width: min(1100px, 92vw);
-  height: min(620px, 80vh);
+  max-height: 620px;
+  height: auto;
   background: rgba(255,255,255,0.92);
   border-radius: 30px;
   box-shadow: var(--shadow);
   overflow: hidden;
-
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
 }
@@ -142,6 +142,11 @@ body{
   height: 100%;
   object-fit: cover;
   transform: translateY(-10px);
+}
+
+.auth-right,
+.auth-img{
+  height: 100%;
 }
 
 .auth-right::after{

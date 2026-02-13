@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	refreshUI();
 	renderReservations();
 
-	// Building/Lab Switching
 	document.getElementById('switchBuildingBtn').onclick = () => {
 		appState.currentBld = (appState.currentBld.includes("Gok")) ? "Andrew Gonzales Hall" : "Gokongwei Hall";
 		appState.currentLab = appState.data[appState.currentBld].labs[0];
@@ -29,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		refreshUI();
 	};
 
-	// Edit Panel Buttons
 	document.getElementById('btnCancelEdit').onclick = () => {
 		if (!appState.editingTargetId) return;
 		new bootstrap.Modal(document.getElementById('confirmCancelModal')).show();
@@ -40,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		new bootstrap.Modal(document.getElementById('successModal')).show();
 	};
 
-	// Reservation Flow
 	document.getElementById('btnOpenModal').onclick = () => {
 		appState.tempSlots = [];
 		openBookingFlow();
@@ -66,23 +63,24 @@ document.addEventListener('DOMContentLoaded', () => {
 		const timeRange = calculateTimeRange(appState.tempSlots);
 
 		if (appState.editingTargetId) {
-			const resIndex = appState.reservations.findIndex(r => r.id === appState.editingTargetId);
+			const targetId = Number(appState.editingTargetId);
+			const resIndex = appState.reservations.findIndex(r => r.id === targetId);
 			if (resIndex !== -1) {
 				appState.reservations[resIndex].date = dateStr;
 				appState.reservations[resIndex].time = timeRange;
 				appState.reservations[resIndex].seat = appState.selectedSeats.join(', ');
-				// Store raw slots for precise collision checking
 				appState.reservations[resIndex].slots = [...appState.tempSlots];
+				appState.reservations[resIndex].building = appState.reservations[resIndex].building ?? appState.currentBld;
 			}
 		} else {
 			appState.reservations.unshift({
 				id: Date.now(),
+				building: appState.currentBld,
 				lab: (appState.currentBld[0] + appState.currentLab),
 				seat: appState.selectedSeats.join(', '),
 				date: dateStr,
 				time: timeRange,
-				slots: [...appState.tempSlots], // Store raw slots
-				color: appState.currentBld.includes("Gok") ? "red" : "purple"
+				slots: [...appState.tempSlots]
 			});
 		}
 
@@ -103,7 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	};
 
 	document.getElementById('executeDelete').onclick = () => {
-		appState.reservations = appState.reservations.filter(r => r.id !== appState.editingTargetId);
+		const targetId = Number(appState.editingTargetId);
+		appState.reservations = appState.reservations.filter(r => r.id !== targetId);
 		appState.editingTargetId = null;
 		renderReservations();
 		bootstrap.Modal.getInstance(document.getElementById('confirmCancelModal')).hide();
@@ -117,10 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			return;
 		}
 
-		const res = appState.reservations.find(r => r.id === appState.editingTargetId);
+		const targetId = Number(appState.editingTargetId);
+		const res = appState.reservations.find(r => r.id === targetId);
 		if (res) {
 			appState.selectedSeats = res.seat.toString().split(', ').map(s => parseInt(s));
-			// Pre-fill tempSlots so user sees what they previously picked
 			appState.tempSlots = res.slots ? [...res.slots] : [];
 			openBookingFlow();
 		}
@@ -210,14 +209,11 @@ function renderCalendar() {
 			.filter(r => r.date === checkDate)
 			.reduce((acc, r) => acc.concat(r.slots || []), []);
 
-		const systemSlotsCount = appState.bookedDates.includes(fullDate) ? 18 : appState.bookedSlots.length;
 		const totalBookedCount = new Set([...userSlotsForDay, ...appState.bookedSlots]).size;
-
 		const isDayFullyBooked = totalBookedCount >= 18;
 
 		dayEl.className = `cal-day ${isDayFullyBooked ? 'unavailable' : ''} ${d === appState.selectedDate.getDate() && month === appState.selectedDate.getMonth() ? 'selected' : ''}`;
 
-		// Optional: Add a small indicator if the user has AT LEAST one booking
 		if (userSlotsForDay.length > 0 && !isDayFullyBooked) {
 			dayEl.style.borderBottom = "2px solid #ff6b4a";
 		}
@@ -261,9 +257,7 @@ function renderTimeGrid() {
 		const isUserReserved = appState.reservations.some(res => {
 			const isSameDate = res.date === dateStr;
 			const hasSlot = res.slots && res.slots.includes(s);
-
-			const isNotBeingEdited = res.id !== appState.editingTargetId;
-
+			const isNotBeingEdited = res.id !== Number(appState.editingTargetId);
 			return isSameDate && hasSlot && isNotBeingEdited;
 		});
 
@@ -309,21 +303,33 @@ function setLab(l) {
 
 function renderReservations() {
 	const container = document.getElementById('activeResContainer');
-	container.innerHTML = appState.reservations.map(res => `
-        <div class="mini-card ${res.color}" onclick="selectForEdit(${res.id})">
-            <div class="info">
-                <strong>${res.lab} • Seat(s) ${res.seat}</strong>
-                <p>${res.date} | ${res.time}</p>
-            </div>
-            <div class="accent"></div>
+
+	container.innerHTML = appState.reservations.map(res => {
+		const building = String(res.building ?? "").toLowerCase().trim();
+		const colorClass = building.includes("andrew gonzales") ? "green" : (building.includes("gokongwei") ? "red" : "");
+		const id = String(res.id);
+
+		return `
+      <div class="mini-card ${colorClass}" data-res-id="${id}" onclick="selectForEdit(event,'${id}')">
+        <div class="accent"></div>
+        <div class="info">
+          <strong>${res.lab} • Seat(s) ${res.seat}</strong>
+          <p>${res.date} | ${res.time}</p>
         </div>
-    `).join('');
+      </div>
+    `;
+	}).join('');
 }
 
-window.selectForEdit = (id) => {
-	appState.editingTargetId = id;
-	const res = appState.reservations.find(r => r.id === id);
+window.selectForEdit = (e, id) => {
+	const targetId = Number(id);
+	appState.editingTargetId = targetId;
+
+	const res = appState.reservations.find(r => r.id === targetId);
+	if (!res) return;
+
 	document.querySelector('.edit-desc').innerText = `Editing: ${res.lab} Seat(s) ${res.seat}`;
-	document.querySelectorAll('.mini-card').forEach(c => c.style.border = "none");
-	event.currentTarget.style.border = "1px solid #ff6b4a";
+
+	document.querySelectorAll('#activeResContainer .mini-card').forEach(c => c.style.border = "1px solid rgba(255,255,255,0.12)");
+	e.currentTarget.style.border = "1px solid #ff6b4a";
 };
