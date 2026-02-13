@@ -18,7 +18,7 @@
 
   <aside class="side-nav">
     <div class="side-icons">
-      <button class="side-btn" type="button" onclick="location.href='dashboard.html'"><span class="material-symbols-rounded">home</span></button>
+      <button class="side-btn" type="button" onclick="goToDashboard()"><span class="material-symbols-rounded">home</span></button>
       <button class="side-btn" type="button" onclick="location.href='rseat.html'"><span class="material-symbols-rounded">computer</span></button>
       <button class="side-btn" type="button" onclick="location.href='itassist.html'"><span class="material-symbols-rounded">report</span></button>
       <button class="side-btn" type="button" onclick="location.href='notifications.html'"><span class="material-symbols-rounded">notifications</span></button>
@@ -43,7 +43,7 @@
               <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
             </svg>
           </span>
-          <input type="text" id="searchInput" placeholder="Search for Labs here...">
+          <input type="text" id="labSearch" placeholder="Search for Labs here...">
         </div>
       </div>
     </div>
@@ -106,56 +106,7 @@
 
 </div>
 
-<script>
-const editBtn = document.getElementById("editBtn");
-const cancelBtn = document.getElementById("cancelBtn");
-const saveBtn = document.getElementById("saveBtn");
-
-const viewMode = document.getElementById("viewMode");
-const editMode = document.getElementById("editMode");
-const leftViewActions = document.getElementById("leftViewActions");
-const leftEditActions = document.getElementById("leftEditActions");
-
-const viewName = document.getElementById("viewName");
-const viewEmail = document.getElementById("viewEmail");
-const viewPass = document.getElementById("viewPass");
-
-const nameInput = document.getElementById("nameInput");
-const emailInput = document.getElementById("emailInput");
-const passInput = document.getElementById("passInput");
-
-const avatarFile = document.getElementById("avatarFile");
-const avatarPreview = document.getElementById("avatarPreview");
-
-function setEdit(isEdit){
-  viewMode.classList.toggle("is-hidden", isEdit);
-  editMode.classList.toggle("is-hidden", !isEdit);
-  leftViewActions.classList.toggle("is-hidden", isEdit);
-  leftEditActions.classList.toggle("is-hidden", !isEdit);
-}
-
-editBtn.onclick = () => setEdit(true);
-
-cancelBtn.onclick = () => {
-  nameInput.value = viewName.textContent;
-  emailInput.value = viewEmail.textContent;
-  passInput.value = "passwordpassword";
-  setEdit(false);
-};
-
-saveBtn.onclick = () => {
-  viewName.textContent = nameInput.value.trim() || "User";
-  viewEmail.textContent = emailInput.value.trim() || "sample.email@dlsu.edu.ph";
-  viewPass.textContent = "****************";
-  setEdit(false);
-};
-
-avatarFile.onchange = (e) => {
-  const file = e.target.files && e.target.files[0];
-  if(!file) return;
-  const url = URL.createObjectURL(file);
-  avatarPreview.src = url;
-};
-</script>
+<script src="../js/profile.js"></script>
+<script src="../js/search.js"></script>
 </body>
 </html>

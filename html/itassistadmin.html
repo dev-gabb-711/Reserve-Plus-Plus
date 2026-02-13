@@ -18,7 +18,7 @@
 
   <aside class="side-nav">
     <div class="side-icons">
-      <button class="side-btn" type="button" onclick="location.href='admindashboard.html'"><span class="material-symbols-rounded">home</span></button>
+      <button class="side-btn" type="button" onclick="goToDashboard()"><span class="material-symbols-rounded">home</span></button>
       <button class="side-btn" type="button" onclick="location.href='rseat.html'"><span class="material-symbols-rounded">computer</span></button>
       <button class="side-btn active" type="button" onclick="location.href='itassistadmin.html'"><span class="material-symbols-rounded">report</span></button>
       <button class="side-btn" type="button" onclick="location.href='notifications.html'"><span class="material-symbols-rounded">notifications</span></button>
@@ -49,38 +49,7 @@
 
 </div>
 
-<script>
-const ticketGrid = document.getElementById("ticketGrid");
+<script src="../js/itassistadmin.js"></script>
 
-const tickets = [
-  { title:"Assistance Ticket 1", sub:"A1103 • Seat 1", issue:"PC Unresponsive", status:"Unresolved", priority:"1" },
-  { title:"Assistance Ticket 1", sub:"A1103 • Seat 1", issue:"PC Unresponsive", status:"Unresolved", priority:"1" },
-  { title:"Assistance Ticket 1", sub:"A1103 • Seat 1", issue:"PC Unresponsive", status:"Unresolved", priority:"1" },
-  { title:"Assistance Ticket 1", sub:"A1103 • Seat 1", issue:"PC Unresponsive", status:"Unresolved", priority:"1" },
-  { title:"Assistance Ticket 1", sub:"A1103 • Seat 1", issue:"PC Unresponsive", status:"Unresolved", priority:"1" },
-  { title:"Assistance Ticket 1", sub:"A1103 • Seat 1", issue:"PC Unresponsive", status:"Unresolved", priority:"1" }
-];
-
-ticketGrid.innerHTML = tickets.map(t => `
-  <div class="ticket-card">
-    <div class="ticket-head">
-      <div class="t-title">${t.title}</div>
-      <div class="t-sub">${t.sub}</div>
-    </div>
-
-    <div class="ticket-line"></div>
-
-    <div class="ticket-body">
-      <div><span class="k">Issue :</span> ${t.issue}</div>
-      <div><span class="k">Status:</span> ${t.status}</div>
-      <div><span class="k">Priority Level:</span> ${t.priority}</div>
-    </div>
-
-    <div class="ticket-actions">
-      <button class="pill-btn" type="button">Resolved</button>
-    </div>
-  </div>
-`).join("");
-</script>
 </body>
 </html>

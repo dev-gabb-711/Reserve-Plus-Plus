@@ -101,3 +101,14 @@ function renderCalendar() {
 
 	daysGrid.innerHTML = daysHTML;
 }
+
+// function for keeping track of which dashboard to visit
+function goToDashboard() {
+        const role = localStorage.getItem('role');
+
+        if (role === 'admin') {
+            location.href = './admindashboard.html';
+        } else {
+            location.href = './dashboard.html';
+        }
+}

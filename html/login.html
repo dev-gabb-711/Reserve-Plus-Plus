@@ -59,9 +59,11 @@
         const username = document.getElementById('username').value.trim().toLowerCase();
 
         if (username === 'admin') {
+            localStorage.setItem('role', 'admin');
             location.href = './admindashboard.html';
         } else {
             // Anything else goes to student dashboard
+            localStorage.setItem('role', 'student');
             location.href = './dashboard.html';
         }
     });
