@@ -18,7 +18,7 @@
 
   <aside class="side-nav">
     <div class="side-icons">
-      <button class="side-btn" type="button" onclick="location.href='dashboard.html'"><span class="material-symbols-rounded">home</span></button>
+      <button class="side-btn" type="button" onclick="goToDashboard()"><span class="material-symbols-rounded">home</span></button>
       <button class="side-btn" type="button" onclick="location.href='rseat.html'"><span class="material-symbols-rounded">computer</span></button>
       <button class="side-btn" type="button" onclick="location.href='itassist.html'"><span class="material-symbols-rounded">report</span></button>
       <button class="side-btn" type="button" onclick="location.href='notifications.html'"><span class="material-symbols-rounded">notifications</span></button>
@@ -43,7 +43,7 @@
               <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
             </svg>
           </span>
-          <input type="text" id="searchInput" placeholder="Search for Labs here...">
+          <input type="text" id="labSearch" placeholder="Search for Labs here...">
         </div>
       </div>
     </div>
@@ -157,5 +157,6 @@ avatarFile.onchange = (e) => {
   avatarPreview.src = url;
 };
 </script>
+<script src="../js/search.js"></script>
 </body>
 </html>

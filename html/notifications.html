@@ -24,7 +24,7 @@
   <aside class="side-nav">
   <div class="side-icons">
 
-    <button class="side-btn" type="button" onclick="location.href='dashboard.html'"><span class="material-symbols-rounded">home</span></button>
+    <button class="side-btn" type="button" onclick="goToDashboard()"><span class="material-symbols-rounded">home</span></button>
   <button class="side-btn" type="button" onclick="location.href='rseat.html'"><span class="material-symbols-rounded">computer</span></button>
   <button class="side-btn" type="button" onclick="location.href='itassist.html'"><span class="material-symbols-rounded">report</span></button>
   <button class="side-btn active" type="button" onclick="location.href='notifications.html'"><span class="material-symbols-rounded">notifications</span></button>
@@ -280,6 +280,17 @@ function()
 
 // Initial render
 renderNotifications(notifications);
+
+// function for keeping track of which dashboard to visit
+function goToDashboard() {
+        const role = localStorage.getItem('role');
+
+        if (role === 'admin') {
+            location.href = './admindashboard.html';
+        } else {
+            location.href = './dashboard.html';
+        }
+}
 
 </script>
 </body>

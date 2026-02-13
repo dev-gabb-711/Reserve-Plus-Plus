@@ -333,3 +333,14 @@ window.selectForEdit = (e, id) => {
 	document.querySelectorAll('#activeResContainer .mini-card').forEach(c => c.style.border = "1px solid rgba(255,255,255,0.12)");
 	e.currentTarget.style.border = "1px solid #ff6b4a";
 };
+
+// function for keeping track of which dashboard to visit
+function goToDashboard() {
+        const role = localStorage.getItem('role');
+
+        if (role === 'admin') {
+            location.href = './admindashboard.html';
+        } else {
+            location.href = './dashboard.html';
+        }
+}

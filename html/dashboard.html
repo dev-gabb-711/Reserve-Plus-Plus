@@ -19,7 +19,7 @@
   <div class="page-wrap">
     <aside class="side-nav">
       <div class="side-icons">
-        <button class="side-btn active" type="button" onclick="location.href='dashboard.html'"><span
+        <button class="side-btn active" type="button" onclick="goToDashboard()"><span
             class="material-symbols-rounded">home</span></button>
         <button class="side-btn" type="button" onclick="location.href='rseat.html'"><span
             class="material-symbols-rounded">computer</span></button>
@@ -228,7 +228,7 @@
       return (labSearch.value || "").trim().toLowerCase();
     }
 
-    function renderLabs() {
+    /* function renderLabs() {
       const q = getQuery();
       const filtered = labsToday.filter(item => {
         if (!activeBuildingFilters.has(item.bldgKey)) return false;
@@ -245,7 +245,7 @@
           </div>
         </div>
       `).join("");
-    }
+    } */
 
     function syncChecks() {
       filterChecks.forEach(c => c.checked = activeBuildingFilters.has(c.value));
@@ -345,7 +345,7 @@
       if (!within) filterPop.classList.remove("show");
     });
 
-    labSearch.addEventListener("input", renderLabs);
+    // labSearch.addEventListener("input", renderLabs);
 
     prevBtn.addEventListener("click", () => {
       viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
@@ -361,6 +361,7 @@
     renderReservations();
     renderCalendar();
   </script>
+  <script src="../js/search.js"></script>
 </body>
 
 </html>
