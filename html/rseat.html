@@ -2,138 +2,205 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>RESERVE++: Reserve a Seat</title>
-    <link rel="stylesheet" href="../css/rseat.css">
-    <!--icons stylesheet-->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <!--fonts stylesheet-->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RESERVE++ | Seat Selection</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/rseat.css">
 </head>
 
 <body>
-    <div class="app-bg"></div>
+  <div class="app-bg"></div>
 
-    <div class="reservation-container">
-        <!--NAVBAR-->
-        <nav class="side-nav">
-            <div class="side-icons">
+  <div class="dashboard-container">
+    <nav class="sidebar">
+      <div class="nav-links-wrapper">
+        <ul class="nav-links">
+          <li><a href="dashboard.html"><span class="material-symbols-rounded">home</span></a></li>
+          <li class="active"><a href="rseat.html"><span class="material-symbols-rounded">computer</span></a></li>
+          <li><a href="itassist.html"><span class="material-symbols-rounded">report</span></a></li>
+          <li><a href="#"><span class="material-symbols-rounded">notifications</span></a></li>
+        </ul>
+      </div>
+      <div class="sidebar-logo">
+        <img src="../img/logo.png" alt="Logo">
+      </div>
+    </nav>
 
-                <button class="side-btn">
-                <span class="material-symbols-rounded">home</span>
-                </button>
+    <main class="main-content">
+      <header class="page-top-header">
+        <div class="header-titles">
+          <h1>Reserve a Seat</h1>
+          <p>Select your preferred laboratory and choose an available seat for your session.</p>
+        </div>
+        <div class="search-container">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" placeholder="Search for Labs here...">
+        </div>
+      </header>
 
-                <button class="side-btn">
-                <span class="material-symbols-rounded">computer</span>
-                </button>
+      <section class="hero-banner" id="heroBg">
+        <div class="hero-overlay">
+          <div class="bld-title-row">
+            <h2 id="currentBuildingName">Gokongwei Hall</h2>
+            <button id="switchBuildingBtn" class="btn-swap-building">
+              <span class="material-symbols-rounded">sync_alt</span>
+            </button>
+          </div>
+          <div class="lab-pill-row" id="labNavBar">
+          </div>
+        </div>
+      </section>
 
-                <button class="side-btn">
-                <span class="material-symbols-rounded">report</span>
-                </button>
+      <section class="seat-map-area glass-panel">
+        <div class="map-header">
+          <h2 id="displayLabCode">GK201</h2>
+          <div class="status-legend">
+            <span><i class="dot available"></i> Available</span>
+            <span><i class="dot selected"></i> Selected</span>
+            <span><i class="dot occupied"></i> Occupied</span>
+          </div>
+        </div>
 
-                <button class="side-btn active">
-                <span class="material-symbols-rounded">notifications</span>
-                </button>
+        <div class="monitor-grid" id="seatContainer"></div>
+
+        <div class="action-bar-bottom">
+          <button class="btn-reserve-main" id="btnOpenModal" disabled>Proceed to Reservation</button>
+        </div>
+      </section>
+    </main>
+
+    <aside class="right-panel">
+      <div class="sticky-wrapper">
+        <div class="reservation-card glass-panel">
+          <h3>Current Reservations</h3>
+          <div id="activeResContainer">
+            <div class="mini-card red">
+              <div class="accent"></div>
+              <div class="info">
+                <strong>GK201 • Seat 5</strong>
+                <p>Feb 12 | 9:00 AM</p>
+              </div>
             </div>
+          </div>
+        </div>
 
-            <div class="side-brand">
-                <img src="../img/logo.png" class="brand-logo" alt="Logo">
+        <div class="edit-panel glass-panel">
+          <h3>Edit Reservation</h3>
+          <p class="edit-desc">Select a reservation to edit.</p>
+          <button class="btn-outline-edit" id="openEditFlow">
+            <span class="material-symbols-rounded">event_repeat</span> Change Date & Time
+          </button>
+          <div class="edit-btn-group">
+            <button class="btn-save" id="btnConfirmEdit">Confirm</button>
+            <button class="btn-discard" id="btnCancelEdit">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="modal fade" id="reservationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content glass-modal">
+        <div class="modal-header border-0">
+          <div>
+            <h4 class="fw-bold mb-0" id="modalTitle">Gokongwei Hall</h4>
+            <p class="text-white-50 small mb-0" id="modalSub">GK201 • Select Date & Time</p>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-4">
+            <div class="col-md-7">
+              <label class="input-label">Select Date</label>
+              <div class="calendar-widget" id="calendarEl" style="min-height: 340px;"></div>
             </div>
-        </nav>
-
-        <main class="reserve-main">
-            <!--HEADER-->
-            <header class="reserve-header">
-                <div class="header-text">
-                    <h1 id="title">Reserve a Seat</h1>
-                    <p id="subtitle">Choose a lab and time that works for you</p>
-                </div>
-
-                <div class="search-wrap">
-                    <i class="material-symbols-rounded search-icon">search</i>
-                    <input type="text" placeholder="Search for Labs here...">
-                </div>
-
-            </header>
-
-            <!--BANNER-->
-            <section class="reserve-banner">
-                <div class="building-name">
-                    <h2>GOKONGWEI HALL</h2>
-                    <button id="next" type="button">></button>
-                </div>
-
-                <div class="room-container">
-                    <!--FOR JS IMPLEMENTATION-->
-                </div>
-
-            </section>
-            
-            <!--SEAT SELECTION-->
-            <section class="glass-panel reserve-selection">
-
-            </section>
-        </main>
-        
-
-        <!--RIGHT PANEL-->
-        <!--duplicated dashboard style of displaying cards-->
-        <aside class="glass-panel right-panel">
-            <div class="reservations-section">
-                <h3>My Reservations</h3>
-                <div class="res-card red-accent">
-                <div class="res-accent-bar"></div>
-                <div class="res-info">
-                    <p class="res-room">Room G203 • Seat 1</p>
-                    <p class="res-time">Feb 27 | 4:15 AM</p>
-                </div>
-                </div>
-                <div class="res-card purple-accent">
-                <div class="res-accent-bar"></div>
-                <div class="res-info">
-                    <p class="res-room">Room A1103 • Seat 1</p>
-                    <p class="res-time">Feb 27 | 4:15 AM</p>
-                </div>
-                </div>
+            <div class="col-md-5">
+              <label class="input-label">Select Time Slot</label>
+              <div class="time-slot-container" id="timeSlotGrid" style="max-height: 340px;"></div>
             </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button class="btn-reserve-main w-100" id="finalConfirm">Confirm Reservation</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            <!--EDIT RESERVATIONS-->
-            <section class="glass-panel edit-reservations">
-                <h3>Edit Reservations</h3>
-                <div class="edit-card">
-                    <!--FOR JS IMPLEMENTATION-->
-                </div>
-            </section>
+  <div class="modal fade" id="confirmCancelModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content glass-modal text-center p-4">
+        <h5 class="fw-bold text-white mb-3">Cancel Reservation?</h5>
+        <p class="text-white-50 small mb-4">This action cannot be undone.</p>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn-discard w-100" data-bs-dismiss="modal">Keep It</button>
+          <button type="button" class="btn-save w-100" id="executeDelete" style="background: #ff4a4a !important;">Yes,
+            Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        </aside>    
-    </div>  
+  <div class="modal fade" id="summaryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-modal p-3">
+        <div class="modal-header border-0">
+          <h4 class="fw-bold text-white mb-0">Review Reservation</h4>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-white">
+          <div class="p-3 rounded mb-3" style="background: rgba(255,255,255,0.05); border-left: 4px solid #ff6b4a;">
+            <p class="mb-2"><span class="text-white-50">Location:</span> <span id="sumBld" class="fw-bold"></span></p>
+            <p class="mb-2"><span class="text-white-50">Lab & Seat:</span> <span id="sumLabSeat" class="fw-bold"></span>
+            </p>
+            <p class="mb-2"><span class="text-white-50">Date:</span> <span id="sumDate" class="fw-bold"></span></p>
+            <p class="mb-0"><span class="text-white-50">Time:</span> <span id="sumTime" class="fw-bold"></span></p>
+          </div>
+          <p class="small text-white-50 text-center">Please ensure all details are correct before proceeding.</p>
+        </div>
+        <div class="modal-footer border-0">
+          <button class="btn-save w-100" id="btnFinalSubmit">Finalize Reservation</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <!--FOR JS IMPLEMENTATION-->
-	<div id="modal" class="modal-overlay">
-		<div class="modal-content">
-			<h2 id="modalTitle">Gokongwei Hall</h2>
-			<p id="modalSeats">Selected Seats: None</p>
+  <div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content glass-modal text-center p-4" style="border: 1px solid rgba(46, 204, 113, 0.3);">
+        <div class="mb-3">
+          <span class="material-symbols-rounded"
+            style="font-size: 80px; color: #2ecc71; display: block;">check_circle</span>
+        </div>
+        <h4 class="fw-bold text-white">Confirmed!</h4>
+        <p class="text-white-50 small mb-4">Your seat has been successfully reserved.</p>
+        <button type="button" class="btn-save w-100" data-bs-dismiss="modal"
+          style="background: #2ecc71 !important;">Great!</button>
+      </div>
+    </div>
+  </div>
 
-			<select id="dateSelect">
-				<option value="" disabled selected>Select Date</option>
-				<option value="2026-02-10">Feb 10, 2026</option>
-				<option value="2026-02-11" disabled>Feb 11, 2026 (Fully Booked)</option>
-				<option value="2026-02-12">Feb 12, 2026</option>
-			</select>
+  <div class="modal fade" id="cancelSuccessModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content glass-modal text-center p-4" style="border: 1px solid rgba(255, 107, 74, 0.3);">
+        <div class="mb-3">
+          <span class="material-symbols-rounded"
+            style="font-size: 80px; color: #ff6b4a; display: block;">delete_forever</span>
+        </div>
+        <h4 class="fw-bold text-white">Canceled</h4>
+        <p class="text-white-50 small mb-4">Your reservation has been removed.</p>
+        <button type="button" class="btn-discard w-100" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 
-			<select id="timeSelect">
-				<option value="" disabled selected>Select Time Slot</option>
-				<option value="08:00 AM">08:00 AM</option>
-				<option value="10:00 AM" disabled style="color:red;">10:00 AM (Reserved)</option>
-				<option value="01:00 PM">01:00 PM</option>
-			</select>
-
-			<button id="confirmBtn" class="btn-reserve">Reserve</button>
-			<button onclick="closeModal()"
-				style="margin-top:10px; background:none; border:none; color:#888; cursor:pointer;">Cancel</button>
-		</div>
-	</div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/rseat.js"></script>
 </body>
 
 </html>

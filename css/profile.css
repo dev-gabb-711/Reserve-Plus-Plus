@@ -1,294 +1,343 @@
-/* =========================
-   Variables & Reset
-========================= */
-
 :root{
-  --bg-1: #0b0c10;
-  --panel: rgba(140, 120, 160, 0.35);
-  --panel-2: rgba(140, 120, 160, 0.28);
-  --panel-solid: rgba(120, 98, 138, 0.55);
-  --white: #ffffff;
-  --muted: rgba(255,255,255,0.72);
-  --muted2: rgba(255,255,255,0.55);
-  --stroke: rgba(255,255,255,0.18);
-  --shadow: 0 18px 40px rgba(0,0,0,0.35);
+  --bg-1:#0b0c10;
+  --panel:rgba(140,120,160,.35);
+  --panel-2:rgba(140,120,160,.28);
+  --white:#fff;
+  --muted:rgba(255,255,255,.72);
+  --shadow:0 18px 40px rgba(0,0,0,.35);
 }
 
-* { box-sizing: border-box; }
-html, body { height: 100%; }
+*{box-sizing:border-box;}
+html,body{height:100%;}
 body{
-  margin: 0;
-  font-family: "DM Sans", -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: var(--white);
-  background: var(--bg-1);
-  overflow-x: hidden;
-  position: relative;
+  margin:0;
+  font-family:"DM Sans",-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--white);
+  background:var(--bg-1);
+  overflow-x:hidden;
+  position:relative;
 }
 
 .app-bg{
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background-image:
-    linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.35)),
-    url("../img/background.png");
+  position:fixed;
+  inset:0;
+  z-index:0;
+  background-image:linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.35)),url("../img/background.png");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  filter:blur(20px);
+  transform:scale(1.05);
+}
+.app-bg::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.15);}
 
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  filter: blur(20px);
-  transform: scale(1.05);
+.page-wrap{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:96px 1fr;
+  position:relative;
+  z-index:1;
 }
 
-.app-bg::after{
-  content:"";
-  position:absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.15);
-}
-
-#title {
-    margin: 0;
-    font-size: clamp(38px, 4vw, 64px);
-    font-weight: 700;
-    letter-spacing: 5px;
-    color: #fff;
-    position: relative;
-    z-index: 20;
-    filter:
-        drop-shadow(0 0 4px rgba(255,255,255,0.35))
-        drop-shadow(0 0 10px rgba(255,255,255,0.18));
-}
-
-#subtitle{
-    margin: 10px 0 0 0;
-    color: var(--muted);
-    font-weight: 500;
-}
-
-/* =========================
-   Main Layout Grid
-========================= */
-
-.profile-container{    
-    display: grid;           
-    position: relative; 
-    z-index: 1;
-    grid-template-columns: 96px 1fr; 
-    height: 100vh; 
-}
-
-/* Assign template areas */
-.profile-main{
-    padding: 40px 38px;
-    max-width: 1400px;
-    width: 100%;
-    margin: 0 auto;
-}
-
-.profile-header{
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 22px;
-    margin-bottom: 26px;
-}
-
-.profile-shell{
-    width: 100%;
-    border-radius: 28px;
-    padding: 22px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.10);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: var(--shadow);    
-}
-
-.content-grid{
-  display: flex;
-  gap: 5px;
-  align-items: stretch;
-}
-
-.profile-settings{
-    display: grid;
-    place-items: center;
-    margin-left: 80px;
-    margin-right: 20px;
-    margin-top: 40px;
-    margin-bottom: 20px;  
-}
-
-.btn-hollow{
-    border-radius: 10px;
-    border: 1.5px solid rgba(255,255,255,0.75);
-    background: transparent;
-    padding: 10px 20px;
-    color: rgba(255,255,255,0.95);
-    letter-spacing: 0.3px;
-    width: 200px;
-
-    transition:
-        background 0.18s ease,
-        color 0.18s ease,
-        box-shadow 0.18s ease,
-        transform 0.12s ease;    
-}
-
-.btn-hollow:hover{
-  background: rgba(255,255,255,0.92);
-  color: rgba(30,30,40,0.9);
-  box-shadow:
-    0 8px 18px rgba(0,0,0,0.25),
-    inset 0 1px 0 rgba(255,255,255,0.8);
-
-  transform: translateY(-1px);
-}
-
-.account-info{   
-    margin-left: 100px;
-    margin-right: 20px;
-    margin-top: 40px;
-    margin-bottom: 20px;
-     
-}
-
-.profile-picture {
-    width: 250px;
-    height: 250px;
-    border-radius: 50%;
-}
-
-/* =========================
-   Side Bar Layout
-========================= */
 .side-nav{
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    padding-left: 25px;
-    display: flex;
-    flex-direction: column;
+  position:sticky;
+  top:0;
+  height:100vh;
+  padding-left:25px;
+  display:flex;
+  flex-direction:column;
 }
-
 .side-icons{
-    margin: auto 0;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+  margin:auto 0;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
 }
-
 .side-btn{
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    border: none;
-    background: transparent;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    transition: transform 0.12s ease, opacity 0.12s ease;
+  width:48px;
+  height:48px;
+  border-radius:12px;
+  border:none;
+  background:transparent;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  transition:transform .12s ease,opacity .12s ease;
 }
-
 .material-symbols-rounded{
-    font-size: 30px;
-    color: rgba(255,255,255,0.9);
-
-    font-variation-settings:
-        "FILL" 1,
-        "wght" 500,
-        "GRAD" 0,
-        "opsz" 24;
-
-    filter:
-        drop-shadow(0 0 4px rgba(255,255,255,0.35))
-        drop-shadow(0 0 10px rgba(255,255,255,0.18));
-    transition: filter 0.2s ease, transform 0.12s ease;
+  font-size:30px;
+  color:rgba(255,255,255,.9);
+  font-variation-settings:"FILL" 1,"wght" 500,"GRAD" 0,"opsz" 24;
+  filter:drop-shadow(0 0 4px rgba(255,255,255,.35)) drop-shadow(0 0 10px rgba(255,255,255,.18));
+  transition:filter .2s ease,transform .12s ease;
 }
 .side-btn:hover{
-    filter:
-        drop-shadow(0 0 6px rgba(255,255,255,0.6))
-        drop-shadow(0 0 16px rgba(255,255,255,0.35));
+  filter:drop-shadow(0 0 6px rgba(255,255,255,.6)) drop-shadow(0 0 16px rgba(255,255,255,.35));
 }
-.side-btn.active{
-    background: transparent;
-    box-shadow: none;
-    position: relative;
-}
+.side-btn.active{background:transparent;box-shadow:none;position:relative;}
 .side-btn.active::after{
-    content: "";
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 18px;
-    height: 4px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.95);
+  content:"";
+  position:absolute;
+  bottom:-10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:18px;
+  height:4px;
+  border-radius:999px;
+  background:rgba(255,255,255,.95);
+}
+.side-brand{display:grid;place-items:center;padding-bottom:10px;}
+.brand-logo{width:100px;height:auto;opacity:.9;transform:translateX(-12px);}
+
+.main-area{
+  padding:40px 38px;
+  max-width:1400px;
+  width:100%;
+  margin:0 auto;
 }
 
-.side-brand{
-    display: grid;
-    place-items: center;
-    padding-bottom: 10px;
-}
-.brand-logo{
-    width: 100px;
-    height: auto;
-    opacity: 0.9;
-    transform: translateX(-12px);
+.top-row{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:22px;
+  margin-bottom:26px;
 }
 
-/* =========================
-   PANEL DESIGN
-========================= */
-
-.profile-shell{
-    border-radius: 28px;
-    padding: 22px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.10);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: var(--shadow);
+.page-title{
+  margin:0;
+  font-size:clamp(38px,4vw,64px);
+  font-weight:700;
+  letter-spacing:5px;
+  color:#fff;
+  position:relative;
+  z-index:20;
+  filter:drop-shadow(0 0 4px rgba(255,255,255,.35)) drop-shadow(0 0 10px rgba(255,255,255,.18));
 }
+.page-subtitle{margin:10px 0 0 0;color:var(--muted);font-weight:500;}
 
-/* Search pill */
-.search-wrap{
-    min-width: 280px;
-    width: min(420px, 40vw);
-    margin-top: 25px;
-}
+.search-wrap{min-width:280px;width:min(420px,40vw);margin-top:10px;}
 .search-pill{
-    width: 100%;
-    height: 44px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.92);
-    display: flex;
-    align-items: center;
-    padding: 0 14px 0 12px;
-    box-shadow: 0 14px 28px rgba(0,0,0,0.25);
+  width:100%;
+  height:44px;
+  border-radius:999px;
+  background:rgba(255,255,255,.92);
+  display:flex;
+  align-items:center;
+  padding:0 14px 0 12px;
+  box-shadow:0 14px 28px rgba(0,0,0,.25);
 }
 .search-ico svg{
-    width: 22px;
-    height: 22px;
-    stroke: rgba(100, 40, 190, 0.95);
-    stroke-width: 2.6;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+  width:22px;
+  height:22px;
+  stroke:rgba(100,40,190,.95);
+  stroke-width:2.6;
+  stroke-linecap:round;
+  stroke-linejoin:round;
 }
 .search-pill input{
-    border: 0;
-    outline: none;
-    background: transparent;
-    width: 100%;
-    height: 100%;
-    padding-left: 10px;
-    font-weight: 600;
-    color: rgba(40,40,50,0.85);
+  border:0;
+  outline:none;
+  background:transparent;
+  width:100%;
+  height:100%;
+  padding-left:10px;
+  font-weight:600;
+  color:rgba(40,40,50,.85);
 }
-.search-pill input::placeholder{
-    color: rgba(120, 80, 150, 0.55);
+.search-pill input::placeholder{color:rgba(120,80,150,.55);}
+
+/* Profile main box */
+.profile-shell{
+  width:100%;
+  border-radius:28px;
+  padding:22px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  box-shadow:var(--shadow);
+}
+
+.profile-grid{
+  display:grid;
+  grid-template-columns:520px 1fr;
+  gap:0;
+  align-items:stretch;
+  min-height:560px;
+}
+
+.profile-left{
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:18px;
+  padding:26px 18px;
+}
+
+.profile-avatar{
+  width:320px;
+  height:320px;
+  border-radius:50%;
+  object-fit:cover;
+  background:rgba(255,255,255,.12);
+}
+
+.left-actions{
+  display:grid;
+  gap:14px;
+  width:260px;
+}
+
+.profile-right{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:36px 38px;
+}
+
+.p-name{
+  font-size:44px;
+  font-weight:800;
+  letter-spacing:3px;
+  color:rgba(255,255,255,.95);
+}
+
+.p-role{
+  margin-top:6px;
+  font-size:30px;
+  letter-spacing:3px;
+  font-weight:500;
+  color:rgba(255,255,255,.92);
+}
+
+.field{margin-top:34px;}
+.label{
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:2px;
+  color:rgba(255,255,255,.95);
+}
+.value{
+  margin-top:10px;
+  font-size:22px;
+  letter-spacing:1px;
+  color:rgba(255,255,255,.95);
+}
+
+.btn-outline{
+  border-radius:2px;
+  border:1.5px solid rgba(255,255,255,.65);
+  background:transparent;
+  padding:10px 14px;
+  color:rgba(255,255,255,.95);
+  font-weight:700;
+  cursor:pointer;
+  transition:background .18s ease,color .18s ease,box-shadow .18s ease,transform .12s ease;
+}
+.btn-outline:hover{
+  background:rgba(255,255,255,.92);
+  color:rgba(30,30,40,.9);
+  box-shadow:0 8px 18px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.8);
+  transform:translateY(-1px);
+}
+
+.mode{width:100%;}
+.is-hidden{display:none!important;}
+
+.edit-input{
+  width:min(560px,100%);
+  border:none;
+  outline:none;
+  background:rgba(220,210,225,.85);
+  color:#0b0c10;
+  padding:10px 12px;
+  font-weight:800;
+  border-radius:2px;
+}
+.edit-input.name{
+  font-size:44px;
+  letter-spacing:3px;
+  padding:8px 12px;
+}
+.edit-input:not(.name){
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.edit-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:22px;
+  margin-top:46px;
+}
+.btn-outline.wide{width:240px;text-align:center;}
+
+.file-input{display:none;}
+.file-btn{text-align:center;display:block;}
+
+@media (max-width: 1100px){
+  .profile-grid{grid-template-columns:1fr;gap:18px;}
+  .profile-right{padding:28px 18px;}
+  .profile-avatar{width:260px;height:260px;}
+  .p-name,.edit-input.name{font-size:36px;}
+  .p-role{font-size:26px;}
+}
+
+
+/* Extra adjustments to override the sizes, ayusin to para di nakahiwalay, tinatamad lang ako HAHAAH */
+/* Reduce overall shell height */
+.profile-shell{
+  padding: 18px;
+}
+
+/* Tighten grid + reduce visual weight */
+.profile-grid{
+  min-height: 420px;
+  grid-template-columns: 420px 1fr;
+}
+
+/* Smaller avatar */
+.profile-avatar{
+  width: 240px;
+  height: 240px;
+}
+
+/* Reduce left column spacing */
+.profile-left{
+  gap: 14px;
+  padding: 18px 14px;
+}
+
+/* Reduce name + role sizes */
+.p-name{
+  font-size: 32px;
+  letter-spacing: 2px;
+}
+
+.p-role{
+  font-size: 20px;
+  letter-spacing: 2px;
+}
+
+/* Reduce labels + values */
+.label{
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.value{
+  font-size: 16px;
+}
+
+/* Buttons smaller */
+.btn-outline{
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.left-actions{
+  width: 220px;
+  gap: 12px;
 }
