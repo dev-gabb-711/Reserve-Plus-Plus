@@ -1,0 +1,26 @@
+{
+  "name": "ccapdev-mcos",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dev-gabb-711/CCAPDEV-MCOs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dev-gabb-711/CCAPDEV-MCOs/issues"
+  },
+  "homepage": "https://github.com/dev-gabb-711/CCAPDEV-MCOs#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "express-handlebars": "^8.0.6",
+    "mongoose": "^9.2.3"
+  }
+}
