@@ -92,68 +92,18 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 		const timeRange = calculateTimeRange(appState.tempSlots);
 
-		document.getElementById('sumBld').innerText = appState.currentBld;
-		document.getElementById('sumLabSeat').innerText =
-			`${appState.currentBld[0]}${appState.currentLab} • Seat(s) ${appState.selectedSeats.join(', ')}`;
-		document.getElementById('sumDate').innerText = dateStr;
-		document.getElementById('sumTime').innerText = timeRange;
+		// Populate form with data
+		populateReservationForm(dateStr, timeRange);
 
 		bootstrap.Modal.getInstance(document.getElementById('reservationModal')).hide();
 		setTimeout(() => { new bootstrap.Modal(document.getElementById('summaryModal')).show(); }, 400);
 	};
 
-	// Final submit (creates a new reservation OR updates an existing one)
-	document.getElementById('btnFinalSubmit').onclick = () => {
-		const dateStr = appState.selectedDate.toLocaleDateString('en-US', {
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric'
-		});
-		const timeRange = calculateTimeRange(appState.tempSlots);
-
-		// Edit existing reservation
-		if (appState.editingTargetId) {
-			const targetId = Number(appState.editingTargetId);
-			const resIndex = appState.reservations.findIndex(r => r.id === targetId);
-
-			if (resIndex !== -1) {
-				appState.reservations[resIndex].date = dateStr;
-				appState.reservations[resIndex].time = timeRange;
-				appState.reservations[resIndex].seat = appState.selectedSeats.join(', ');
-				appState.reservations[resIndex].slots = [...appState.tempSlots];
-				appState.reservations[resIndex].building =
-					appState.reservations[resIndex].building ?? appState.currentBld;
-			}
-		}
-		// Create new reservation
-		else {
-			appState.reservations.unshift({
-				id: Date.now(),
-				building: appState.currentBld,
-				lab: (appState.currentBld[0] + appState.currentLab),
-				seat: appState.selectedSeats.join(', '),
-				date: dateStr,
-				time: timeRange,
-				slots: [...appState.tempSlots]
-			});
-		}
-
-		// UI refresh after save
-		renderReservations();
-		appState.editingTargetId = null;
-		document.querySelector('.edit-desc').innerText = "Select a reservation to edit.";
-
-		const sumModalEl = document.getElementById('summaryModal');
-		const sumModal = bootstrap.Modal.getInstance(sumModalEl);
-		sumModal.hide();
-
-		// Show success modal once summary modal fully closes
-		sumModalEl.addEventListener('hidden.bs.modal', function () {
-			new bootstrap.Modal(document.getElementById('successModal')).show();
-			appState.selectedSeats = [];
-			renderSeats();
-		}, { once: true });
-	};
+	// Form submission handler
+	document.getElementById('reservation-form').addEventListener('submit', (e) => {
+		e.preventDefault();
+		submitReservationForm();
+	});
 
 	// Delete reservation (after confirmation)
 	document.getElementById('executeDelete').onclick = () => {
@@ -186,6 +136,120 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	};
 });
+
+
+/* =====================================================
+   Populate Reservation Form
+   - Fills form fields with reservation data
+   ===================================================== */
+function populateReservationForm(dateStr, timeRange) {
+	const labCode = appState.currentBld[0] + appState.currentLab;
+
+	// Populate form inputs (hidden)
+	document.getElementById('building').value = appState.currentBld;
+	document.getElementById('lab').value = labCode;
+	document.getElementById('seats').value = JSON.stringify(appState.selectedSeats);
+	document.getElementById('date').value = dateStr;
+	document.getElementById('time').value = timeRange;
+	document.getElementById('slots').value = JSON.stringify(appState.tempSlots);
+	document.getElementById('reservationId').value = appState.editingTargetId || '';
+
+	// Update display spans with the same data
+	document.getElementById('sumBld').innerText = appState.currentBld;
+	document.getElementById('sumLabSeat').innerText = `${labCode} • Seat(s) ${appState.selectedSeats.join(', ')}`;
+	document.getElementById('sumDate').innerText = dateStr;
+	document.getElementById('sumTime').innerText = timeRange;
+}
+
+
+/* =====================================================
+   Form Submission Handler
+   - Extracts form data and logs to console
+   ===================================================== */
+function submitReservationForm() {
+	const form = document.getElementById('reservation-form');
+	const formData = new FormData(form);
+
+	// Extract data from form fields
+	const reservationData = {
+		building: formData.get('building'),
+		lab: formData.get('lab'),
+		seats: JSON.parse(formData.get('seats')),
+		date: formData.get('date'),
+		time: formData.get('time'),
+		slots: JSON.parse(formData.get('slots')),
+		reservation_id: formData.get('reservation_id') || null,
+		created_at: new Date().toISOString()
+	};
+
+	// Log extracted data to console
+	console.log('=== RESERVATION DATA EXTRACTED FROM FORM ===');
+	console.log('Building:', reservationData.building);
+	console.log('Lab:', reservationData.lab);
+	console.log('Seats:', reservationData.seats);
+	console.log('Date:', reservationData.date);
+	console.log('Time:', reservationData.time);
+	console.log('Slots:', reservationData.slots);
+	console.log('Reservation ID:', reservationData.reservation_id);
+	console.log('Created At:', reservationData.created_at);
+	console.log('Full Data:', reservationData);
+	console.log('=============================================');
+
+	// Show success with extracted data
+	showReservationSuccess(reservationData);
+}
+
+
+/* =====================================================
+   Show Reservation Success
+   - Updates local state and shows success modal
+   ===================================================== */
+function showReservationSuccess(reservationData) {
+	const dateStr = reservationData.date;
+	const timeRange = reservationData.time;
+
+	// Edit existing reservation
+	if (reservationData.reservation_id) {
+		const targetId = Number(reservationData.reservation_id);
+		const resIndex = appState.reservations.findIndex(r => r.id === targetId);
+
+		if (resIndex !== -1) {
+			appState.reservations[resIndex].date = dateStr;
+			appState.reservations[resIndex].time = timeRange;
+			appState.reservations[resIndex].seat = reservationData.seats.join(', ');
+			appState.reservations[resIndex].slots = [...reservationData.slots];
+			appState.reservations[resIndex].building = reservationData.building;
+		}
+	}
+	// Create new reservation
+	else {
+		appState.reservations.unshift({
+			id: Date.now(),
+			building: reservationData.building,
+			lab: reservationData.lab,
+			seat: reservationData.seats.join(', '),
+			date: dateStr,
+			time: timeRange,
+			slots: [...reservationData.slots]
+		});
+	}
+
+	// UI refresh after save
+	renderReservations();
+	appState.editingTargetId = null;
+	document.querySelector('.edit-desc').innerText = "Select a reservation to edit.";
+
+	const sumModalEl = document.getElementById('summaryModal');
+	const sumModal = bootstrap.Modal.getInstance(sumModalEl);
+	sumModal.hide();
+
+	// Show success modal once summary modal fully closes
+	sumModalEl.addEventListener('hidden.bs.modal', function () {
+		new bootstrap.Modal(document.getElementById('successModal')).show();
+		appState.selectedSeats = [];
+		renderSeats();
+	}, { once: true });
+}
 
 
 /* =====================================================

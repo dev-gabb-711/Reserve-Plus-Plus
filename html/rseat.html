@@ -198,7 +198,7 @@
     </div>
   </div>
 
-  <!--========================= SUMMARY MODAL =========================-->
+  <!--========================= SUMMARY MODAL WITH FORM =========================-->
   <div class="modal fade" id="summaryModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content glass-modal p-3">
@@ -207,24 +207,39 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
-        <div class="modal-body text-white">
-          <div class="p-3 rounded mb-3" style="background:rgba(255,255,255,0.05);border-left:4px solid #ff6b4a;">
-            <p class="mb-2"><span class="text-white-50">Location:</span> <span id="sumBld" class="fw-bold"></span></p>
-            <p class="mb-2"><span class="text-white-50">Lab &amp; Seat:</span> <span id="sumLabSeat" class="fw-bold"></span></p>
-            <p class="mb-2"><span class="text-white-50">Date:</span> <span id="sumDate" class="fw-bold"></span></p>
-            <p class="mb-0"><span class="text-white-50">Time:</span> <span id="sumTime" class="fw-bold"></span></p>
+        <!--========================= RESERVATION FORM =========================-->
+        <form id="reservation-form" method="POST">
+          <div class="modal-body">
+            <div class="p-3 rounded mb-3" style="background:rgba(255,255,255,0.05);border-left:4px solid #ff6b4a;">
+              
+              <!-- Form Inputs (Hidden) -->
+              <input type="hidden" id="building" name="building" required>
+              <input type="hidden" id="lab" name="lab" required>
+              <input type="hidden" id="seats" name="seats" required>
+              <input type="hidden" id="date" name="date" required>
+              <input type="hidden" id="time" name="time" required>
+              <input type="hidden" id="slots" name="slots" required>
+              <input type="hidden" id="reservationId" name="reservation_id">
+
+              <!-- Summary Display -->
+              <p class="mb-2"><span class="text-white-50">Location:</span> <span id="sumBld" class="fw-bold"></span></p>
+              <p class="mb-2"><span class="text-white-50">Lab &amp; Seat:</span> <span id="sumLabSeat" class="fw-bold"></span></p>
+              <p class="mb-2"><span class="text-white-50">Date:</span> <span id="sumDate" class="fw-bold"></span></p>
+              <p class="mb-0"><span class="text-white-50">Time:</span> <span id="sumTime" class="fw-bold"></span></p>
+            </div>
+
+            <p class="small text-white-50 text-center mb-0">
+              Please ensure all details are correct before proceeding.
+            </p>
           </div>
 
-          <p class="small text-white-50 text-center mb-0">
-            Please ensure all details are correct before proceeding.
-          </p>
-        </div>
-
-        <div class="modal-footer border-0">
-          <button class="btn-ghost w-100" id="btnFinalSubmit" type="button">
-            Finalize Reservation
-          </button>
-        </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+            <button class="btn-proceed" id="btnFinalSubmit" type="submit">
+              Finalize Reservation
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
