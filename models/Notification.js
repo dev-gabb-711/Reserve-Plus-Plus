@@ -7,7 +7,7 @@ const notificationSchema = new mongoose.Schema({
         required: true 
     },
 
-    senderName: { type: String, defualt: System },
+    senderName: { type: String, default: 'System' },
     senderRole: { type: String, default: 'Lab Management' },
     senderAvatar: { type: String, default: 'def_avatar.jpg' },
     
