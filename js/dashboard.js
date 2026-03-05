@@ -4,9 +4,6 @@
 
 const labGrid = document.getElementById("lab-room-grid");
 
-/* Optional Search + Filter UI (disabled for now)
-const labSearch = document.getElementById("labSearch");
-*/
 
 const filterBtn = document.getElementById("filterBtn");
 const filterPop = document.getElementById("filterPop");
