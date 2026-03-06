@@ -317,13 +317,9 @@ app.post('/login', async (req, res) => {
 
     const user = await User.findOne({ email: mail });
 
-    if (!user) {
-      return res.status(400).send('Account not found.');
-    }
-
-    if (user.password !== pass) {
-      return res.status(400).send('Incorrect password.');
-    }
+    if (!user || user.password !== pass ) { // changed to one message
+      return res.status(400).send('Invalid login'); 
+    } 
 
     if (user.role === 'Admin') {
       return res.redirect(`/admin-dashboard?userId=${user._id}`);
