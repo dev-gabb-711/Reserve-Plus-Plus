@@ -225,8 +225,8 @@ function goToDashboard() {
   const role = localStorage.getItem('role');
 
   if (role === 'admin') {
-    location.href = './admindashboard.html';
+    location.href = './admindashboard';
   } else {
-    location.href = './dashboard.html';
+    location.href = './dashboard';
   }
 }
