@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--========================= META + TITLE =========================-->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up</title>
+
+  <!--========================= FONTS =========================-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!--========================= PAGE STYLES =========================-->
+  <link rel="stylesheet" href="/css/login.css">
+</head>
+
+<body class="page page--signup">
+
+  <!--========================= BACKGROUND LAYER =========================-->
+  <div class="app-bg"></div>
+
+  <!--========================= AUTH WRAPPER =========================-->
+  <main class="auth-wrap">
+    <section class="auth-card">
+
+      <!--========================= LEFT: SIGN UP FORM =========================-->
+      <div class="auth-left">
+        <h1 class="auth-title">Sign Up</h1>
+
+        <form class="auth-form" action="/signup" method="post">
+
+          <!-- Email -->
+          <label class="field">
+            <span class="sr-only">Email</span>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Email"
+              required
+            >
+          </label>
+
+          <!-- First + Last Name -->
+          <div class="field-row">
+            <label class="field">
+              <span class="sr-only">First Name</span>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                placeholder="First Name"
+                required
+              >
+            </label>
+
+            <label class="field">
+              <span class="sr-only">Last Name</span>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                placeholder="Last Name"
+                required
+              >
+            </label>
+          </div>
+
+          <!-- Password -->
+          <label class="field">
+            <span class="sr-only">Password</span>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Password"
+              required
+            >
+          </label>
+
+          <!-- Submit Button -->
+          <button class="btn-grad" type="submit">Sign Up</button>
+
+          <!-- Redirect Link -->
+          <a class="auth-link bottom center" href="/login">
+            Already have an account?
+          </a>
+
+        </form>
+      </div>
+
+      <!--========================= RIGHT: IMAGE PANEL =========================-->
+      <div class="auth-right">
+        <img src="/img/rightimg.png" alt="Computer Lab" class="auth-img">
+      </div>
+
+    </section>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!--========================= META + LINKS =========================-->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+
+  <!--========================= VENDORS + FONTS =========================-->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0">
+
+  <!--========================= PAGE STYLES =========================-->
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+
+<body class="page page--dashboard">
+
+  <!--========================= BACKGROUND LAYER =========================-->
+  <div class="app-bg"></div>
+
+  <!--========================= PAGE WRAPPER =========================-->
+  <div class="page-wrap">
+
+    <!--========================= SIDEBAR NAV =========================-->
+    <aside class="side-nav">
+
+      <div class="side-icons">
+
+        <button class="side-btn active" onclick="location.href='/dashboard'">
+          <span class="material-symbols-rounded">home</span>
+        </button>
+
+        <button class="side-btn" onclick="location.href='/reserve'">
+          <span class="material-symbols-rounded">computer</span>
+        </button>
+
+        <button class="side-btn" onclick="location.href='/it-assist'">
+          <span class="material-symbols-rounded">report</span>
+        </button>
+
+        <button class="side-btn" onclick="location.href='/notifications'">
+          <span class="material-symbols-rounded">notifications</span>
+        </button>
+
+      </div>
+
+      <div class="side-brand">
+        <img src="/img/logo.png" class="brand-logo">
+      </div>
+
+    </aside>
+
+
+    <!--========================= MAIN CONTENT =========================-->
+    <main class="main-area">
+
+      <div class="dash-grid">
+
+        <!--========================= HEADER =========================-->
+        <header class="dash-head">
+
+          <div class="head-left">
+
+            <div>
+              <h1 class="page-title">Hi, {{studentUser.firstName}}</h1>
+              <p class="page-subtitle">Let's get you a seat in the lab</p>
+            </div>
+
+            <!--========================= SEARCH =========================-->
+            <div class="search-wrap">
+              <div class="search-pill">
+
+                <span class="search-ico">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+                  </svg>
+                </span>
+
+                <input id="labSearch" placeholder="Search for Labs here...">
+
+              </div>
+            </div>
+
+          </div>
+
+        </header>
+
+
+        <!--========================= CENTER COLUMN =========================-->
+        <section class="center-col">
+
+          <!--========================= LABS OPEN TODAY =========================-->
+          <div class="hero-shell">
+
+            <div class="hero-inner">
+
+              <div class="hero-top">
+
+                <div class="hero-title">Labs Open Today</div>
+
+              </div>
+
+              <div class="hero-scroll">
+
+                <div class="lab-room-grid" id="lab-room-grid">
+
+                  {{#each labs}}
+
+                  <div class="lab-room">
+
+                    <span class="lab-pill"></span>
+
+                    <div class="lab-meta">
+                      <div class="lab-name">Room {{labCode}}</div>
+                      <div class="lab-sub">{{building}}</div>
+                    </div>
+
+                  </div>
+
+                  {{/each}}
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!--========================= BOTTOM PANELS =========================-->
+          <div class="bottom-grid">
+
+            <!--========================= NOTIFICATIONS =========================-->
+            <div class="panel notif-panel">
+
+              <div class="panel-title">Notifications</div>
+
+              <div class="notif-list">
+
+                {{#each notifications}}
+
+                <div class="notif-item">
+
+                  <img
+                    src="{{avatar}}"
+                    class="avatar"
+                    onerror="this.onerror=null;this.src='/img/system_profile.png';">
+
+                  <div class="notif-text">
+                    <div class="notif-name">{{senderName}}</div>
+                    <div class="notif-meta">{{message}}</div>
+                  </div>
+
+                </div>
+
+                {{/each}}
+
+              </div>
+
+            </div>
+
+
+            <!--========================= IT ASSIST =========================-->
+            <div class="panel assist-panel">
+
+              <div class="panel-title">IT Assist</div>
+
+              <div class="assist-box">
+
+                <textarea class="assist-input" placeholder="Request for assistance"></textarea>
+
+                <button class="assist-send">
+                  <span class="material-symbols-rounded">send</span>
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!--========================= RIGHT COLUMN =========================-->
+        <aside class="right-col">
+
+          <div class="profile-card">
+
+            <div class="profile-row">
+
+              <div class="seal-wrap">
+
+                <img
+                  src="{{studentUser.profilePic}}"
+                  class="seal"
+                  onerror="this.onerror=null;this.src='/img/dlsu.png';">
+
+              </div>
+
+              <div class="profile-meta">
+
+                <div class="profile-name">
+                  {{studentUser.firstName}} {{studentUser.lastName}}
+                </div>
+
+                <div class="profile-role">
+                  {{studentUser.role}}
+                </div>
+
+                <div class="profile-actions">
+
+                  <button class="edit-btn" onclick="location.href='/profile'">
+                    Edit Profile
+                  </button>
+
+                  <button class="profile-icon-btn logout"
+                    data-bs-toggle="modal"
+                    data-bs-target="#logoutModal">
+
+                    <span class="material-symbols-rounded">logout</span>
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!--========================= RESERVATIONS =========================-->
+            <div class="right-title">My Reservations</div>
+
+            <div class="res-list">
+
+              {{#each reservations}}
+
+              <div class="res-card">
+
+                <div class="res-accent-bar"></div>
+
+                <div class="res-info">
+
+                  <div class="res-room">
+                    Room {{roomNumber}} • Seat {{seatNumber}}
+                  </div>
+
+                  <div class="res-time">
+                    {{date}}
+                  </div>
+
+                </div>
+
+              </div>
+
+              {{/each}}
+
+            </div>
+
+
+            <!--========================= CALENDAR =========================-->
+            <div class="calendar-card">
+
+              <div class="cal-head">
+
+                <div class="cal-title" id="calMonthLabel">Calendar</div>
+
+                <div class="cal-nav">
+                  <button id="prev-month">
+                    <span class="material-symbols-rounded">chevron_left</span>
+                  </button>
+
+                  <button id="next-month">
+                    <span class="material-symbols-rounded">chevron_right</span>
+                  </button>
+                </div>
+
+              </div>
+
+              <div class="cal-week">
+                <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+              </div>
+
+              <div class="cal-days" id="calendar-days-grid"></div>
+
+            </div>
+
+          </div>
+
+        </aside>
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <!--========================= LOGOUT MODAL =========================-->
+  <div class="modal fade" id="logoutModal">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+      <div class="modal-content">
+
+        <div class="modal-body" style="text-align:center">
+
+          <h5>Confirm Logout</h5>
+          <p>Are you sure you want to log out?</p>
+
+          <button class="btn" data-bs-dismiss="modal">Cancel</button>
+
+          <button class="btn" onclick="location.href='/login'">
+            Logout
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!--========================= SCRIPTS =========================-->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script src="/js/dashboard.js"></script>
+  <script src="/js/search.js"></script>
+
+</body>
+</html>

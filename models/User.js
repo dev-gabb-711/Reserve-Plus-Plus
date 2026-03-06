@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
         enum: ['Student', 'Admin'], 
         default: 'Student' 
     },
-    profilePic: { type: String, default: 'def_avatar.jpg' }
+    profilePic: { type: String, default: '/img/def_avatar.jpg' }
 });
 
 module.exports = mongoose.model('User', userSchema);

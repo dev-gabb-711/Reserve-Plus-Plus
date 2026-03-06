@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--========================= META + TITLE =========================-->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log In</title>
+
+  <!--========================= FONTS =========================-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!--========================= PAGE STYLES =========================-->
+  <link rel="stylesheet" href="/css/login.css">
+</head>
+
+<body class="page page--login">
+
+  <!--========================= BACKGROUND LAYER =========================-->
+  <div class="app-bg"></div>
+
+  <!--========================= AUTH WRAPPER =========================-->
+  <main class="auth-wrap">
+
+    <section class="auth-card">
+
+      <!--========================= LEFT: LOGIN FORM =========================-->
+      <div class="auth-left">
+        <h1 class="auth-title">Log In</h1>
+
+        <form class="auth-form" id="loginForm" action="/login" method="post">
+
+          <!------------------ Email ------------------>
+          <label class="field">
+            <span class="sr-only">Email</span>
+            <input 
+              type="email" 
+              id="email"
+              name="email"
+              placeholder="Email" 
+              required
+            >
+          </label>
+
+          <!------------------ Password ------------------>
+          <label class="field">
+            <span class="sr-only">Password</span>
+            <input 
+              type="password" 
+              id="password"
+              name="password"
+              placeholder="Password" 
+              required
+            >
+          </label>
+
+          <!------------------ Forgot Password ------------------>
+          <a class="auth-link" href="#">
+            Forgot Password
+          </a>
+
+          <!------------------ Submit Button ------------------>
+          <button class="btn-grad" type="submit">
+            Log In
+          </button>
+
+          <!------------------ Sign Up Link ------------------>
+          <a class="auth-link bottom" href="/signup">
+            Not yet a member? Sign up now
+          </a>
+
+        </form>
+      </div>
+
+      <!--========================= RIGHT: IMAGE PANEL =========================-->
+      <div class="auth-right">
+        <img 
+          src="/img/rightimg.png" 
+          alt="Computer Laboratory" 
+          class="auth-img"
+        >
+      </div>
+
+    </section>
+  </main>
+
+</body>
+</html>
