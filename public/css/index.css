@@ -36,7 +36,7 @@ body {
   position: relative;
 }
 
-/*----------------Background Blur Layer------------------*/
+/*----------------Background Blur Layer-----------------*/
 .app-bg {
   position: fixed;
   inset: 0;
