@@ -189,11 +189,14 @@ app.get('/dashboard', async (req, res) => {
 
       return {
         ...reservation,
+        roomNumber: roomCode,
         roomLabel: roomCode
           ? `Room ${roomCode} • Seat ${reservation.seatNumber}`
           : `Seat ${reservation.seatNumber}`,
         dateLabel: reservation.date || '',
         timeLabel: reservation.timeSlot || '',
+        dateISO: reservation.date || '',
+        timeSlot: reservation.timeSlot || '',
         building,
         buildingKey
       };

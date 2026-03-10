@@ -665,10 +665,9 @@ body {
 /*----------------Active + Pending Layout------------------*/
 .live-main {
   display: grid;
-  grid-template-columns: 135px 1fr;
+  grid-template-columns: 200px 1fr;
   align-items: center;
-  gap: 16px;
-  min-height: 92px;
+  gap: 24px;
 }
 
 .live-count-wrap {

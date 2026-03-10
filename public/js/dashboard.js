@@ -65,6 +65,40 @@ function formatTimeDisplay(dateObj) {
   });
 }
 
+function parseReservationDateTime(dateStr, timeSlot, whichPart) {
+  if (!dateStr || !timeSlot) return null;
+
+  const slotParts = String(timeSlot).split(" - ");
+  if (slotParts.length !== 2) return null;
+
+  const rawTime = whichPart === "start" ? slotParts[0] : slotParts[1];
+  const fullDateTime = new Date(`${dateStr}T${rawTime}`);
+
+  if (Number.isNaN(fullDateTime.getTime())) {
+    return null;
+  }
+
+  return fullDateTime;
+}
+
+function formatMinutesRemaining(msDiff) {
+  const totalMinutes = Math.max(0, Math.ceil(msDiff / 60000));
+  return String(totalMinutes);
+}
+
+function formatPendingCountdown(msDiff) {
+  const totalSeconds = Math.max(0, Math.floor(msDiff / 1000));
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}`;
+  }
+
+  return String(minutes);
+}
+
 /* =====================================================
    Building Helpers
    ===================================================== */
@@ -199,7 +233,6 @@ function buildReservationMap() {
 
 /* =====================================================
    Live Reservation Status
-   - Scoped only to the dashboard live status card
    ===================================================== */
 
 function setLiveStatusState(state, payload = {}) {
@@ -256,7 +289,6 @@ function setLiveStatusState(state, payload = {}) {
 
 function getReservationCardsForLiveStatus() {
   if (!reservationList) return [];
-
   return Array.from(reservationList.querySelectorAll(".res-card"));
 }
 
@@ -265,63 +297,61 @@ function extractLiveReservations() {
 
   return cards.map(card => {
     const roomTextEl = card.querySelector(".res-room");
-    const timeTextEl = card.querySelector(".res-time");
-
     const roomText = roomTextEl ? roomTextEl.textContent.trim() : "";
-    const timeText = timeTextEl ? timeTextEl.textContent.trim() : "";
 
     const dateISO = card.dataset.date || "";
-    const dateObj = parseDateFromReservation(dateISO);
+    const timeSlot = card.dataset.time || "";
+    const buildingKey = card.dataset.bldg || "";
+
+    const start = parseReservationDateTime(dateISO, timeSlot, "start");
+    const end = parseReservationDateTime(dateISO, timeSlot, "end");
 
     return {
       roomText,
-      timeText,
       dateISO,
-      dateObj
+      timeSlot,
+      buildingKey,
+      start,
+      end
     };
-  }).filter(item => item.roomText);
+  }).filter(item => item.roomText && item.start && item.end);
 }
 
-/* =====================================================
-   Demo Loader
-   - Temporary visual state control until reservation
-     time fields are finalized by the backend
-   ===================================================== */
-
-function initLiveStatusDemo() {
+function initLiveStatusReal() {
   if (!liveStatusBox) return;
 
-  /*
-    CHANGE THIS VALUE TO TEST DIFFERENT STATES:
-    "active"
-    "pending"
-    "none"
-  */
-  const demoState = "active";
+  const now = new Date();
+  const reservations = extractLiveReservations();
 
-  if (demoState === "active") {
-    const firstReservation = extractLiveReservations()[0];
-
-    setLiveStatusState("active", {
-      count: "30",
-      room: firstReservation?.roomText || "Room A1103 • Seat 1",
-      start: "Started: 3:00 PM",
-      end: "Ends: 3:30 PM"
-    });
-
+  if (!reservations.length) {
+    setLiveStatusState("none");
     return;
   }
 
-  if (demoState === "pending") {
-    const firstReservation = extractLiveReservations()[0];
+  const activeReservation = reservations.find(res => now >= res.start && now < res.end);
 
-    setLiveStatusState("pending", {
-      count: "12:40",
-      room: firstReservation?.roomText || "Room A1103 • Seat 1",
-      start: "Starts at: 3:00 PM",
-      end: "Ends at: 3:30 PM"
+  if (activeReservation) {
+    setLiveStatusState("active", {
+      count: formatMinutesRemaining(activeReservation.end - now),
+      room: activeReservation.roomText,
+      start: `Started: ${formatTimeDisplay(activeReservation.start)}`,
+      end: `Ends: ${formatTimeDisplay(activeReservation.end)}`
     });
+    return;
+  }
 
+  const pendingReservation = reservations.find(res => {
+    const diff = res.start - now;
+    return diff > 0 && diff <= 24 * 60 * 60 * 1000;
+  });
+
+  if (pendingReservation) {
+    setLiveStatusState("pending", {
+      count: formatPendingCountdown(pendingReservation.start - now),
+      room: pendingReservation.roomText,
+      start: `Starts at: ${formatTimeDisplay(pendingReservation.start)}`,
+      end: `Ends at: ${formatTimeDisplay(pendingReservation.end)}`
+    });
     return;
   }
 
@@ -510,4 +540,4 @@ applyLabBuildingStyles();
 renderLabsByFilter();
 applyReservationStyles();
 renderCalendar();
-initLiveStatusDemo();
+initLiveStatusReal();
