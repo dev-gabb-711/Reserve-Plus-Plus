@@ -103,9 +103,7 @@
             <div class="hero-inner">
 
               <div class="hero-top">
-
                 <div class="hero-title">Labs Open Today</div>
-
               </div>
 
               <div class="hero-scroll">
@@ -113,7 +111,6 @@
                 <div class="lab-room-grid" id="lab-room-grid">
 
                   {{#each labs}}
-
                   <div class="lab-room">
 
                     <span class="lab-pill"></span>
@@ -124,7 +121,6 @@
                     </div>
 
                   </div>
-
                   {{/each}}
 
                 </div>
@@ -147,7 +143,6 @@
               <div class="notif-list">
 
                 {{#each notifications}}
-
                 <div class="notif-item">
 
                   <img
@@ -161,7 +156,6 @@
                   </div>
 
                 </div>
-
                 {{/each}}
 
               </div>
@@ -169,18 +163,91 @@
             </div>
 
 
-            <!--========================= IT ASSIST =========================-->
-            <div class="panel assist-panel">
+            <!--========================= LIVE RESERVATION STATUS =========================-->
+            <div class="panel live-panel">
 
-              <div class="panel-title">IT Assist</div>
+              <div class="panel-title">Live Reservation Status</div>
 
-              <div class="assist-box">
+              <div class="live-box" id="liveStatusBox" data-state="active">
 
-                <textarea class="assist-input" placeholder="Request for assistance"></textarea>
+                <!-- ACTIVE STATE -->
+                <div class="live-state live-state--active">
+                  <div class="live-top">
+                    <div class="live-badge live-badge--active">
+                      Active Reservation
+                      <span class="live-dot"></span>
+                    </div>
 
-                <button class="assist-send">
-                  <span class="material-symbols-rounded">send</span>
-                </button>
+                    <div class="live-subtext">
+                      You are currently checked in
+                    </div>
+                  </div>
+
+                  <div class="live-main">
+                    <div class="live-count-wrap">
+                      <div class="live-count" id="liveActiveCount">30</div>
+                      <div class="live-count-label">Minutes Remaining</div>
+                    </div>
+
+                    <div class="live-info">
+                      <div class="live-room" id="liveActiveRoom">Room A1103 • Seat 1</div>
+                      <div class="live-time" id="liveActiveStart">Started: 3:00 PM</div>
+                      <div class="live-time" id="liveActiveEnd">Ends: 3:30 PM</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- PENDING STATE -->
+                <div class="live-state live-state--pending">
+                  <div class="live-top">
+                    <div class="live-badge live-badge--pending">
+                      Pending Reservation
+                      <span class="live-dot"></span>
+                    </div>
+
+                    <div class="live-subtext">
+                      Please arrive 5 minutes early
+                    </div>
+                  </div>
+
+                  <div class="live-main">
+                    <div class="live-count-wrap">
+                      <div class="live-count" id="livePendingCount">12:40</div>
+                      <div class="live-count-label">Until Reservation</div>
+                    </div>
+
+                    <div class="live-info">
+                      <div class="live-room" id="livePendingRoom">Room A1103 • Seat 1</div>
+                      <div class="live-time" id="livePendingStart">Starts at: 3:00 PM</div>
+                      <div class="live-time" id="livePendingEnd">Ends at: 3:30 PM</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- NO RESERVATION STATE -->
+                <div class="live-state live-state--none">
+                  <div class="live-top">
+                    <div class="live-badge live-badge--none">
+                      No Reservation
+                      <span class="live-dot"></span>
+                    </div>
+
+                    <div class="live-subtext">
+                      You are not currently checked in to any lab
+                    </div>
+                  </div>
+
+                  <div class="live-reminders">
+                    <div class="live-reminders-title">Lab Reminders</div>
+
+                    <ul class="live-reminders-list">
+                      <li>Arrive 5 minutes before your reserved time</li>
+                      <li>Always log out of lab computers after use</li>
+                      <li>Report technical issues through IT Assist</li>
+                      <li>Bring your student ID for verification</li>
+                    </ul>
+                  </div>
+                </div>
 
               </div>
 
@@ -241,11 +308,13 @@
             <!--========================= RESERVATIONS =========================-->
             <div class="right-title">My Reservations</div>
 
-            <div class="res-list">
+            <div class="res-list" id="reservationList">
 
               {{#each reservations}}
-
-              <div class="res-card">
+              <div
+                class="res-card"
+                data-date="{{dateISO}}"
+                data-bldg="{{buildingKey}}">
 
                 <div class="res-accent-bar"></div>
 
@@ -262,7 +331,6 @@
                 </div>
 
               </div>
-
               {{/each}}
 
             </div>

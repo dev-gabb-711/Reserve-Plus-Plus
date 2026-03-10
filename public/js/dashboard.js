@@ -18,6 +18,8 @@ const prevBtn = document.getElementById("prev-month");
 const nextBtn = document.getElementById("next-month");
 const calMonthLabel = document.getElementById("calMonthLabel");
 
+const liveStatusBox = document.getElementById("liveStatusBox");
+
 /* =====================================================
    State
    ===================================================== */
@@ -39,6 +41,28 @@ function toISODateKey(d) {
 
 function mondayIndex(jsDay) {
   return (jsDay + 6) % 7;
+}
+
+function parseDateFromReservation(value) {
+  if (!value) return null;
+
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed;
+  }
+
+  return null;
+}
+
+function formatTimeDisplay(dateObj) {
+  if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) {
+    return "";
+  }
+
+  return dateObj.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit"
+  });
 }
 
 /* =====================================================
@@ -174,6 +198,137 @@ function buildReservationMap() {
 }
 
 /* =====================================================
+   Live Reservation Status
+   - Scoped only to the dashboard live status card
+   ===================================================== */
+
+function setLiveStatusState(state, payload = {}) {
+  if (!liveStatusBox) return;
+
+  liveStatusBox.dataset.state = state;
+
+  if (state === "active") {
+    const activeCount = document.getElementById("liveActiveCount");
+    const activeRoom = document.getElementById("liveActiveRoom");
+    const activeStart = document.getElementById("liveActiveStart");
+    const activeEnd = document.getElementById("liveActiveEnd");
+
+    if (activeCount && payload.count) {
+      activeCount.textContent = payload.count;
+    }
+
+    if (activeRoom && payload.room) {
+      activeRoom.textContent = payload.room;
+    }
+
+    if (activeStart && payload.start) {
+      activeStart.textContent = payload.start;
+    }
+
+    if (activeEnd && payload.end) {
+      activeEnd.textContent = payload.end;
+    }
+  }
+
+  if (state === "pending") {
+    const pendingCount = document.getElementById("livePendingCount");
+    const pendingRoom = document.getElementById("livePendingRoom");
+    const pendingStart = document.getElementById("livePendingStart");
+    const pendingEnd = document.getElementById("livePendingEnd");
+
+    if (pendingCount && payload.count) {
+      pendingCount.textContent = payload.count;
+    }
+
+    if (pendingRoom && payload.room) {
+      pendingRoom.textContent = payload.room;
+    }
+
+    if (pendingStart && payload.start) {
+      pendingStart.textContent = payload.start;
+    }
+
+    if (pendingEnd && payload.end) {
+      pendingEnd.textContent = payload.end;
+    }
+  }
+}
+
+function getReservationCardsForLiveStatus() {
+  if (!reservationList) return [];
+
+  return Array.from(reservationList.querySelectorAll(".res-card"));
+}
+
+function extractLiveReservations() {
+  const cards = getReservationCardsForLiveStatus();
+
+  return cards.map(card => {
+    const roomTextEl = card.querySelector(".res-room");
+    const timeTextEl = card.querySelector(".res-time");
+
+    const roomText = roomTextEl ? roomTextEl.textContent.trim() : "";
+    const timeText = timeTextEl ? timeTextEl.textContent.trim() : "";
+
+    const dateISO = card.dataset.date || "";
+    const dateObj = parseDateFromReservation(dateISO);
+
+    return {
+      roomText,
+      timeText,
+      dateISO,
+      dateObj
+    };
+  }).filter(item => item.roomText);
+}
+
+/* =====================================================
+   Demo Loader
+   - Temporary visual state control until reservation
+     time fields are finalized by the backend
+   ===================================================== */
+
+function initLiveStatusDemo() {
+  if (!liveStatusBox) return;
+
+  /*
+    CHANGE THIS VALUE TO TEST DIFFERENT STATES:
+    "active"
+    "pending"
+    "none"
+  */
+  const demoState = "active";
+
+  if (demoState === "active") {
+    const firstReservation = extractLiveReservations()[0];
+
+    setLiveStatusState("active", {
+      count: "30",
+      room: firstReservation?.roomText || "Room A1103 • Seat 1",
+      start: "Started: 3:00 PM",
+      end: "Ends: 3:30 PM"
+    });
+
+    return;
+  }
+
+  if (demoState === "pending") {
+    const firstReservation = extractLiveReservations()[0];
+
+    setLiveStatusState("pending", {
+      count: "12:40",
+      room: firstReservation?.roomText || "Room A1103 • Seat 1",
+      start: "Starts at: 3:00 PM",
+      end: "Ends at: 3:30 PM"
+    });
+
+    return;
+  }
+
+  setLiveStatusState("none");
+}
+
+/* =====================================================
    Calendar Rendering
    ===================================================== */
 
@@ -253,12 +408,9 @@ function renderCalendar() {
     }
 
     dayEl.style.position = "relative";
-
     dayEl.style.setProperty("background", "transparent");
     dayEl.style.setProperty("z-index", "0");
-
     dayEl.style.setProperty("--calendar-shadow", "none");
-
     dayEl.setAttribute("data-hasres", "true");
   });
 
@@ -358,3 +510,4 @@ applyLabBuildingStyles();
 renderLabsByFilter();
 applyReservationStyles();
 renderCalendar();
+initLiveStatusDemo();
