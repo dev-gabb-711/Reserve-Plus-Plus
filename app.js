@@ -153,6 +153,42 @@ function buildStudentNotifications (notifications) {
   }))
 }
 
+/**
+ * Calculates a user-friendly time range (e.g., "09:00 AM - 10:30 AM")
+ * from an array of 30-min time slots for the dashboard.
+ */
+function calculateTimeRangeServer (slots) {
+  if (!slots || slots.length === 0) return ''
+  try {
+    const sorted = [...slots].sort(
+      (a, b) => new Date('1970/01/01 ' + a) - new Date('1970/01/01 ' + b)
+    )
+
+    const start = sorted[0]
+    const lastSlot = sorted[sorted.length - 1]
+
+    let [time, modifier] = lastSlot.split(' ')
+    let [hours, minutes] = time.split(':')
+
+    let h = parseInt(hours, 10)
+    if (h === 12) h = 0
+    if (modifier === 'PM') h += 12
+
+    const endDate = new Date(1970, 0, 1, h, parseInt(minutes, 10))
+    endDate.setMinutes(endDate.getMinutes() + 30)
+
+    const endStr = endDate.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    })
+
+    return `${start} - ${endStr}`
+  } catch (e) {
+    return slots.join(', ') // Fallback just in case
+  }
+}
+
 /* ==========================================
    6. GET ROUTES
    ========================================== */
@@ -185,6 +221,17 @@ app.get('/dashboard', async (req, res) => {
         ? 'gokongwei'
         : ''
 
+      // Calculate the time range if it's saved as an array string!
+      let calculatedTime = reservation.timeSlot
+      try {
+        const parsedSlots = JSON.parse(reservation.timeSlot)
+        if (Array.isArray(parsedSlots)) {
+          calculatedTime = calculateTimeRangeServer(parsedSlots)
+        }
+      } catch (e) {
+        // Ignore if it's an old string-format reservation
+      }
+
       return {
         ...reservation,
         roomNumber: roomCode,
@@ -192,9 +239,9 @@ app.get('/dashboard', async (req, res) => {
           ? `Room ${roomCode} • Seat ${reservation.seatNumber}`
           : `Seat ${reservation.seatNumber}`,
         dateLabel: reservation.date || '',
-        timeLabel: reservation.timeSlot || '',
+        timeLabel: calculatedTime || '', // Use the calculated time here!
         dateISO: reservation.date || '',
-        timeSlot: reservation.timeSlot || '',
+        timeSlot: calculatedTime || '',
         building,
         buildingKey
       }
@@ -433,6 +480,47 @@ app.post('/api/reservations', async (req, res) => {
   } catch (error) {
     console.error('Reservation Error:', error)
     res.status(500).json({ error: 'Failed to create reservation' })
+  }
+})
+
+// 1.5 Update an existing reservation
+app.put('/api/reservations/:id', async (req, res) => {
+  try {
+    if (!req.session.user)
+      return res.status(401).json({ error: 'Please log in first.' })
+
+    const { labId, labCode, seats, date, timeRange, slotsArray } = req.body
+
+    let lab
+    if (labId) {
+      lab = await Lab.findById(labId)
+    } else {
+      const cleanCode = normalizeRoomCode(labCode)
+      lab = await Lab.findOne({ labCode: cleanCode })
+    }
+
+    if (!lab)
+      return res.status(404).json({ error: `Lab not found in database.` })
+
+    // Find the reservation by ID and update its fields
+    const updatedReservation = await Reservation.findByIdAndUpdate(
+      req.params.id,
+      {
+        lab: lab._id,
+        seatNumber: seats.join(', '),
+        date: date,
+        timeSlot: JSON.stringify(slotsArray)
+      },
+      { new: true } // This tells Mongoose to return the updated document
+    )
+
+    if (!updatedReservation)
+      return res.status(404).json({ error: 'Reservation not found' })
+
+    res.json(updatedReservation)
+  } catch (error) {
+    console.error('Update Error:', error)
+    res.status(500).json({ error: 'Failed to update reservation' })
   }
 })
 

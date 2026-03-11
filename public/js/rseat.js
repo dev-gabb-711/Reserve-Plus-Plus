@@ -4,7 +4,7 @@
    ===================================================== */
 const appState = {
   currentBld: 'Gokongwei Hall',
-  currentLab: '201',
+  currentLab: '',
   selectedSeats: [],
   reservations: [],
   editingTargetId: null,
@@ -15,13 +15,53 @@ const appState = {
   bookedSlots: [],
   data: {
     'Gokongwei Hall': {
-      labs: ['201', '302', '305', '407'],
+      labs: [],
       bg: "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../img/gok_lab.jpg')"
     },
     'Andrew Gonzales Hall': {
-      labs: ['1102', '1403', '1405', '1501', '1704'],
+      labs: [],
       bg: "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../img/ag_lab.jpg')"
     }
+  }
+}
+
+/* =====================================================
+   Sync Labs from Database
+   - Overwrites hardcoded labs with real ones from MongoDB
+   ===================================================== */
+function syncLabsFromDatabase () {
+  if (!window.DB_LABS || window.DB_LABS.length === 0) return
+
+  // Clear out the hardcoded ones
+  appState.data['Gokongwei Hall'].labs = []
+  appState.data['Andrew Gonzales Hall'].labs = []
+
+  // Sort them naturally so "201" comes BEFORE "1102"
+  const sortedLabs = [...window.DB_LABS].sort((a, b) =>
+    a.labCode.localeCompare(b.labCode, undefined, {
+      numeric: true,
+      sensitivity: 'base'
+    })
+  )
+
+  sortedLabs.forEach(lab => {
+    // Remove the letter prefix (e.g., "G201" becomes "201") so the UI tabs look clean
+    const cleanCode = String(lab.labCode).replace(/^[A-Za-z]+/, '')
+
+    if (lab.building && lab.building.toLowerCase().includes('gokongwei')) {
+      if (!appState.data['Gokongwei Hall'].labs.includes(cleanCode)) {
+        appState.data['Gokongwei Hall'].labs.push(cleanCode)
+      }
+    } else if (lab.building && lab.building.toLowerCase().includes('andrew')) {
+      if (!appState.data['Andrew Gonzales Hall'].labs.includes(cleanCode)) {
+        appState.data['Andrew Gonzales Hall'].labs.push(cleanCode)
+      }
+    }
+  })
+
+  // Ensure the default selected lab actually exists in the newly synced list
+  if (appState.data[appState.currentBld].labs.length > 0) {
+    appState.currentLab = appState.data[appState.currentBld].labs[0]
   }
 }
 
@@ -54,7 +94,10 @@ async function fetchMyReservations () {
         lab: dbRes.lab ? dbRes.lab.labCode : 'Unknown Lab',
         seat: dbRes.seatNumber,
         date: dbRes.date,
-        time: Array.isArray(slotsArr) ? slotsArr.join(', ') : dbRes.timeSlot,
+        time:
+          Array.isArray(slotsArr) && slotsArr.length > 0
+            ? calculateTimeRange(slotsArr)
+            : dbRes.timeSlot,
         slots: slotsArr
       }
     })
@@ -107,6 +150,8 @@ async function fetchBookedSlots () {
    - Initializes the UI once the DOM is ready
    ===================================================== */
 document.addEventListener('DOMContentLoaded', () => {
+  syncLabsFromDatabase()
+
   // 1. Fetch real data immediately when page loads
   fetchMyReservations()
   fetchBookedSlots()
@@ -267,33 +312,45 @@ function populateReservationForm (dateStr, timeRange) {
 
 /* =====================================================
    Form Submission Handler
+   - Extracts form data and logs to console / Sends to DB
    ===================================================== */
 async function submitReservationForm () {
   const form = document.getElementById('reservation-form')
   const formData = new FormData(form)
 
+  const labCodeStr = appState.currentBld[0] + appState.currentLab
+
+  // Check if we are updating an existing reservation
+  const existingResId = formData.get('reservation_id')
+
+  // Extract data from form fields
   const reservationData = {
-    labId: formData.get('labId'), // Sending the true ObjectId!
-    labCode: formData.get('lab'),
+    labId: formData.get('labId'),
+    labCode: labCodeStr,
     seats: JSON.parse(formData.get('seats')),
     date: formData.get('date'),
     timeRange: formData.get('time'),
-    slotsArray: JSON.parse(formData.get('slots')) // Send the array of chips
+    slotsArray: JSON.parse(formData.get('slots'))
   }
 
+  // If we have an ID, we UPDATE (PUT). Otherwise, we CREATE (POST).
+  const fetchUrl = existingResId
+    ? `/api/reservations/${existingResId}`
+    : '/api/reservations'
+  const fetchMethod = existingResId ? 'PUT' : 'POST'
+
   try {
-    const response = await fetch('/api/reservations', {
-      method: 'POST',
+    const response = await fetch(fetchUrl, {
+      method: fetchMethod,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(reservationData)
     })
 
     if (response.ok) {
-      // Refresh our lists from the DB!
+      // Successful reservation / update
       await fetchMyReservations()
       await fetchBookedSlots()
 
-      // Handle UI cleanup
       appState.editingTargetId = null
       document.querySelector('.edit-desc').innerText =
         'Select a reservation to edit.'
@@ -407,12 +464,24 @@ function renderCalendar () {
   const firstDay = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
 
+  // Calculate Today and 1 Week from Now
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // Reset time to midnight for accurate date comparison
+
+  const maxDate = new Date(today)
+  maxDate.setDate(today.getDate() + 7) // Exactly 7 days from today
+
   for (let p = 0; p < firstDay; p++)
     calGrid.appendChild(document.createElement('div'))
 
   for (let d = 1; d <= daysInMonth; d++) {
     const dayEl = document.createElement('div')
-    const checkDate = new Date(year, month, d).toLocaleDateString('en-US', {
+    const loopDate = new Date(year, month, d) // The specific day being rendered
+
+    // Check if the day is in the past or beyond 1 week
+    const isOutOfRange = loopDate < today || loopDate > maxDate
+
+    const checkDate = loopDate.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
@@ -428,26 +497,27 @@ function renderCalendar () {
     ]).size
     const isDayFullyBooked = totalBookedCount >= 18
 
-    dayEl.className = `cal-day ${isDayFullyBooked ? 'unavailable' : ''} ${
+    // Add unavailable class if fully booked OR out of range
+    dayEl.className = `cal-day ${
+      isDayFullyBooked || isOutOfRange ? 'unavailable' : ''
+    } ${
       d === appState.selectedDate.getDate() &&
       month === appState.selectedDate.getMonth()
         ? 'selected'
         : ''
     }`
 
-    if (userSlotsForDay.length > 0 && !isDayFullyBooked) {
+    if (userSlotsForDay.length > 0 && !isDayFullyBooked && !isOutOfRange) {
       dayEl.style.borderBottom = '2px solid #ff6b4a'
     }
 
     dayEl.innerText = d
 
-    // Allow selecting only if not fully booked
-    if (!isDayFullyBooked) {
+    // Only allow clicking if it's NOT fully booked and NOT out of range
+    if (!isDayFullyBooked && !isOutOfRange) {
       dayEl.onclick = () => {
         appState.selectedDate = new Date(year, month, d)
         appState.tempSlots = [] // Clear current selections when switching days
-
-        // Fetch the real booked slots for the new date!
         fetchBookedSlots()
         renderCalendar()
       }
