@@ -215,6 +215,7 @@
               <!-- Form Inputs (Hidden) -->
               <input type="hidden" id="building" name="building" required>
               <input type="hidden" id="lab" name="lab" required>
+              <input type="hidden" id="labId" name="labId" required>
               <input type="hidden" id="seats" name="seats" required>
               <input type="hidden" id="date" name="date" required>
               <input type="hidden" id="time" name="time" required>
@@ -279,6 +280,10 @@
   </div>
 
   <!--========================= SCRIPTS =========================-->
+  <script>
+    window.DB_LABS = {{{json labs}}};
+  </script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../js/rseat.js"></script>
   <script src="../js/search.js"></script>
