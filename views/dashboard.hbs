@@ -367,28 +367,20 @@
 
   <!--========================= LOGOUT MODAL =========================-->
   <div class="modal fade" id="logoutModal">
-
     <div class="modal-dialog modal-dialog-centered">
-
-      <div class="modal-content">
-
-        <div class="modal-body" style="text-align:center">
-
-          <h5>Confirm Logout</h5>
-          <p>Are you sure you want to log out?</p>
-
-          <button class="btn" data-bs-dismiss="modal">Cancel</button>
-
-          <button class="btn" onclick="location.href='/login'">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-body" style="text-align:center; padding: 2rem;">
+          <h5 class="mb-3">Confirm Logout</h5>
+          <p class="mb-4">Are you sure you want to log out?</p>
+          <div class="d-flex justify-content-center gap-3">
+            <button class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+            <button class="btn btn-danger" onclick="location.href='/login'">
             Logout
-          </button>
-
+            </button>
+          </div>
         </div>
-
       </div>
-
     </div>
-
   </div>
 
   <!--========================= SCRIPTS =========================-->
