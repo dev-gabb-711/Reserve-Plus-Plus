@@ -554,15 +554,4 @@ window.selectForEdit = (e, id) => {
 };
 
 
-/* =====================================================
-   Dashboard Routing (Role-based Redirect)
-   ===================================================== */
-function goToDashboard() {
-	const role = localStorage.getItem('role');
-
-	if (role === 'admin') {
-		location.href = './admindashboard';
-	} else {
-		location.href = './dashboard';
-	}
-}
+// removed local storage based role handling, should be implemented in app.js

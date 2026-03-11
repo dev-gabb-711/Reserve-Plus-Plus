@@ -192,15 +192,4 @@ if (clearFilters) {
    ===================================================== */
 applyAllFilters();
 
-/* =====================================================
-   Dashboard Routing
-   ===================================================== */
-function goToDashboard() {
-  const role = localStorage.getItem('role');
-
-  if (role === 'admin') {
-    location.href = '/admin-dashboard';
-  } else {
-    location.href = '/dashboard';
-  }
-}
+// removed local storage based role handling, should be implemented in app.js

@@ -117,12 +117,7 @@ function setupAnnouncementActions() {
   }
 }
 
-/* =====================================================
-   Dashboard Navigation Logic
-   ===================================================== */
-function goToDashboard() {
-  location.href = "/admin-dashboard";
-}
+// removed local storage based role handling, should be implemented in app.js
 
 /* =====================================================
    Initial Setup

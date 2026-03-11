@@ -213,20 +213,4 @@ renderNotifications(notifications);
 showEmptyDetail();
 
 
-/* =====================================================
-   Dashboard Routing (Role-based Redirect)
-   ===================================================== */
-
-/**
- * Redirects the user to the correct dashboard page
- * based on the stored role in localStorage.
- */
-function goToDashboard() {
-  const role = localStorage.getItem('role');
-
-  if (role === 'admin') {
-    location.href = './admindashboard';
-  } else {
-    location.href = './dashboard';
-  }
-}
+// removed local storage based role handling, should be implemented in app.js
