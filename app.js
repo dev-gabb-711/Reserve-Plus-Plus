@@ -2,8 +2,24 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const hbs = require('hbs');
+const session = require('express-session');
 
 const app = express();
+
+/*===========================================
+ * SESSION CREATION
+ ============================================ */
+
+ app.use(session({
+    secret: "sikretLangDaw",
+    resave: false,
+    saveUninitialized: true,
+    cookie:{
+        maxAge: 60*60*1000,
+        secure: false
+    }
+ }));
+
 
 /* ==========================================
    1. DATABASE CONNECTION
@@ -165,22 +181,19 @@ app.get('/signup', (req, res) => res.render('signup'));
 // Student dashboard
 app.get('/dashboard', async (req, res) => {
   try {
-    const userId = req.query.userId;
+    if (!req.session.user) return res.redirect('/login');
 
-    const studentUser = userId
-      ? await User.findById(userId).lean()
-      : await User.findOne({ role: 'Student' }).lean();
-
+    const userId = req.session.user.id;
+    const studentUser = await User.findById(userId).lean();
     const labs = await Lab.find().lean();
 
-    const reservationDocs = userId
-      ? await Reservation.find({ user: userId, status: 'Active' }).populate('lab').lean()
-      : await Reservation.find({ status: 'Active' }).populate('lab').lean();
+    const reservationDocs = await Reservation.find({ user: userId, status: 'Active' })
+      .populate('lab')
+      .lean();
 
     const reservations = reservationDocs.map(reservation => {
       const roomCode = reservation.lab?.labCode || '';
       const building = reservation.lab?.building || '';
-
       const buildingKey = String(building).toLowerCase().includes('andrew')
         ? 'andrew'
         : String(building).toLowerCase().includes('gokongwei')
@@ -202,24 +215,23 @@ app.get('/dashboard', async (req, res) => {
       };
     });
 
-    const rawNotifications = userId
-      ? await Notification.find({ recipient: userId }).sort({ createdAt: -1 }).limit(5).lean()
-      : await Notification.find().sort({ createdAt: -1 }).limit(5).lean();
+    const rawNotifications = await Notification.find({ recipient: userId })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean();
 
     const notifications = buildStudentNotifications(rawNotifications);
 
-    res.render('dashboard', {
-      studentUser,
-      labs,
-      reservations,
-      notifications
-    });
+    res.render('dashboard', { studentUser, labs, reservations, notifications });
   } catch (err) {
     console.error('Error loading student dashboard:', err);
     res.status(500).send('Error loading dashboard');
   }
 });
 
+/**
+
+ */
 // Admin dashboard
 app.get('/admin-dashboard', async (req, res) => {
   try {
@@ -324,11 +336,17 @@ app.post('/login', async (req, res) => {
       return res.status(400).send('Invalid login'); 
     } 
 
-    if (user.role === 'Admin') {
-      return res.redirect(`/admin-dashboard?userId=${user._id}`);
+    req.session.user = {
+        id: user._id,
+        role: user.role,
+        name: user.firstName
     }
-
-    return res.redirect(`/dashboard?userId=${user._id}`);
+    
+    if (user.role == 'Admin'){
+        return res.redirect('/admin-dashboard');
+    } else {
+        return res.redirect('/dashboard');
+    }
   } catch (err) {
     console.error('Login failed:', err);
     res.status(500).send('Login failed: ' + err.message);
