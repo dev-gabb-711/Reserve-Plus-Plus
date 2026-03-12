@@ -798,7 +798,7 @@ function showPopover (e, user) {
   document.getElementById('popAvatar').src =
     user.avatar || '../img/default-avatar.png'
   document.getElementById('popName').innerText = user.name || 'Unknown User'
-  document.getElementById('popName').href = `/profile/view/${user.userId}`
+  document.getElementById('popName').href = `/profile/${user.userId}`
 
   popover.style.display = 'flex'
 
