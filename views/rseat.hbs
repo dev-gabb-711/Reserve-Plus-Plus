@@ -279,6 +279,15 @@
     </div>
   </div>
 
+  <!--========================= USER POP UP MODAL =========================-->
+  <div id="userPopover" class="user-popover" style="display: none; position: fixed; z-index: 9999; background: rgba(20,20,20,0.95); border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); pointer-events: auto; align-items: center; gap: 10px; backdrop-filter: blur(10px);">
+    <img id="popAvatar" src="" alt="User" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">
+    <div>
+      <div style="font-size: 0.75rem; color: #aaa; margin-bottom: 2px;">Reserved by</div>
+      <a id="popName" href="#" style="color: #ff6b4a; font-weight: 600; text-decoration: none; font-size: 0.9rem;">Name</a>
+    </div>
+  </div>
+
   <!--========================= SCRIPTS =========================-->
   <script>
     window.DB_LABS = {{{json labs}}};

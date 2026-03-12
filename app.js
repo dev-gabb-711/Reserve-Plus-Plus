@@ -591,7 +591,9 @@ app.get('/api/notifications/me', async (req, res) => {
       .sort({ createdAt: -1 })
       .lean()
 
-    const formattedNotifications = notifications.map(formatNotificationForClient)
+    const formattedNotifications = notifications.map(
+      formatNotificationForClient
+    )
 
     res.json(formattedNotifications)
   } catch (err) {
@@ -776,7 +778,7 @@ app.get('/api/reservations/me', async (req, res) => {
   }
 })
 
-// 3. Fetch globally booked slots to "black out" chips
+// 3. Get booked slots and the users who reserved them
 app.get('/api/reservations/booked', async (req, res) => {
   try {
     const { labId, labCode, date } = req.query
@@ -789,27 +791,41 @@ app.get('/api/reservations/booked', async (req, res) => {
       lab = await Lab.findOne({ labCode: cleanCode })
     }
 
-    if (!lab) return res.json([])
+    if (!lab) return res.json({})
 
+    // Populate user details to retrieve who booked what
     const bookings = await Reservation.find({
       lab: lab._id,
       date: date,
       status: 'Active'
-    })
+    }).populate('user', 'firstName lastName email avatar')
 
-    let takenSlots = []
+    let bookedData = {}
+
     bookings.forEach(booking => {
-      if (booking.timeSlot) {
+      if (booking.timeSlot && booking.user) {
         try {
-          takenSlots = takenSlots.concat(JSON.parse(booking.timeSlot))
+          const slots = JSON.parse(booking.timeSlot)
+          slots.forEach(slot => {
+            bookedData[slot] = {
+              userId: booking.user._id,
+              name: (
+                booking.user.firstName +
+                ' ' +
+                booking.user.lastName
+              ).trim(),
+              avatar: booking.user.avatar || '../img/default-avatar.png'
+            }
+          })
         } catch (e) {
-          // Ignore old text-format string reservations if they exist
+          // Ignore old string format errors
         }
       }
     })
 
-    res.json(takenSlots)
+    res.json(bookedData)
   } catch (error) {
+    console.error(error)
     res.status(500).json({ error: 'Failed to fetch booked slots' })
   }
 })

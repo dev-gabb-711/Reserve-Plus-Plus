@@ -13,6 +13,7 @@ const appState = {
   tempSlots: [],
   bookedDates: [],
   bookedSlots: [],
+  bookedSlotsData: {}, // Holds detailed user info for hovered slots
   data: {
     'Gokongwei Hall': {
       labs: [],
@@ -133,10 +134,11 @@ async function fetchBookedSlots () {
     )
     if (!res.ok) throw new Error('Failed to fetch slots')
 
-    const takenSlots = await res.json()
+    const data = await res.json()
 
-    // Update the global state with REAL booked slots!
-    appState.bookedSlots = takenSlots
+    // Update the global state with REAL booked slots and user info mapping
+    appState.bookedSlotsData = data
+    appState.bookedSlots = Object.keys(data)
 
     // Redraw the time grid to black out the unavailable chips
     renderTimeGrid()
@@ -162,6 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	   ===================================================== */
 
   document.getElementById('switchBuildingBtn').onclick = () => {
+    clearEditMode()
+
     appState.currentBld = appState.currentBld.includes('Gok')
       ? 'Andrew Gonzales Hall'
       : 'Gokongwei Hall'
@@ -179,12 +183,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btnCancelEdit').onclick = () => {
     if (!appState.editingTargetId) return
-    new bootstrap.Modal(document.getElementById('confirmCancelModal')).show()
+    bootstrap.Modal.getOrCreateInstance(
+      document.getElementById('confirmCancelModal')
+    ).show()
   }
 
   document.getElementById('btnConfirmEdit').onclick = () => {
     if (!appState.editingTargetId) return
-    new bootstrap.Modal(document.getElementById('successModal')).show()
+    bootstrap.Modal.getOrCreateInstance(
+      document.getElementById('successModal')
+    ).show()
   }
 
   /* =====================================================
@@ -208,14 +216,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     populateReservationForm(dateStr, timeRange)
 
-    bootstrap.Modal.getInstance(
+    bootstrap.Modal.getOrCreateInstance(
       document.getElementById('reservationModal')
     ).hide()
     setTimeout(() => {
-      new bootstrap.Modal(document.getElementById('summaryModal')).show()
+      bootstrap.Modal.getOrCreateInstance(
+        document.getElementById('summaryModal')
+      ).show()
     }, 400)
   }
 
+  // Form submission handler
   document.getElementById('reservation-form').addEventListener('submit', e => {
     e.preventDefault()
     submitReservationForm()
@@ -232,6 +243,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const res = appState.reservations.find(r => r.id === targetId)
 
     if (res) {
+      // --- EXTRA SAFETY: Force the UI to match the reservation's room ---
+      let targetBuilding = ''
+      if (res.building && res.building.toLowerCase().includes('gokongwei')) {
+        targetBuilding = 'Gokongwei Hall'
+      } else if (
+        res.building &&
+        res.building.toLowerCase().includes('andrew')
+      ) {
+        targetBuilding = 'Andrew Gonzales Hall'
+      }
+      const cleanLab = String(res.lab).replace(/^[A-Za-z]+/, '')
+
+      if (targetBuilding && cleanLab) {
+        appState.currentBld = targetBuilding
+        appState.currentLab = cleanLab
+        refreshUI() // Re-render the correct room
+        fetchBookedSlots() // Fetch the slots for the correct room
+      }
+      // ------------------------------------------------------------------
+
       appState.selectedSeats = res.seat
         .toString()
         .split(', ')
@@ -250,7 +281,6 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'DELETE'
       })
       if (res.ok) {
-        // Success! Remove from UI and refresh the blackout slots
         appState.reservations = appState.reservations.filter(
           r => r.id !== targetId
         )
@@ -258,13 +288,13 @@ document.addEventListener('DOMContentLoaded', () => {
         renderReservations()
         fetchBookedSlots()
 
-        bootstrap.Modal.getInstance(
+        bootstrap.Modal.getOrCreateInstance(
           document.getElementById('confirmCancelModal')
         ).hide()
         document.querySelector('.edit-desc').innerText =
           'Select a reservation to edit.'
         setTimeout(() => {
-          new bootstrap.Modal(
+          bootstrap.Modal.getOrCreateInstance(
             document.getElementById('cancelSuccessModal')
           ).show()
         }, 400)
@@ -281,7 +311,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function populateReservationForm (dateStr, timeRange) {
   const labCode = appState.currentBld[0] + appState.currentLab
 
-  // Search the injected database array for the real MongoDB ID
   let labId = ''
   if (window.DB_LABS) {
     const foundLab = window.DB_LABS.find(
@@ -292,7 +321,7 @@ function populateReservationForm (dateStr, timeRange) {
 
   document.getElementById('building').value = appState.currentBld
   document.getElementById('lab').value = labCode
-  document.getElementById('labId').value = labId // Save the true ID
+  document.getElementById('labId').value = labId
   document.getElementById('seats').value = JSON.stringify(
     appState.selectedSeats
   )
@@ -312,18 +341,14 @@ function populateReservationForm (dateStr, timeRange) {
 
 /* =====================================================
    Form Submission Handler
-   - Extracts form data and logs to console / Sends to DB
    ===================================================== */
 async function submitReservationForm () {
   const form = document.getElementById('reservation-form')
   const formData = new FormData(form)
 
   const labCodeStr = appState.currentBld[0] + appState.currentLab
-
-  // Check if we are updating an existing reservation
   const existingResId = formData.get('reservation_id')
 
-  // Extract data from form fields
   const reservationData = {
     labId: formData.get('labId'),
     labCode: labCodeStr,
@@ -333,7 +358,6 @@ async function submitReservationForm () {
     slotsArray: JSON.parse(formData.get('slots'))
   }
 
-  // If we have an ID, we UPDATE (PUT). Otherwise, we CREATE (POST).
   const fetchUrl = existingResId
     ? `/api/reservations/${existingResId}`
     : '/api/reservations'
@@ -347,7 +371,6 @@ async function submitReservationForm () {
     })
 
     if (response.ok) {
-      // Successful reservation / update
       await fetchMyReservations()
       await fetchBookedSlots()
 
@@ -355,11 +378,14 @@ async function submitReservationForm () {
       document.querySelector('.edit-desc').innerText =
         'Select a reservation to edit.'
 
-      const sumModalEl = document.getElementById('summaryModal')
-      bootstrap.Modal.getInstance(sumModalEl).hide()
+      bootstrap.Modal.getOrCreateInstance(
+        document.getElementById('summaryModal')
+      ).hide()
 
       setTimeout(() => {
-        new bootstrap.Modal(document.getElementById('successModal')).show()
+        bootstrap.Modal.getOrCreateInstance(
+          document.getElementById('successModal')
+        ).show()
         appState.selectedSeats = []
         renderSeats()
       }, 400)
@@ -466,19 +492,18 @@ function renderCalendar () {
 
   // Calculate Today and 1 Week from Now
   const today = new Date()
-  today.setHours(0, 0, 0, 0) // Reset time to midnight for accurate date comparison
+  today.setHours(0, 0, 0, 0)
 
   const maxDate = new Date(today)
-  maxDate.setDate(today.getDate() + 7) // Exactly 7 days from today
+  maxDate.setDate(today.getDate() + 7)
 
   for (let p = 0; p < firstDay; p++)
     calGrid.appendChild(document.createElement('div'))
 
   for (let d = 1; d <= daysInMonth; d++) {
     const dayEl = document.createElement('div')
-    const loopDate = new Date(year, month, d) // The specific day being rendered
+    const loopDate = new Date(year, month, d)
 
-    // Check if the day is in the past or beyond 1 week
     const isOutOfRange = loopDate < today || loopDate > maxDate
 
     const checkDate = loopDate.toLocaleDateString('en-US', {
@@ -497,7 +522,6 @@ function renderCalendar () {
     ]).size
     const isDayFullyBooked = totalBookedCount >= 18
 
-    // Add unavailable class if fully booked OR out of range
     dayEl.className = `cal-day ${
       isDayFullyBooked || isOutOfRange ? 'unavailable' : ''
     } ${
@@ -513,11 +537,10 @@ function renderCalendar () {
 
     dayEl.innerText = d
 
-    // Only allow clicking if it's NOT fully booked and NOT out of range
     if (!isDayFullyBooked && !isOutOfRange) {
       dayEl.onclick = () => {
         appState.selectedDate = new Date(year, month, d)
-        appState.tempSlots = [] // Clear current selections when switching days
+        appState.tempSlots = []
         fetchBookedSlots()
         renderCalendar()
       }
@@ -582,6 +605,23 @@ function renderTimeGrid () {
           ? appState.tempSlots.splice(idx, 1)
           : appState.tempSlots.push(s)
       }
+    } else if (isGlobalOccupied) {
+      // NEW: Hover listeners for occupied slots
+      const userInfo = appState.bookedSlotsData[s]
+
+      if (userInfo) {
+        // --- OVERRIDE THE CSS BLOCKER ---
+        chip.style.pointerEvents = 'auto'
+        chip.style.cursor = 'help' // Makes the cursor look like a ? so users know they can hover
+        // --------------------------------
+
+        chip.dataset.userId = userInfo.userId
+        chip.dataset.userName = userInfo.name
+        chip.dataset.userAvatar = userInfo.avatar
+
+        chip.onmouseenter = e => showPopover(e, userInfo)
+        chip.onmouseleave = hidePopover
+      }
     }
 
     grid.appendChild(chip)
@@ -594,7 +634,9 @@ function renderTimeGrid () {
 function openBookingFlow () {
   renderCalendar()
   renderTimeGrid()
-  new bootstrap.Modal(document.getElementById('reservationModal')).show()
+  bootstrap.Modal.getOrCreateInstance(
+    document.getElementById('reservationModal')
+  ).show()
 }
 
 /* =====================================================
@@ -623,6 +665,7 @@ function refreshUI () {
    Lab Switching
    ===================================================== */
 window.setLab = l => {
+  clearEditMode()
   appState.currentLab = l
   appState.selectedSeats = []
   refreshUI()
@@ -673,10 +716,104 @@ window.selectForEdit = (e, id) => {
     '.edit-desc'
   ).innerText = `Editing: ${res.lab} Seat(s) ${res.seat}`
 
-  // Reset borders, then highlight the selected card
-  document
-    .querySelectorAll('#activeResContainer .mini-card')
-    .forEach(c => (c.style.border = '1px solid rgba(255,255,255,0.12)'))
+  let targetBuilding = ''
+  if (res.building && res.building.toLowerCase().includes('gokongwei')) {
+    targetBuilding = 'Gokongwei Hall'
+  } else if (res.building && res.building.toLowerCase().includes('andrew')) {
+    targetBuilding = 'Andrew Gonzales Hall'
+  }
+  const cleanLab = String(res.lab).replace(/^[A-Za-z]+/, '')
 
-  e.currentTarget.style.border = '1px solid #ff6b4a'
+  if (targetBuilding && cleanLab) {
+    appState.currentBld = targetBuilding
+    appState.currentLab = cleanLab
+
+    if (typeof renderTabs === 'function') renderTabs()
+    if (typeof renderSeats === 'function') renderSeats()
+    if (typeof fetchBookedSlots === 'function') fetchBookedSlots()
+  }
+
+  document.querySelectorAll('.mini-card').forEach(c => {
+    c.style.border = '1px solid rgba(255,255,255,0.1)'
+    c.style.boxShadow = 'none'
+  })
+
+  const card = e.currentTarget
+  card.style.border = '1px solid #ff6b4a'
+  card.style.boxShadow = '0 0 10px rgba(255,107,74,0.3)'
 }
+
+/* =====================================================
+   Helper: Clear Edit Mode
+   - Resets state when user browses away from an edit
+   ===================================================== */
+function clearEditMode () {
+  appState.editingTargetId = null
+  const desc = document.querySelector('.edit-desc')
+  if (desc) desc.innerText = 'Select a reservation to edit.'
+
+  document.querySelectorAll('#activeResContainer .mini-card').forEach(c => {
+    c.style.border = '1px solid rgba(255,255,255,0.1)'
+    c.style.boxShadow = 'none'
+  })
+}
+
+/* =====================================================
+   Hover Popover Logic & Auto-Refresh Timer
+   ===================================================== */
+const popover = document.getElementById('userPopover')
+let popoverTimer // <-- NEW: Timer variable to prevent flickering
+
+function showPopover (e, user) {
+  if (!popover) return
+  clearTimeout(popoverTimer) // Cancel any pending commands to hide the popover
+
+  const rect = e.currentTarget.getBoundingClientRect()
+
+  document.getElementById('popAvatar').src =
+    user.avatar || '../img/default-avatar.png'
+  document.getElementById('popName').innerText = user.name || 'Unknown User'
+  document.getElementById('popName').href = `/profile/view/${user.userId}`
+
+  popover.style.display = 'flex'
+
+  // Smart Positioning: Place it 60px above the chip
+  let topPos = rect.top - 60
+
+  // QoL check: If it's too close to the top of the screen, flip it below the chip!
+  if (topPos < 10) {
+    topPos = rect.bottom + 10
+  }
+
+  popover.style.top = `${topPos}px`
+  popover.style.left = `${rect.left}px`
+}
+
+function hidePopover () {
+  if (!popover) return
+
+  // Wait 300ms before hiding, giving the user time to move their mouse to the popover
+  popoverTimer = setTimeout(() => {
+    if (!popover.matches(':hover')) {
+      popover.style.display = 'none'
+    }
+  }, 300)
+}
+
+// Make sure hovering over the popover itself keeps it alive!
+if (popover) {
+  popover.onmouseenter = () => {
+    clearTimeout(popoverTimer)
+    popover.style.display = 'flex'
+  }
+  popover.onmouseleave = () => {
+    hidePopover()
+  }
+}
+
+// Start the periodic auto-refresh (Every 30 seconds)
+setInterval(() => {
+  if (appState.currentLab && appState.selectedDate) {
+    fetchBookedSlots()
+  }
+}, 30000)
