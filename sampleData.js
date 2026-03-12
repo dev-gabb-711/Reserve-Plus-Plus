@@ -39,9 +39,12 @@ async function seedDatabase () {
     }
 
     function formatDateKey (dateObj) {
-      return `${dateObj.getFullYear()}-${String(
-        dateObj.getMonth() + 1
-      ).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`
+      // Formats as "Mar 15, 2026" to perfectly match your frontend calendar format!
+      return dateObj.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      })
     }
 
     function to12HourLabel (hours, minutes) {
@@ -98,12 +101,15 @@ async function seedDatabase () {
       return `${start} - ${end}`
     }
 
+    // FIX: Updated payload to include date, timeSlot (stringified array), and isAnonymous
     function makeReservationPayload ({
       userId,
       labId,
       labCode,
       seatNumbers,
+      date,
       slotsArray,
+      isAnonymous = false,
       status = 'Active'
     }) {
       return {
@@ -111,9 +117,12 @@ async function seedDatabase () {
         lab: labId,
         labCode,
         seatNumber: seatNumbers,
-        slotsArray,
+        date: date,
+        timeSlot: JSON.stringify(slotsArray), // Dashboard looks for this!
+        slotsArray: slotsArray,
         timeRange: buildTimeRangeFromSlots(slotsArray),
-        status
+        isAnonymous: isAnonymous,
+        status: status
       }
     }
 
@@ -376,6 +385,7 @@ async function seedDatabase () {
         labId: labMap.G202._id,
         labCode: labMap.G202.labCode,
         seatNumbers: [10],
+        date: todayDate, // FIX: Added Date
         slotsArray: gabrielPastSlots,
         status: 'Completed'
       }),
@@ -384,6 +394,7 @@ async function seedDatabase () {
         labId: labMap.A1904._id,
         labCode: labMap.A1904.labCode,
         seatNumbers: [6],
+        date: gabbyPendingDate, // FIX: Added Date
         slotsArray: gabbyPendingSlots,
         status: 'Active'
       }),
@@ -392,7 +403,9 @@ async function seedDatabase () {
         labId: labMap.A1707._id,
         labCode: labMap.A1707.labCode,
         seatNumbers: [19],
+        date: todayDate, // FIX: Added Date
         slotsArray: marionActiveSlots,
+        isAnonymous: true, // Example of an anonymous mock booking!
         status: 'Active'
       }),
       makeReservationPayload({
@@ -400,6 +413,7 @@ async function seedDatabase () {
         labId: labMap.A1103._id,
         labCode: labMap.A1103.labCode,
         seatNumbers: [4],
+        date: tomorrowDate, // FIX: Added Date
         slotsArray: alyssaFutureSlots,
         status: 'Active'
       }),
@@ -408,6 +422,7 @@ async function seedDatabase () {
         labId: labMap.G305._id,
         labCode: labMap.G305.labCode,
         seatNumbers: [14],
+        date: tomorrowDate, // FIX: Added Date
         slotsArray: danielFutureSlots,
         status: 'Active'
       }),
@@ -416,6 +431,7 @@ async function seedDatabase () {
         labId: labMap.G203._id,
         labCode: labMap.G203.labCode,
         seatNumbers: [22, 23],
+        date: tomorrowDate, // FIX: Added Date
         slotsArray: patriciaFutureSlots,
         status: 'Active'
       }),
@@ -424,6 +440,7 @@ async function seedDatabase () {
         labId: labMap.G201._id,
         labCode: labMap.G201.labCode,
         seatNumbers: [2],
+        date: todayDate, // FIX: Added Date
         slotsArray: buildSlotsArray(16, 0, 2),
         status: 'Cancelled'
       })
