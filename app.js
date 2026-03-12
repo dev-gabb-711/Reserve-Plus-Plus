@@ -465,24 +465,23 @@ app.get('/search-results', async (req, res) => {
       }).lean()
 
       userResults = users.map(u => ({
-        type: "user",
+        type: 'user',
         userId: u._id,
         name: `${u.firstName} ${u.lastName}`,
-        avatar: u.profilePic || "/img/def_avatar.jpg",
-        role: u.role === "Admin" ? "Admin" : "Lab User"
-}))
+        avatar: u.profilePic || '/img/def_avatar.jpg',
+        role: u.role === 'Admin' ? 'Admin' : 'Lab User'
+      }))
     }
 
     const combinedResults = [
       ...userResults,
       ...labResults.map(r => ({
         ...r,
-        type: "lab"
+        type: 'lab'
       }))
     ]
 
     res.render('searchresults', { searchResults: combinedResults })
-
   } catch (err) {
     console.error('Search error:', err)
     res.status(500).send('Search failed')
@@ -852,7 +851,9 @@ app.post('/api/reservations', async (req, res) => {
       return res.status(401).json({ error: 'Please log in first.' })
     }
 
-    const { labId, labCode, seats, date, slotsArray } = req.body
+    // Extracted timeRange and isAnonymous from req.body
+    const { labId, labCode, seats, date, timeRange, slotsArray, isAnonymous } =
+      req.body
 
     let lab
     if (labId) {
@@ -869,9 +870,13 @@ app.post('/api/reservations', async (req, res) => {
     const newReservation = new Reservation({
       user: req.session.user.id,
       lab: lab._id,
-      seatNumber: seats.join(', '),
+      labCode: labCode,
+      seatNumber: seats,
       date: date,
-      timeSlot: JSON.stringify(slotsArray)
+      timeRange: timeRange,
+      slotsArray: slotsArray,
+      timeSlot: JSON.stringify(slotsArray),
+      isAnonymous: isAnonymous || false
     })
 
     await newReservation.save()
@@ -901,7 +906,9 @@ app.put('/api/reservations/:id', async (req, res) => {
       return res.status(401).json({ error: 'Please log in first.' })
     }
 
-    const { labId, labCode, seats, date, slotsArray } = req.body
+    // Extracted timeRange and isAnonymous from req.body
+    const { labId, labCode, seats, date, timeRange, slotsArray, isAnonymous } =
+      req.body
 
     let lab
     if (labId) {
@@ -921,7 +928,9 @@ app.put('/api/reservations/:id', async (req, res) => {
         lab: lab._id,
         seatNumber: seats.join(', '),
         date: date,
-        timeSlot: JSON.stringify(slotsArray)
+        timeRange: timeRange,
+        timeSlot: JSON.stringify(slotsArray),
+        isAnonymous: isAnonymous || false
       },
       { new: true }
     )
@@ -997,11 +1006,17 @@ app.get('/api/reservations/booked', async (req, res) => {
         try {
           const slots = JSON.parse(booking.timeSlot)
           slots.forEach(slot => {
-            bookedData[slot] = {
-              userId: booking.user._id,
-              name: `${booking.user.firstName} ${booking.user.lastName}`.trim(),
-              email: booking.user.email || '',
-              avatar: booking.user.profilePic || '/img/def_avatar.jpg'
+            // Check if the booking is anonymous
+            if (booking.isAnonymous) {
+              // Null blocks the slot out but won't trigger the hover popover
+              bookedData[slot] = null
+            } else {
+              bookedData[slot] = {
+                userId: booking.user._id,
+                name: `${booking.user.firstName} ${booking.user.lastName}`.trim(),
+                email: booking.user.email || '',
+                avatar: booking.user.profilePic || '/img/def_avatar.jpg'
+              }
             }
           })
         } catch (e) {
