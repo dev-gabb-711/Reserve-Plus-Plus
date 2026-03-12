@@ -221,7 +221,7 @@ async function seedDatabase () {
         seats: createSeats(30)
       },
       {
-        labCode: '203',
+        labCode: 'G203',
         building: 'Gokongwei Hall',
         seats: createSeats(45)
       },
@@ -244,17 +244,23 @@ async function seedDatabase () {
         labCode: 'G305',
         building: 'Gokongwei Hall',
         seats: createSeats(40)
+      },
+      {
+        labCode: 'A1503',
+        building: 'Br. Andrew Hall',
+        seats: createSeats(40)
       }
     ])
 
     const labMap = {
       G201: insertedLabs.find(l => l.labCode === 'G201'),
       G202: insertedLabs.find(l => l.labCode === 'G202'),
-      G203: insertedLabs.find(l => l.labCode === '203'),
+      G203: insertedLabs.find(l => l.labCode === 'G203'),
       A1707: insertedLabs.find(l => l.labCode === 'A1707'),
       A1904: insertedLabs.find(l => l.labCode === 'A1904'),
       A1103: insertedLabs.find(l => l.labCode === 'A1103'),
-      G305: insertedLabs.find(l => l.labCode === 'G305')
+      G305: insertedLabs.find(l => l.labCode === 'G305'),
+      A1503: insertedLabs.find(l => l.labCode === 'A1503')
     }
 
     /* ==========================================
