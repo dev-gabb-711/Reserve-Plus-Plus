@@ -69,6 +69,58 @@ function normalizeRoomCode (value) {
   return String(value || '').replace(/^[A-Za-z]+/, '')
 }
 
+function requireLogin (req, res, next) {
+  if (!req.session.user) {
+    return res.redirect('/login')
+  }
+  next()
+}
+
+function makeAvatar (color) {
+  return `
+  data:image/svg+xml,
+  <svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'>
+    <rect width='100' height='100' rx='50' fill='${color}'/>
+    <circle cx='50' cy='40' r='15' fill='white'/>
+    <rect x='30' y='55' width='40' height='25' rx='12' fill='white'/>
+  </svg>
+  `
+}
+
+function getNotificationAvatar (type, senderAvatar) {
+  if (senderAvatar && String(senderAvatar).trim() !== '') {
+    return senderAvatar
+  }
+
+  if (type === 'IT Assist') return makeAvatar('purple')
+  if (type === 'Reservation') return makeAvatar('teal')
+  return makeAvatar('blue')
+}
+
+function formatNotificationForClient (notif) {
+  return {
+    id: String(notif._id),
+    _id: String(notif._id),
+    name: notif.senderName || notif.type || 'System',
+    role: notif.senderRole || notif.type || 'System',
+    snippet: notif.message || '',
+    body: notif.message || '',
+    avatar: getNotificationAvatar(notif.type, notif.senderAvatar),
+    type: notif.type || 'System',
+    title: notif.title || 'Notification',
+    isRead: !!notif.isRead,
+    createdAt: notif.createdAt
+  }
+}
+
+async function createNotificationSafe (data) {
+  try {
+    await Notification.create(data)
+  } catch (err) {
+    console.error('Notification creation failed:', err.message)
+  }
+}
+
 function buildDashboardBuildings (labs, tickets) {
   return labs.reduce((groups, lab) => {
     let buildingGroup = groups.find(group => group.title === lab.building)
@@ -185,7 +237,7 @@ function calculateTimeRangeServer (slots) {
 
     return `${start} - ${endStr}`
   } catch (e) {
-    return slots.join(', ') // Fallback just in case
+    return slots.join(', ')
   }
 }
 
@@ -221,7 +273,6 @@ app.get('/dashboard', async (req, res) => {
         ? 'gokongwei'
         : ''
 
-      // Calculate the time range if it's saved as an array string!
       let calculatedTime = reservation.timeSlot
       try {
         const parsedSlots = JSON.parse(reservation.timeSlot)
@@ -229,7 +280,7 @@ app.get('/dashboard', async (req, res) => {
           calculatedTime = calculateTimeRangeServer(parsedSlots)
         }
       } catch (e) {
-        // Ignore if it's an old string-format reservation
+        // Ignore old format
       }
 
       return {
@@ -239,7 +290,7 @@ app.get('/dashboard', async (req, res) => {
           ? `Room ${roomCode} • Seat ${reservation.seatNumber}`
           : `Seat ${reservation.seatNumber}`,
         dateLabel: reservation.date || '',
-        timeLabel: calculatedTime || '', // Use the calculated time here!
+        timeLabel: calculatedTime || '',
         dateISO: reservation.date || '',
         timeSlot: calculatedTime || '',
         building,
@@ -306,7 +357,7 @@ app.get('/reserve', async (req, res) => {
   }
 })
 
-app.get('/it-assist', (req, res) => res.render('itassist'))
+app.get('/it-assist', requireLogin, (req, res) => res.render('itassist'))
 
 app.get('/it-assist-admin', async (req, res) => {
   try {
@@ -318,10 +369,9 @@ app.get('/it-assist-admin', async (req, res) => {
   }
 })
 
-app.get('/notifications', async (req, res) => {
+app.get('/notifications', requireLogin, async (req, res) => {
   try {
-    const notifs = await Notification.find().sort({ createdAt: -1 }).lean()
-    res.render('notifications', { notifications: notifs })
+    res.render('notifications')
   } catch (err) {
     console.error('Error loading notifications:', err)
     res.status(500).send('Error loading notifications')
@@ -414,31 +464,193 @@ app.post('/signup', async (req, res) => {
 // Submit ticket
 app.post('/submit-ticket', async (req, res) => {
   try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: 'Please log in first.' })
+    }
+
+    const building = (req.body.building || '').trim()
+    const room = (req.body.room || '').trim().toUpperCase()
+    const seat = Number(req.body.seat)
+    const concern = (req.body.concern || '').trim()
+    const message = (req.body.message || '').trim()
+
+    const allowedBuildings = ['Br. Andrew Hall', 'Gokongwei Hall']
+
+    if (!building || !room || !seat) {
+      return res.status(400).json({
+        error: 'Building, room, and seat are required.'
+      })
+    }
+
+    if (!allowedBuildings.includes(building)) {
+      return res.status(400).json({
+        error: 'Invalid building value.'
+      })
+    }
+
+    if (!concern && !message) {
+      return res.status(400).json({
+        error: 'Please select a concern or enter a message.'
+      })
+    }
+
     const newTicket = new Ticket({
-      user: req.body.userId,
-      building: req.body.building,
-      roomNumber: req.body.room,
-      seatNumber: req.body.seat,
-      concernCategory: req.body.concern,
-      description: req.body.message
+      user: req.session.user.id,
+      building,
+      roomNumber: room,
+      seatNumber: seat,
+      concernCategory: concern || 'Other',
+      description: message
     })
 
     await newTicket.save()
-    res.redirect('/it-assist')
+
+    await createNotificationSafe({
+      recipient: req.session.user.id,
+      senderName: 'IT Assist',
+      senderRole: 'Support Desk',
+      title: 'Ticket Submitted',
+      message: `Your concern for Room ${room}, Seat ${seat} has been submitted successfully.`,
+      type: 'IT Assist'
+    })
+
+    res.status(201).json({
+      success: true,
+      message: 'Ticket submitted successfully.',
+      ticket: newTicket
+    })
   } catch (err) {
     console.error('Submit failed:', err)
-    res.status(500).send('Submit failed: ' + err.message)
+    res.status(500).json({ error: 'Submit failed: ' + err.message })
   }
 })
 
 // Resolve ticket
 app.post('/resolve-ticket/:id', async (req, res) => {
   try {
-    await Ticket.findByIdAndUpdate(req.params.id, { status: 'Resolved' })
+    const updatedTicket = await Ticket.findByIdAndUpdate(
+      req.params.id,
+      { status: 'Resolved' },
+      { new: true }
+    )
+
+    if (updatedTicket && updatedTicket.user) {
+      await createNotificationSafe({
+        recipient: updatedTicket.user,
+        senderName: 'IT Assist',
+        senderRole: 'Lab Technician',
+        title: 'Concern Resolved',
+        message: 'Your PC concern has been successfully resolved.',
+        type: 'IT Assist'
+      })
+    }
+
     res.redirect(req.get('Referrer') || '/it-assist-admin')
   } catch (err) {
     console.error('Resolve error:', err)
     res.status(500).send('Resolve error')
+  }
+})
+
+/* ==========================================
+   API ROUTES (TICKETS)
+   ========================================== */
+
+// Fetch current logged-in user's tickets
+app.get('/api/tickets/me', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    const tickets = await Ticket.find({ user: req.session.user.id })
+      .sort({ createdAt: -1 })
+      .lean()
+
+    res.json(tickets)
+  } catch (err) {
+    console.error('Fetch tickets failed:', err)
+    res.status(500).json({ error: 'Failed to fetch tickets' })
+  }
+})
+
+/* ==========================================
+   API ROUTES (NOTIFICATIONS)
+   ========================================== */
+
+// Fetch current logged-in user's notifications
+app.get('/api/notifications/me', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    const userId = req.session.user.id
+
+    const notifications = await Notification.find({ recipient: userId })
+      .sort({ createdAt: -1 })
+      .lean()
+
+    const formattedNotifications = notifications.map(formatNotificationForClient)
+
+    res.json(formattedNotifications)
+  } catch (err) {
+    console.error('Error fetching notifications:', err)
+    res.status(500).json({ error: 'Failed to fetch notifications' })
+  }
+})
+
+// Delete a notification owned by the current user
+app.delete('/api/notifications/:id', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    const userId = req.session.user.id
+
+    const deletedNotification = await Notification.findOneAndDelete({
+      _id: req.params.id,
+      recipient: userId
+    })
+
+    if (!deletedNotification) {
+      return res.status(404).json({ error: 'Notification not found' })
+    }
+
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Error deleting notification:', err)
+    res.status(500).json({ error: 'Failed to delete notification' })
+  }
+})
+
+// Mark a notification as read
+app.patch('/api/notifications/:id/read', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    const userId = req.session.user.id
+
+    const updatedNotification = await Notification.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        recipient: userId
+      },
+      { isRead: true },
+      { new: true }
+    )
+
+    if (!updatedNotification) {
+      return res.status(404).json({ error: 'Notification not found' })
+    }
+
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Error marking notification as read:', err)
+    res.status(500).json({ error: 'Failed to mark notification as read' })
   }
 })
 
@@ -455,11 +667,9 @@ app.post('/api/reservations', async (req, res) => {
     const { labId, labCode, seats, date, timeRange, slotsArray } = req.body
 
     let lab
-    // Fast, precise lookup using the true ObjectId!
     if (labId) {
       lab = await Lab.findById(labId)
     } else {
-      // Fallback just in case
       const cleanCode = normalizeRoomCode(labCode)
       lab = await Lab.findOne({ labCode: cleanCode })
     }
@@ -469,13 +679,25 @@ app.post('/api/reservations', async (req, res) => {
 
     const newReservation = new Reservation({
       user: req.session.user.id,
-      lab: lab._id, // Perfectly mapped as an ObjectId
+      lab: lab._id,
       seatNumber: seats.join(', '),
       date: date,
       timeSlot: JSON.stringify(slotsArray)
     })
 
     await newReservation.save()
+
+    await createNotificationSafe({
+      recipient: req.session.user.id,
+      senderName: 'Reserve++ Team',
+      senderRole: 'Reservation System',
+      title: 'Reservation Created',
+      message: `Your reservation for Room ${lab.labCode}, Seat ${seats.join(
+        ', '
+      )} on ${date} has been created successfully.`,
+      type: 'Reservation'
+    })
+
     res.status(201).json(newReservation)
   } catch (error) {
     console.error('Reservation Error:', error)
@@ -502,7 +724,6 @@ app.put('/api/reservations/:id', async (req, res) => {
     if (!lab)
       return res.status(404).json({ error: `Lab not found in database.` })
 
-    // Find the reservation by ID and update its fields
     const updatedReservation = await Reservation.findByIdAndUpdate(
       req.params.id,
       {
@@ -511,11 +732,22 @@ app.put('/api/reservations/:id', async (req, res) => {
         date: date,
         timeSlot: JSON.stringify(slotsArray)
       },
-      { new: true } // This tells Mongoose to return the updated document
+      { new: true }
     )
 
     if (!updatedReservation)
       return res.status(404).json({ error: 'Reservation not found' })
+
+    await createNotificationSafe({
+      recipient: req.session.user.id,
+      senderName: 'Reserve++ Team',
+      senderRole: 'Reservation System',
+      title: 'Reservation Updated',
+      message: `Your reservation for Room ${lab.labCode}, Seat ${seats.join(
+        ', '
+      )} on ${date} has been updated successfully.`,
+      type: 'Reservation'
+    })
 
     res.json(updatedReservation)
   } catch (error) {
@@ -560,7 +792,7 @@ app.get('/api/reservations/booked', async (req, res) => {
     if (!lab) return res.json([])
 
     const bookings = await Reservation.find({
-      lab: lab._id, // Perfectly mapped ObjectId search
+      lab: lab._id,
       date: date,
       status: 'Active'
     })
@@ -588,7 +820,27 @@ app.delete('/api/reservations/:id', async (req, res) => {
     if (!req.session.user)
       return res.status(401).json({ error: 'Unauthorized' })
 
-    await Reservation.findByIdAndUpdate(req.params.id, { status: 'Cancelled' })
+    const cancelledReservation = await Reservation.findByIdAndUpdate(
+      req.params.id,
+      { status: 'Cancelled' },
+      { new: true }
+    ).populate('lab')
+
+    if (!cancelledReservation) {
+      return res.status(404).json({ error: 'Reservation not found' })
+    }
+
+    await createNotificationSafe({
+      recipient: req.session.user.id,
+      senderName: 'Reserve++ Team',
+      senderRole: 'Reservation System',
+      title: 'Reservation Cancelled',
+      message: `Your reservation for Room ${
+        cancelledReservation.lab?.labCode || ''
+      }, Seat ${cancelledReservation.seatNumber} has been cancelled.`,
+      type: 'Reservation'
+    })
+
     res.json({ success: true })
   } catch (error) {
     res.status(500).json({ error: 'Failed to cancel reservation' })

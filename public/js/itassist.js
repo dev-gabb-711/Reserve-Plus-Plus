@@ -1,6 +1,7 @@
 /* =====================================================
    Ticket Form Logic (Scoped Module)
-   - Encapsulates ticket UI behavior to avoid global conflicts
+   - Handles ticket UI, database-driven dropdowns,
+     submission, and loading from backend
    ===================================================== */
 (function () {
     /* -------------------------
@@ -19,19 +20,8 @@
        State
        ------------------------- */
     let selectedConcern = "";
-
-    /* -------------------------
-       Demo Data (replace later with API response)
-       ------------------------- */
-    let tickets = [
-        { room: "G203", seat: 1, status: "Pending" },
-        { room: "A1103", seat: 1, status: "Resolved" },
-        { room: "A1103", seat: 1, status: "Resolved" },
-        { room: "A1103", seat: 1, status: "Resolved" },
-        { room: "A1103", seat: 1, status: "Resolved" },
-        { room: "A1103", seat: 1, status: "Resolved" },
-        { room: "A1103", seat: 1, status: "Resolved" },
-    ];
+    let tickets = [];
+    let labs = [];
 
     /* =====================================================
        Ticket Rendering Helpers
@@ -55,12 +45,13 @@
      */
     function ticketCardHTML(t) {
         const cls = statusToClass(t.status);
+
         return `
             <div class="mini-card ${cls}">
                 <div class="accent"></div>
                 <div class="info">
-                    <strong>Room ${t.room} • Seat ${t.seat}</strong>
-                    <p>${t.status}</p>
+                    <strong>Room ${t.roomNumber} • Seat ${t.seatNumber}</strong>
+                    <p>${t.status || "Pending"}</p>
                 </div>
             </div>
         `.trim();
@@ -75,16 +66,81 @@
             ticketsPane.innerHTML = `<p class="mb-0" style="opacity:.75;">No tickets yet.</p>`;
             return;
         }
+
         ticketsPane.innerHTML = tickets.map(ticketCardHTML).join("");
     }
 
+    /* =====================================================
+       Dropdown Helpers
+       ===================================================== */
+
+    /**
+     * Fills a select element with placeholder + options.
+     */
+    function fillSelect(selectEl, placeholder, values) {
+        if (!selectEl) return;
+
+        selectEl.innerHTML = `
+            <option value="" selected disabled>${placeholder}</option>
+        `;
+
+        values.forEach(value => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            selectEl.appendChild(option);
+        });
+
+        selectEl.value = "";
+    }
+
+    /**
+     * Loads unique building values from labs into the building dropdown.
+     */
+    function populateBuildingOptions() {
+        const uniqueBuildings = [...new Set(labs.map(lab => lab.building))];
+        fillSelect(buildingEl, "Select building...", uniqueBuildings);
+        fillSelect(roomEl, "Select room...", []);
+        fillSelect(seatEl, "Select seat...", []);
+        roomEl.disabled = true;
+        seatEl.disabled = true;
+    }
+
+    /**
+     * Loads room options based on selected building.
+     */
+    function populateRoomOptions(building) {
+        const filteredLabs = labs.filter(lab => lab.building === building);
+        const roomCodes = filteredLabs.map(lab => lab.labCode);
+
+        fillSelect(roomEl, "Select room...", roomCodes);
+        fillSelect(seatEl, "Select seat...", []);
+        roomEl.disabled = false;
+        seatEl.disabled = true;
+    }
+
+    /**
+     * Loads seat options based on selected room.
+     */
+    function populateSeatOptions(building, roomCode) {
+        const selectedLab = labs.find(
+            lab => lab.building === building && lab.labCode === roomCode
+        );
+
+        const seatNumbers = selectedLab
+            ? (selectedLab.seats || []).map(seat => seat.seatNumber)
+            : [];
+
+        fillSelect(seatEl, "Select seat...", seatNumbers);
+        seatEl.disabled = false;
+    }
 
     /* =====================================================
        Form + Chip Utilities
        ===================================================== */
 
     /**
-     * Clears selected concern and removes "active" styling from chips.
+     * Clears selected concern and removes active styling from chips.
      */
     function clearChipSelection() {
         selectedConcern = "";
@@ -93,12 +149,81 @@
 
     /**
      * Resets the form inputs and clears chip selection.
+     * Also resets dependent dropdowns.
      */
     function resetForm() {
         form.reset();
         clearChipSelection();
+        populateBuildingOptions();
     }
 
+    /* =====================================================
+       Backend Communication
+       ===================================================== */
+
+    /**
+     * Fetches available labs from the backend.
+     */
+    async function fetchLabs() {
+        try {
+            const response = await fetch("/api/labs");
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Failed to fetch labs");
+            }
+
+            labs = data || [];
+            populateBuildingOptions();
+        } catch (error) {
+            console.error("Error fetching labs:", error);
+
+            if (buildingEl) buildingEl.disabled = true;
+            if (roomEl) roomEl.disabled = true;
+            if (seatEl) seatEl.disabled = true;
+        }
+    }
+
+    /**
+     * Fetches the current user's tickets from the backend.
+     */
+    async function fetchTickets() {
+        try {
+            const response = await fetch("/api/tickets/me");
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Failed to fetch tickets");
+            }
+
+            tickets = data;
+            renderTickets();
+        } catch (error) {
+            console.error("Error fetching tickets:", error);
+            ticketsPane.innerHTML = `<p class="mb-0" style="opacity:.75;">Failed to load tickets.</p>`;
+        }
+    }
+
+    /**
+     * Submits a new ticket to the backend.
+     */
+    async function submitTicket(payload) {
+        const response = await fetch("/submit-ticket", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Failed to submit ticket");
+        }
+
+        return data;
+    }
 
     /* =====================================================
        Concern Chips Interaction
@@ -116,7 +241,6 @@
         const concern = btn.dataset.concern || btn.textContent.trim();
         const isActive = btn.classList.contains("active");
 
-        // Ensure only one chip is active at a time
         chipsWrap.querySelectorAll(".chip.active").forEach(b => b.classList.remove("active"));
 
         if (isActive) {
@@ -127,6 +251,25 @@
         }
     });
 
+    /* =====================================================
+       Dropdown Interactions
+       ===================================================== */
+
+    buildingEl.addEventListener("change", () => {
+        const building = buildingEl.value;
+        if (!building) return;
+
+        populateRoomOptions(building);
+    });
+
+    roomEl.addEventListener("change", () => {
+        const building = buildingEl.value;
+        const room = roomEl.value;
+
+        if (!building || !room) return;
+
+        populateSeatOptions(building, room);
+    });
 
     /* =====================================================
        Form Submission
@@ -135,10 +278,10 @@
     /**
      * Submission rule:
      * - Must have building + room + seat
-     * - Must have at least (selectedConcern OR message) or both
-     * - Adds a new "Pending" ticket (demo behavior)
+     * - Must have at least selectedConcern OR message
+     * - Submits to backend and reloads the ticket list
      */
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const building = buildingEl.value.trim();
@@ -146,22 +289,33 @@
         const seat = seatEl.value.trim();
         const message = messageEl.value.trim();
 
-        // Minimal validation for location info (usually required)
-        if (!building || !room || seat === "") return;
+        if (!building || !room || !seat) {
+            alert("Please complete the building, room, and seat fields.");
+            return;
+        }
 
-        // Must have at least a selected concern OR a message
-        if (!selectedConcern && !message) return;
+        if (!selectedConcern && !message) {
+            alert("Please select a concern or enter a message.");
+            return;
+        }
 
-        // Create a new ticket (demo behavior)
-        tickets = [
-            { room: room.toUpperCase(), seat: Number(seat), status: "Pending" },
-            ...tickets
-        ];
+        try {
+            await submitTicket({
+                building,
+                room,
+                seat,
+                concern: selectedConcern,
+                message
+            });
 
-        renderTickets();
-        resetForm();
+            await fetchTickets();
+            resetForm();
+            alert("Concern submitted successfully.");
+        } catch (error) {
+            console.error("Submit error:", error);
+            alert(error.message || "Failed to submit concern.");
+        }
     });
-
 
     /* =====================================================
        Cancel Button
@@ -172,26 +326,24 @@
      */
     cancelBtn.addEventListener("click", () => resetForm());
 
-
     /* =====================================================
        Initial Render
        ===================================================== */
+    roomEl.disabled = true;
+    seatEl.disabled = true;
 
-    renderTickets();
+    fetchLabs();
+    fetchTickets();
 })();
 
-
-// removed local storage based role handling, should be implemented in app.js
-
 /* =====================================================
-    Controls the Navigation of Faq Modal
+   Controls the Navigation of Faq Modal
    ===================================================== */
 
 /**
- * Let's the user click and scroll through the faq modal
+ * Lets the user click and scroll through the FAQ modal
  * that contains FAQs
  */
-
 function openFaqModal() {
     const modal = document.getElementById("faqModal");
     modal.style.display = "flex";
@@ -208,6 +360,6 @@ window.onclick = function (event) {
     const modal = document.getElementById("faqModal");
     if (event.target == modal) {
         modal.style.display = "none";
+        document.body.style.overflow = "auto";
     }
-
-}
+};
