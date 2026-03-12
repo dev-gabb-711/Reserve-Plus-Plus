@@ -243,7 +243,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const res = appState.reservations.find(r => r.id === targetId)
 
     if (res) {
-      // --- EXTRA SAFETY: Force the UI to match the reservation's room ---
       let targetBuilding = ''
       if (res.building && res.building.toLowerCase().includes('gokongwei')) {
         targetBuilding = 'Gokongwei Hall'
@@ -258,10 +257,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (targetBuilding && cleanLab) {
         appState.currentBld = targetBuilding
         appState.currentLab = cleanLab
-        refreshUI() // Re-render the correct room
-        fetchBookedSlots() // Fetch the slots for the correct room
+
+        // FIX: Force the calendar date to match the reservation date!
+        const resDate = new Date(res.date)
+        if (!isNaN(resDate)) {
+          appState.selectedDate = resDate
+          appState.viewDate = resDate
+        }
+
+        refreshUI()
+        fetchBookedSlots()
       }
-      // ------------------------------------------------------------------
 
       appState.selectedSeats = res.seat
         .toString()
@@ -337,6 +343,9 @@ function populateReservationForm (dateStr, timeRange) {
   ).innerText = `${labCode} • Seat(s) ${appState.selectedSeats.join(', ')}`
   document.getElementById('sumDate').innerText = dateStr
   document.getElementById('sumTime').innerText = timeRange
+
+  document.getElementById('sumTime').innerText = timeRange
+  document.getElementById('isAnonymous').checked = false
 }
 
 /* =====================================================
@@ -355,7 +364,8 @@ async function submitReservationForm () {
     seats: JSON.parse(formData.get('seats')),
     date: formData.get('date'),
     timeRange: formData.get('time'),
-    slotsArray: JSON.parse(formData.get('slots'))
+    slotsArray: JSON.parse(formData.get('slots')),
+    isAnonymous: document.getElementById('isAnonymous').checked
   }
 
   const fetchUrl = existingResId
@@ -512,8 +522,12 @@ function renderCalendar () {
       year: 'numeric'
     })
 
+    // FIX: Make sure we only count reservations for the CURRENT lab!
     const userSlotsForDay = appState.reservations
-      .filter(r => r.date === checkDate)
+      .filter(r => {
+        const cleanResLab = String(r.lab).replace(/^[A-Za-z]+/, '')
+        return r.date === checkDate && cleanResLab === appState.currentLab
+      })
       .reduce((acc, r) => acc.concat(r.slots || []), [])
 
     const totalBookedCount = new Set([
@@ -580,13 +594,28 @@ function renderTimeGrid () {
   })
 
   slots.forEach(s => {
-    const isGlobalOccupied = appState.bookedSlots.includes(s)
+    // FIX: Check if this slot belongs to the reservation currently being edited
+    const editingRes = appState.editingTargetId
+      ? appState.reservations.find(r => r.id === appState.editingTargetId)
+      : null
+    const isCurrentEditSlot =
+      editingRes &&
+      editingRes.date === dateStr &&
+      editingRes.slots &&
+      editingRes.slots.includes(s)
+
+    // If it's the current slot being edited, ignore the global occupation flag
+    const isGlobalOccupied =
+      appState.bookedSlots.includes(s) && !isCurrentEditSlot
 
     const isUserReserved = appState.reservations.some(res => {
       const isSameDate = res.date === dateStr
+      const cleanResLab = String(res.lab).replace(/^[A-Za-z]+/, '')
+      const isSameLab = cleanResLab === appState.currentLab
       const hasSlot = res.slots && res.slots.includes(s)
       const isNotBeingEdited = res.id !== appState.editingTargetId
-      return isSameDate && hasSlot && isNotBeingEdited
+
+      return isSameDate && isSameLab && hasSlot && isNotBeingEdited
     })
 
     const isUnavailable = isGlobalOccupied || isUserReserved
@@ -606,14 +635,11 @@ function renderTimeGrid () {
           : appState.tempSlots.push(s)
       }
     } else if (isGlobalOccupied) {
-      // NEW: Hover listeners for occupied slots
       const userInfo = appState.bookedSlotsData[s]
 
       if (userInfo) {
-        // --- OVERRIDE THE CSS BLOCKER ---
         chip.style.pointerEvents = 'auto'
-        chip.style.cursor = 'help' // Makes the cursor look like a ? so users know they can hover
-        // --------------------------------
+        chip.style.cursor = 'help'
 
         chip.dataset.userId = userInfo.userId
         chip.dataset.userName = userInfo.name
@@ -704,8 +730,7 @@ function renderReservations () {
 }
 
 /* =====================================================
-   Reservation Selection for Editing (Exposed to Window)
-   - Called by inline onclick from reservation cards
+   Reservation Selection for Editing
    ===================================================== */
 window.selectForEdit = (e, id) => {
   appState.editingTargetId = id
@@ -728,9 +753,9 @@ window.selectForEdit = (e, id) => {
     appState.currentBld = targetBuilding
     appState.currentLab = cleanLab
 
-    if (typeof renderTabs === 'function') renderTabs()
-    if (typeof renderSeats === 'function') renderSeats()
-    if (typeof fetchBookedSlots === 'function') fetchBookedSlots()
+    // FIX: Replaced broken function calls with refreshUI()
+    refreshUI()
+    fetchBookedSlots()
   }
 
   document.querySelectorAll('.mini-card').forEach(c => {
