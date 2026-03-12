@@ -211,6 +211,7 @@ function buildStudentNotifications (notifications) {
  */
 function calculateTimeRangeServer (slots) {
   if (!slots || slots.length === 0) return ''
+
   try {
     const sorted = [...slots].sort(
       (a, b) => new Date('1970/01/01 ' + a) - new Date('1970/01/01 ' + b)
@@ -378,17 +379,113 @@ app.get('/notifications', requireLogin, async (req, res) => {
   }
 })
 
-app.get('/profile', (req, res) => res.render('profile'))
+app.get('/profile', requireLogin, (req, res) => {
+  res.redirect(`/profile/${req.session.user.id}`)
+})
+
+app.get('/profile/:id', requireLogin, async (req, res) => {
+  try {
+    const viewedUserId = req.params.id
+    const loggedInUserId = req.session.user.id
+
+    const isOwner = String(viewedUserId) === String(loggedInUserId)
+    const isEditMode = isOwner && req.query.edit === 'true'
+
+    const profileUser = await User.findById(viewedUserId).lean()
+
+    if (!profileUser) {
+      return res.status(404).send('User not found')
+    }
+
+    const reservationDocs = await Reservation.find({
+      user: viewedUserId,
+      status: 'Active'
+    })
+      .populate('lab')
+      .sort({ createdAt: -1 })
+      .lean()
+
+    const reservations = reservationDocs.map(reservation => {
+      let calculatedTime = reservation.timeSlot
+
+      try {
+        const parsedSlots = JSON.parse(reservation.timeSlot)
+        if (Array.isArray(parsedSlots)) {
+          calculatedTime = calculateTimeRangeServer(parsedSlots)
+        }
+      } catch (e) {
+        // Ignore old format
+      }
+
+      return {
+        ...reservation,
+        roomLabel: reservation.lab?.labCode
+          ? `Room ${reservation.lab.labCode} • Seat ${reservation.seatNumber}`
+          : `Seat ${reservation.seatNumber}`,
+        dateLabel: reservation.date || '',
+        timeLabel: calculatedTime || ''
+      }
+    })
+
+    res.render('profile', {
+      pageTitle: isOwner ? 'My Profile' : `${profileUser.firstName}'s Profile`,
+      profileUser: {
+        ...profileUser,
+        fullName: `${profileUser.firstName} ${profileUser.lastName}`,
+        displayRole: profileUser.role === 'Admin' ? 'Admin' : 'Lab User',
+        profilePic: profileUser.profilePic || '/img/def_avatar.jpg',
+        description: profileUser.description || ''
+      },
+      reservations,
+      isOwner,
+      isEditMode
+    })
+  } catch (err) {
+    console.error('Error loading profile:', err)
+    res.status(500).send('Error loading profile')
+  }
+})
 
 app.get('/search-results', async (req, res) => {
   try {
-    const labs = await Lab.find().lean()
-    const searchResults = buildSearchResults(labs)
+    const q = (req.query.q || '').trim()
 
-    res.render('searchresults', { searchResults })
+    const labs = await Lab.find().lean()
+    const labResults = buildSearchResults(labs)
+
+    let userResults = []
+
+    if (q) {
+      const users = await User.find({
+        $or: [
+          { firstName: { $regex: q, $options: 'i' } },
+          { lastName: { $regex: q, $options: 'i' } },
+          { email: { $regex: q, $options: 'i' } }
+        ]
+      }).lean()
+
+      userResults = users.map(u => ({
+        type: "user",
+        userId: u._id,
+        name: `${u.firstName} ${u.lastName}`,
+        avatar: u.profilePic || "/img/def_avatar.jpg",
+        role: u.role === "Admin" ? "Admin" : "Lab User"
+}))
+    }
+
+    const combinedResults = [
+      ...userResults,
+      ...labResults.map(r => ({
+        ...r,
+        type: "lab"
+      }))
+    ]
+
+    res.render('searchresults', { searchResults: combinedResults })
+
   } catch (err) {
-    console.error('Error loading search results:', err)
-    res.status(500).send('Error loading search results')
+    console.error('Search error:', err)
+    res.status(500).send('Search failed')
   }
 })
 
@@ -417,7 +514,7 @@ app.post('/login', async (req, res) => {
       name: user.firstName
     }
 
-    if (user.role == 'Admin') {
+    if (user.role === 'Admin') {
       return res.redirect('/admin-dashboard')
     } else {
       return res.redirect('/dashboard')
@@ -450,7 +547,9 @@ app.post('/signup', async (req, res) => {
       lastName: last,
       email: mail,
       password: pass,
-      role: 'Student'
+      role: 'Student',
+      description: '',
+      profilePic: '/img/def_avatar.jpg'
     })
 
     await newUser.save()
@@ -458,6 +557,92 @@ app.post('/signup', async (req, res) => {
   } catch (err) {
     console.error('Signup failed:', err)
     res.status(500).send('Signup failed: ' + err.message)
+  }
+})
+
+app.post('/profile/:id/edit', requireLogin, async (req, res) => {
+  try {
+    const viewedUserId = req.params.id
+    const loggedInUserId = req.session.user.id
+
+    if (String(viewedUserId) !== String(loggedInUserId)) {
+      return res.status(403).send('Unauthorized')
+    }
+
+    const first = (req.body.firstName || '').trim()
+    const last = (req.body.lastName || '').trim()
+    const mail = (req.body.email || '').trim().toLowerCase()
+    const desc = (req.body.description || '').trim()
+    const pass = (req.body.password || '').trim()
+
+    if (!first || !last || !mail) {
+      return res
+        .status(400)
+        .send('First name, last name, and email are required.')
+    }
+
+    const existingUser = await User.findOne({
+      email: mail,
+      _id: { $ne: viewedUserId }
+    })
+
+    if (existingUser) {
+      return res
+        .status(400)
+        .send('That email is already being used by another account.')
+    }
+
+    const updates = {
+      firstName: first,
+      lastName: last,
+      email: mail,
+      description: desc
+    }
+
+    if (pass) {
+      updates.password = pass
+    }
+
+    await User.findByIdAndUpdate(viewedUserId, updates, { new: true })
+
+    req.session.user.name = first
+
+    res.redirect(`/profile/${viewedUserId}`)
+  } catch (err) {
+    console.error('Error updating profile:', err)
+    res.status(500).send('Error updating profile')
+  }
+})
+
+app.post('/profile/:id/delete', requireLogin, async (req, res) => {
+  try {
+    const viewedUserId = req.params.id
+    const loggedInUserId = req.session.user.id
+
+    if (String(viewedUserId) !== String(loggedInUserId)) {
+      return res.status(403).send('Unauthorized')
+    }
+
+    await Reservation.updateMany(
+      { user: viewedUserId, status: 'Active' },
+      { status: 'Cancelled' }
+    )
+
+    await Ticket.deleteMany({ user: viewedUserId })
+    await Notification.deleteMany({ recipient: viewedUserId })
+
+    await User.findByIdAndDelete(viewedUserId)
+
+    req.session.destroy(err => {
+      if (err) {
+        console.error('Session destroy error:', err)
+        return res.redirect('/login')
+      }
+      res.redirect('/signup')
+    })
+  } catch (err) {
+    console.error('Error deleting account:', err)
+    res.status(500).send('Error deleting account')
   }
 })
 
@@ -663,10 +848,11 @@ app.patch('/api/notifications/:id/read', async (req, res) => {
 // 1. Create a new reservation
 app.post('/api/reservations', async (req, res) => {
   try {
-    if (!req.session.user)
+    if (!req.session.user) {
       return res.status(401).json({ error: 'Please log in first.' })
+    }
 
-    const { labId, labCode, seats, date, timeRange, slotsArray } = req.body
+    const { labId, labCode, seats, date, slotsArray } = req.body
 
     let lab
     if (labId) {
@@ -676,8 +862,9 @@ app.post('/api/reservations', async (req, res) => {
       lab = await Lab.findOne({ labCode: cleanCode })
     }
 
-    if (!lab)
-      return res.status(404).json({ error: `Lab not found in database.` })
+    if (!lab) {
+      return res.status(404).json({ error: 'Lab not found in database.' })
+    }
 
     const newReservation = new Reservation({
       user: req.session.user.id,
@@ -710,10 +897,11 @@ app.post('/api/reservations', async (req, res) => {
 // 1.5 Update an existing reservation
 app.put('/api/reservations/:id', async (req, res) => {
   try {
-    if (!req.session.user)
+    if (!req.session.user) {
       return res.status(401).json({ error: 'Please log in first.' })
+    }
 
-    const { labId, labCode, seats, date, timeRange, slotsArray } = req.body
+    const { labId, labCode, seats, date, slotsArray } = req.body
 
     let lab
     if (labId) {
@@ -723,8 +911,9 @@ app.put('/api/reservations/:id', async (req, res) => {
       lab = await Lab.findOne({ labCode: cleanCode })
     }
 
-    if (!lab)
-      return res.status(404).json({ error: `Lab not found in database.` })
+    if (!lab) {
+      return res.status(404).json({ error: 'Lab not found in database.' })
+    }
 
     const updatedReservation = await Reservation.findByIdAndUpdate(
       req.params.id,
@@ -737,8 +926,9 @@ app.put('/api/reservations/:id', async (req, res) => {
       { new: true }
     )
 
-    if (!updatedReservation)
+    if (!updatedReservation) {
       return res.status(404).json({ error: 'Reservation not found' })
+    }
 
     await createNotificationSafe({
       recipient: req.session.user.id,
@@ -761,8 +951,9 @@ app.put('/api/reservations/:id', async (req, res) => {
 // 2. Fetch current logged-in user's active reservations
 app.get('/api/reservations/me', async (req, res) => {
   try {
-    if (!req.session.user)
+    if (!req.session.user) {
       return res.status(401).json({ error: 'Unauthorized' })
+    }
 
     const reservations = await Reservation.find({
       user: req.session.user.id,
@@ -793,12 +984,11 @@ app.get('/api/reservations/booked', async (req, res) => {
 
     if (!lab) return res.json({})
 
-    // Populate user details to retrieve who booked what
     const bookings = await Reservation.find({
       lab: lab._id,
       date: date,
       status: 'Active'
-    }).populate('user', 'firstName lastName email avatar')
+    }).populate('user', 'firstName lastName email profilePic')
 
     let bookedData = {}
 
@@ -809,12 +999,9 @@ app.get('/api/reservations/booked', async (req, res) => {
           slots.forEach(slot => {
             bookedData[slot] = {
               userId: booking.user._id,
-              name: (
-                booking.user.firstName +
-                ' ' +
-                booking.user.lastName
-              ).trim(),
-              avatar: booking.user.avatar || '../img/default-avatar.png'
+              name: `${booking.user.firstName} ${booking.user.lastName}`.trim(),
+              email: booking.user.email || '',
+              avatar: booking.user.profilePic || '/img/def_avatar.jpg'
             }
           })
         } catch (e) {
@@ -833,8 +1020,9 @@ app.get('/api/reservations/booked', async (req, res) => {
 // 4. Cancel a reservation
 app.delete('/api/reservations/:id', async (req, res) => {
   try {
-    if (!req.session.user)
+    if (!req.session.user) {
       return res.status(401).json({ error: 'Unauthorized' })
+    }
 
     const cancelledReservation = await Reservation.findByIdAndUpdate(
       req.params.id,
@@ -859,6 +1047,7 @@ app.delete('/api/reservations/:id', async (req, res) => {
 
     res.json({ success: true })
   } catch (error) {
+    console.error('Cancel Error:', error)
     res.status(500).json({ error: 'Failed to cancel reservation' })
   }
 })

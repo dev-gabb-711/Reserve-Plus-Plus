@@ -451,3 +451,18 @@ body{
   scrollbar-width:thin;
   scrollbar-color:rgba(255,255,255,0.22) transparent;
 }
+
+
+.result-avatar{
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  object-fit:cover;
+  margin-right:12px;
+}
+
+.result-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}

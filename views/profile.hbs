@@ -1,65 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!--========================= META + LINKS =========================-->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile</title>
+  <title>{{pageTitle}}</title>
 
-  <!--========================= VENDORS + FONTS =========================-->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-
-  <!--========================= PAGE STYLES =========================-->
-  <link rel="stylesheet" href="../css/profile.css">
+  <link rel="stylesheet" href="/css/profile.css">
 </head>
 
 <body class="page page--profile">
-  <!--========================= BACKGROUND LAYER =========================-->
   <div class="app-bg"></div>
 
-  <!--========================= PAGE WRAPPER =========================-->
   <div class="page-wrap">
-
-    <!--========================= SIDEBAR NAV =========================-->
     <aside class="side-nav">
       <div class="side-icons">
         <button class="side-btn" type="button" onclick="location.href='/dashboard'">
           <span class="material-symbols-rounded">home</span>
         </button>
-
         <button class="side-btn" type="button" onclick="location.href='/reserve'">
           <span class="material-symbols-rounded">computer</span>
         </button>
-
         <button class="side-btn" type="button" onclick="location.href='/it-assist'">
           <span class="material-symbols-rounded">report</span>
         </button>
-
         <button class="side-btn" type="button" onclick="location.href='/notifications'">
           <span class="material-symbols-rounded">notifications</span>
         </button>
       </div>
 
       <div class="side-brand">
-        <img src="../img/logo.png" class="brand-logo" alt="Logo">
+        <img src="/img/logo.png" class="brand-logo" alt="Logo">
       </div>
     </aside>
 
-    <!--========================= MAIN CONTENT =========================-->
     <main class="main-area">
-
-      <!--========================= HEADER (TITLE + SEARCH) =========================-->
       <div class="top-row">
         <div>
-          <h1 class="page-title">My Profile</h1>
+          <h1 class="page-title">{{pageTitle}}</h1>
           <p class="page-subtitle">Welcome to your account center</p>
         </div>
 
-        <!------------------Search Bar------------------>
         <div class="search-wrap">
           <div class="search-pill">
             <span class="search-ico">
@@ -73,77 +58,168 @@
         </div>
       </div>
 
-      <!--========================= PROFILE SHELL =========================-->
       <div class="profile-shell">
         <div class="profile-grid">
 
-          <!--========================= LEFT (AVATAR + ACTIONS) =========================-->
           <div class="profile-left">
-            <img id="avatarPreview" class="profile-avatar" src="../img/def_avatar.jpg" alt="Profile">
+            <img
+              id="avatarPreview"
+              class="profile-avatar"
+              src="{{profileUser.profilePic}}"
+              alt="{{profileUser.fullName}}"
+            >
 
-            <!------------------View Mode Actions------------------>
-            <div id="leftViewActions" class="left-actions">
-              <button id="deleteBtn" class="btn-outline" type="button">Delete Account</button>
-              <button id="editBtn" class="btn-outline" type="button">Edit Profile</button>
-            </div>
-
-            <!------------------Edit Mode Actions------------------>
-            <div id="leftEditActions" class="left-actions is-hidden">
-              <label class="btn-outline file-btn" for="avatarFile">Edit Profile Picture</label>
-              <input id="avatarFile" class="file-input" type="file" accept="image/*">
-            </div>
+            {{#if isOwner}}
+              {{#if isEditMode}}
+                <div class="left-actions">
+                  <label class="btn-outline file-btn" for="avatarFile">Change Photo</label>
+                  <input id="avatarFile" class="file-input" type="file" accept="image/*">
+                </div>
+              {{/if}}
+            {{/if}}
           </div>
 
-          <!--========================= RIGHT (VIEW + EDIT MODES) =========================-->
           <div class="profile-right">
 
-            <!------------------Profile View Mode------------------>
-            <div id="viewMode" class="mode">
-              <div class="p-name" id="viewName">Gabrielle Martinez</div>
-              <div class="p-role" id="viewRole">Lab User</div>
+            {{#if isEditMode}}
+              <form class="mode" method="POST" action="/profile/{{profileUser._id}}/edit" autocomplete="off">
+                <div class="field">
+                  <div class="label">First Name</div>
+                  <input class="edit-input" type="text" name="firstName" value="{{profileUser.firstName}}" required>
+                </div>
 
-              <div class="field">
-                <div class="label">User Email</div>
-                <div class="value" id="viewEmail">ItzGabbyMartinez@dlsu.edu.ph</div>
+                <div class="field">
+                  <div class="label">Last Name</div>
+                  <input class="edit-input" type="text" name="lastName" value="{{profileUser.lastName}}" required>
+                </div>
+
+                <div class="field">
+                  <div class="label">Role</div>
+                  <div class="value">{{profileUser.displayRole}}</div>
+                </div>
+
+                <div class="field">
+                  <div class="label">Email</div>
+                  <input class="edit-input" type="email" name="email" value="{{profileUser.email}}" required>
+                </div>
+
+                <div class="field">
+                  <div class="label">Password</div>
+                  <input class="edit-input" type="password" name="password" placeholder="Enter new password">
+                </div>
+
+                <div class="field">
+                  <div class="label">Description</div>
+                  <textarea class="edit-input" name="description" rows="4">{{profileUser.description}}</textarea>
+                </div>
+
+                <div class="edit-actions">
+                  <button class="btn-outline wide" type="submit">Save</button>
+                  <button class="btn-outline wide" type="button" onclick="location.href='/profile/{{profileUser._id}}'">Cancel</button>
+                </div>
+              </form>
+            {{else}}
+              <div class="mode">
+                <div class="p-name">{{profileUser.fullName}}</div>
+                <div class="p-role">{{profileUser.displayRole}}</div>
+
+                <div class="field">
+                  <div class="label">Email</div>
+                  <div class="value">{{profileUser.email}}</div>
+                </div>
+
+                <div class="field">
+                  <div class="label">Description</div>
+                  <div class="value">
+                    {{#if profileUser.description}}
+                      {{profileUser.description}}
+                    {{else}}
+                      No description added yet.
+                    {{/if}}
+                  </div>
+                </div>
+
+                {{#if isOwner}}
+                  <div class="field">
+                    <div class="label">Password</div>
+                    <div class="value">****************</div>
+                  </div>
+                {{/if}}
+
+                <div class="owner-actions-inline">
+                  {{#if isOwner}}
+                    <button
+                      class="icon-circle-btn"
+                      type="button"
+                      onclick="location.href='/profile/{{profileUser._id}}?edit=true'"
+                      aria-label="Edit profile"
+                    >
+                      <span class="material-symbols-rounded">edit_square</span>
+                    </button>
+
+                    <form
+                      id="deleteProfileForm"
+                      method="POST"
+                      action="/profile/{{profileUser._id}}/delete"
+                      style="display:inline;"
+                    >
+                      <button
+                        id="deleteBtn"
+                        class="icon-circle-btn"
+                        type="button"
+                        aria-label="Delete account"
+                      >
+                        <span class="material-symbols-rounded">delete</span>
+                      </button>
+                    </form>
+                  {{/if}}
+
+                  <button
+                    id="closeBtn"
+                    class="btn-outline wide"
+                    type="button"
+                    onclick="history.back()"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
+            {{/if}}
 
-              <div class="field">
-                <div class="label">Password</div>
-                <div class="value" id="viewPass">****************</div>
+            <div class="reservations-block">
+              <h2 class="reservations-title">
+                {{#if isOwner}}
+                  Your Reservations
+                {{else}}
+                  {{profileUser.firstName}}'s Reservations
+                {{/if}}
+              </h2>
+
+              <div class="reservations-grid">
+                {{#if reservations.length}}
+                  {{#each reservations}}
+                    <div class="reservation-card">
+                      <div class="reservation-accent"></div>
+                      <div class="reservation-info">
+                        <div class="reservation-room">{{roomLabel}}</div>
+                        <div class="reservation-date">{{dateLabel}}</div>
+                        <div class="reservation-time">{{timeLabel}}</div>
+                      </div>
+                    </div>
+                  {{/each}}
+                {{else}}
+                  <p class="no-reservations">No active reservations.</p>
+                {{/if}}
               </div>
             </div>
 
-            <!------------------Profile Edit Mode------------------>
-            <form id="editMode" class="mode is-hidden" autocomplete="off">
-              <input class="edit-input name" id="nameInput" type="text" value="Gabrielle Martinez">
-              <div class="p-role">Lab User</div>
-
-              <div class="field">
-                <div class="label">User Email</div>
-                <input class="edit-input" id="emailInput" type="email" value="ItzGabbyMartinez@dlsu.edu.ph">
-              </div>
-
-              <div class="field">
-                <div class="label">Password</div>
-                <input class="edit-input" id="passInput" type="password" value="passwordpassword">
-              </div>
-
-              <!------------------Edit Actions------------------>
-              <div class="edit-actions">
-                <button id="saveBtn" class="btn-outline wide" type="button">Save Changes</button>
-                <button id="cancelBtn" class="btn-outline wide" type="button">Cancel</button>
-              </div>
-            </form>
           </div>
-
         </div>
       </div>
     </main>
-
   </div>
 
-  <!--========================= SCRIPTS =========================-->
-  <script src="../js/profile.js"></script>
-  <script src="../js/search.js"></script>
+  <script src="/js/profile.js"></script>
+  <script src="/js/search.js"></script>
 </body>
 </html>

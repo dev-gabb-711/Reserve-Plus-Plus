@@ -380,3 +380,91 @@ body{
 .btn-outline{padding: 8px 12px;font-size: 14px;}
 
 .left-actions{width: 220px;gap: 12px;}
+
+
+.owner-actions-inline{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-top:32px;
+  flex-wrap:wrap;
+}
+
+.icon-circle-btn{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,.8);
+  background:transparent;
+  color:#fff;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  transition:.18s ease;
+}
+
+.icon-circle-btn:hover{
+  background:rgba(255,255,255,.12);
+  transform:translateY(-1px);
+}
+
+.reservations-block{
+  margin-top:42px;
+}
+
+.reservations-title{
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:1px;
+  margin-bottom:18px;
+}
+
+.reservations-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+  gap:18px;
+}
+
+.reservation-card{
+  display:flex;
+  align-items:stretch;
+  gap:14px;
+  background:rgba(220,210,225,.32);
+  border-radius:22px;
+  padding:14px 16px;
+}
+
+.reservation-accent{
+  width:14px;
+  border-radius:999px;
+  background:linear-gradient(180deg, #ff7a45, #ff4d67);
+  flex-shrink:0;
+}
+
+.reservation-info{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.reservation-room{
+  font-size:16px;
+  font-weight:800;
+  color:#fff;
+}
+
+.reservation-date,
+.reservation-time{
+  font-size:14px;
+  color:rgba(255,255,255,.92);
+}
+
+.no-reservations{
+  color:rgba(255,255,255,.72);
+  margin:0;
+}
+
+textarea.edit-input{
+  resize:none;
+  min-height:110px;
+}
