@@ -299,6 +299,7 @@ body{
 
 /*----------------Detail Header------------------*/
 .detail-head{
+  position: relative;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -325,6 +326,35 @@ body{
   font-size: 15px;
   font-weight: 600;
   color: rgba(255,255,255,0.80);
+}
+
+.avatar-container {
+  position: relative !important; 
+  width: 52px;
+  height: 52px;
+  display: inline-block;
+}
+
+.avatar-container .unread-badge {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  transform: translate(3px, 3px); 
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, #d51111 0%, #fe7221 100%);
+  box-shadow: 0 0 8px rgba(255, 59, 48, 0.4);
+  border-radius: 50%;
+  z-index: 99;
+}
+
+.notif-item .unread-badge {
+  left: -2px; 
+  top: -2px;
+}
+
+.unread-badge.hidden {
+  display: none;
 }
 
 /*----------------Detail Body------------------*/

@@ -134,17 +134,21 @@ function renderNotifications(list) {
     const item = document.createElement("div");
     item.className = "notif-item" + (n.id === selectedID ? " active" : "");
 
-    item.innerHTML = `
+  item.innerHTML = `
+    <div class="avatar-container">
       <img src="${n.avatar}" class="avatar" alt="">
-      <div>
-        <div class="notif-name">${n.name}</div>
-        <div class="notif-snippet">${n.snippet}</div>
-      </div>
-    `;
+      ${!n.isRead ? '<span class="unread-badge"></span>' : ''}
+    </div>
+    <div>
+      <div class="notif-name">${n.name}</div>
+      <div class="notif-snippet">${n.snippet}</div>
+    </div>
+  `;
 
-    item.onclick = function () {
-      selectNotification(n.id);
-      renderNotifications(getFilteredNotifications());
+    item.onclick = async function () {
+    await fetch(`/api/notifications/${n.id}/read`, { method: 'PATCH' });
+    n.isRead = true;
+    renderNotifications(getFilteredNotifications());
     };
 
     notifList.appendChild(item);
