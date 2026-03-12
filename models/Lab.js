@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 
 const seatSchema = new mongoose.Schema({
-    seatNumber: { type: String, required: true },
-    isOccupied: { type: Boolean, default: false },
-    occupiedBy: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User', 
-        default: null 
-    }
+    seatNumber: { type: String, required: true }
+    // isOccupied: { type: Boolean, default: false },
+    // occupiedBy: { 
+    //     type: mongoose.Schema.Types.ObjectId, 
+    //     ref: 'User', 
+    //     default: n/ull 
+    // }
 });
 
 const labSchema = new mongoose.Schema({

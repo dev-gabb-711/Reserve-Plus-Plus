@@ -8,12 +8,13 @@ const ticketSchema = new mongoose.Schema({
         required: true
     },
 
-    building: { 
-        type: String, 
-        required: true,
-        enum: ['Br. Andrew Hall', 'Gokongwei Hall']  // dagdagan pa itetchi
+    lab: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Lab',
+    required: true
     },
-    roomNumber: { type: String, required: true },
+    
+
     seatNumber: { type: Number, required: true },
 
     concernCategory: { type: String, required: true }, // Ito yung galing sa "Concern Chips"
