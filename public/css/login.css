@@ -229,3 +229,26 @@ body{
     grid-template-columns: 1fr;
   }
 }
+
+/*----------------Error Messages------------------*/
+.invalid-message {
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+  text-align: left;
+  /* Optional: yugyog effect pag lumabas */
+  animation: shake 0.2s ease-in-out 0s 2;
+}
+
+@keyframes shake {
+  0% { margin-left: 0rem; }
+  25% { margin-left: 0.5rem; }
+  75% { margin-left: -0.5rem; }
+  100% { margin-left: 0rem; }
+}

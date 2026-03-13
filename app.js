@@ -571,38 +571,39 @@ app.get('/api/labs', async (req, res) => {
 /* ==========================================
    7. POST ROUTES
    ========================================== */
-
+   
 app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const mail = (req.body.email || '').trim().toLowerCase()
-    const pass = (req.body.password || '').trim()
+    const user = await User.findOne({ email }).lean();
 
-    if (!mail || !pass) {
-      return res.status(400).send('Please enter both email and password.')
+    if (!user) {
+      return res.render('login', { errorMessage: 'User does not exist.', email });
     }
 
-    const user = await User.findOne({ email: mail })
-
-    if (!user || user.password !== pass) {
-      return res.status(400).send('Invalid login')
+    if (user.password !== password) {
+      return res.render('login', { errorMessage: 'Incorrect password.', email });
     }
 
+    // IMPORTANT: I-set ang session para hindi ka ma-kickout ng requireLogin
     req.session.user = {
       id: user._id,
-      role: user.role,
-      name: user.firstName
+      name: user.firstName,
+      role: user.role
+    };
+
+    // Redirect base sa role
+    if (user.role === 'Admin') {
+      res.redirect('/admin-dashboard');
+    } else {
+      res.redirect('/dashboard'); // Dito pumupunta ang students
     }
 
-    if (user.role === 'Admin') {
-      return res.redirect('/admin-dashboard')
-    } else {
-      return res.redirect('/dashboard')
-    }
   } catch (err) {
-    console.error('Login failed:', err)
-    res.status(500).send('Login failed: ' + err.message)
+    res.status(500).render('login', { errorMessage: 'Server error.' });
   }
-})
+});
 
 app.post('/signup', async (req, res) => {
   try {
