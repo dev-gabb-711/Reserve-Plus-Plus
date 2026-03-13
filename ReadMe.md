@@ -23,10 +23,10 @@ Reserve++ is built using Node.js, Express.js, MongoDB, Mongoose, and Handlebars,
     ```
 3. Ensure MongoDB is running
 
-Make sure that MongoDB is installed and running locally before starting the application.
-Example connection used by the application:
+    - Make sure that MongoDB is installed and running locally before starting the application.
+        Example connection used by the application:
 
-mongodb://localhost:27017/ReserveDB
+        mongodb://localhost:27017/ReserveDB
 
 ## Running the Application
 
