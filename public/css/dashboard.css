@@ -55,7 +55,6 @@ body {
   ================================================ */
 .page-wrap {
   height: 100vh;
-  /* single viewport wrapper */
   display: grid;
   grid-template-columns: 96px 1fr;
   position: relative;
@@ -616,26 +615,28 @@ body {
 .live-box[data-state="active"] .live-state--active,
 .live-box[data-state="pending"] .live-state--pending,
 .live-box[data-state="none"] .live-state--none {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 /*----------------Top Status Area------------------*/
 .live-top {
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .live-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: 800;
+  font-size: 1.05rem;
   color: rgba(255, 255, 255, 0.98);
 }
 
 .live-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   display: inline-block;
 }
@@ -655,22 +656,26 @@ body {
 }
 
 .live-subtext {
-  margin-top: 4px;
-  font-size: 0.98rem;
-  font-weight: 500;
+  margin-top: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: rgba(255, 255, 255, 0.92);
   line-height: 1.2;
 }
 
 /*----------------Active + Pending Layout------------------*/
 .live-main {
-  display: grid;
-  grid-template-columns: 200px 1fr;
+  display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 32px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: nowrap;
 }
 
 .live-count-wrap {
+  flex: 0 0 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -678,77 +683,156 @@ body {
 }
 
 .live-count {
-  font-size: clamp(90px, 10vw, 140px);
-  line-height: 0.85;
   font-weight: 500;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
   color: rgba(255, 255, 255, 0.98);
-  letter-spacing: -4px;
-  width: 100%;
+  text-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  white-space: nowrap;
+  width: auto;
+}
+
+.live-state--active .live-count {
+  font-size: 6.4rem;
+  font-weight: 800;
+}
+
+.live-state--pending .live-count {
+  font-size: 4.6rem;
+  font-weight: 400;
 }
 
 .live-count-label {
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 0.95rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.94);
 }
 
 .live-info {
+  flex: 0 0 auto;
+  min-width: 220px;
+  max-width: 260px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 2px;
-  min-width: 0;
+  gap: 6px;
+  align-items: flex-start;
+  text-align: left;
+  margin-left: 8px;
 }
 
 .live-room {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 500;
   color: rgba(255, 255, 255, 0.98);
   line-height: 1.2;
 }
 
 .live-time {
-  font-size: 0.98rem;
-  font-weight: 500;
+  font-size: 0.92rem;
+  font-weight: 700;
   color: rgba(255, 255, 255, 0.93);
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 /*----------------No Reservation Layout------------------*/
 .live-reminders {
-  margin-top: 18px;
+  margin-top: 8px;
 }
 
 .live-reminders-title {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 800;
   color: rgba(255, 255, 255, 0.98);
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
 .live-reminders-list {
   margin: 0;
-  padding-left: 18px;
+  padding-left: 22px;
   color: rgba(255, 255, 255, 0.94);
   font-size: 0.96rem;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.3;
 }
 
 .live-reminders-list li {
-  margin-bottom: 2px;
+  margin-bottom: 6px;
 }
 
 /*----------------Responsive------------------*/
+@media (max-width: 1400px) {
+  .live-state--active .live-count {
+    font-size: 5.6rem;
+  }
+
+  .live-state--pending .live-count {
+    font-size: 4.2rem;
+  }
+
+  .live-main {
+    gap: 24px;
+  }
+
+  .live-info {
+    min-width: 200px;
+    max-width: 230px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .live-main {
+    gap: 18px;
+  }
+
+  .live-state--active .live-count {
+    font-size: 4.8rem;
+  }
+
+  .live-state--pending .live-count {
+    font-size: 3.8rem;
+  }
+
+  .live-room {
+    font-size: 1rem;
+  }
+
+  .live-time {
+    font-size: 0.9rem;
+  }
+
+  .live-info {
+    min-width: 180px;
+    max-width: 210px;
+  }
+}
+
 @media (max-width: 960px) {
   .live-main {
-    grid-template-columns: 1fr;
+    flex-wrap: wrap;
     gap: 12px;
   }
 
-  .live-count {
-    font-size: 70px;
+  .live-count-wrap {
+    flex-basis: 100%;
+  }
+
+  .live-info {
+    flex-basis: 100%;
+    min-width: 0;
+    max-width: none;
+    margin-left: 0;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .live-state--active .live-count {
+    font-size: 4.2rem;
+  }
+
+  .live-state--pending .live-count {
+    font-size: 3.2rem;
   }
 }
 
@@ -1128,4 +1212,3 @@ body {
     grid-template-columns: 1fr;
   }
 }
-
