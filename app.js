@@ -394,7 +394,21 @@ app.get('/reserve', async (req, res) => {
   }
 })
 
-app.get('/it-assist', requireLogin, (req, res) => res.render('itassist'))
+app.get('/it-assist', requireLogin, async (req, res) => {
+    try{
+        if (!req.session.user) return res.redirect('/login')
+
+        const userId = req.session.user.id
+        const studentUser = await User.findById(userId).lean()
+        
+        res.render('itassist', {studentUser})
+        
+    } catch (err){
+        console.error('Error loading it-assist page:', err)
+        res.status(500).send('Error loading it-assist')
+    }    
+    
+})
 
 app.get('/it-assist-admin', requireAdmin, async (req, res) => {
   try {
@@ -539,6 +553,16 @@ app.get('/search-results', async (req, res) => {
   } catch (err) {
     console.error('Search error:', err)
     res.status(500).send('Search failed')
+  }
+})
+
+app.get('/api/labs', async (req, res) => {
+  try {
+    const labs = await Lab.find().lean()
+    res.json(labs)
+  } catch (err) {
+    console.error('Error fetching labs:', err)
+    res.status(500).json({ error: 'Failed to fetch labs' })
   }
 })
 
