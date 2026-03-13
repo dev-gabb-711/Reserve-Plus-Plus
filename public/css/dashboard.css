@@ -783,18 +783,19 @@ body {
 .seal-wrap {
   width: 96px;
   height: 96px;
-  border-radius: 999px;
+  border-radius: 50%;
   background: rgba(255, 255, 255, 0.06);
-  display: grid;
-  place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.10);
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .seal {
-  width: 88px;
-  height: 88px;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
   filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.35));
 }
 
