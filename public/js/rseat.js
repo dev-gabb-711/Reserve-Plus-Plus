@@ -416,10 +416,22 @@ function renderSeats () {
   grid.innerHTML = ''
 
   document.getElementById('btnOpenModal').disabled = true
-  document.getElementById('displayLabCode').innerText =
-    appState.currentBld[0] + appState.currentLab
 
-  for (let i = 1; i <= 40; i++) {
+  const fullLabCode = appState.currentBld[0] + appState.currentLab
+  document.getElementById('displayLabCode').innerText = fullLabCode
+
+  let totalSeats = 40 // Fallback just in case
+  if (window.DB_LABS) {
+    const currentLabObj = window.DB_LABS.find(
+      l => l.labCode === appState.currentLab || l.labCode === fullLabCode
+    )
+
+    if (currentLabObj && currentLabObj.seats) {
+      totalSeats = currentLabObj.seats.length
+    }
+  }
+
+  for (let i = 1; i <= totalSeats; i++) {
     const el = document.createElement('div')
     el.className = `seat-unit ${
       appState.selectedSeats.includes(i) ? 'selected' : ''
