@@ -210,10 +210,8 @@
                   </form>
 
                   <button
-                    id="closeBtn"
-                    class="icon-circle-btn owner-header-btn"
+                    class="icon-circle-btn owner-header-btn profile-close-btn"
                     type="button"
-                    onclick="history.back()"
                     aria-label="Close profile"
                   >
                     <span class="material-symbols-rounded">logout</span>
@@ -257,9 +255,8 @@
 
                 <div class="owner-actions">
                   <button
-                    class="btn-outline owner-close-btn"
+                    class="btn-outline owner-close-btn profile-close-btn"
                     type="button"
-                    onclick="history.back()"
                   >
                     Close
                   </button>
@@ -316,7 +313,8 @@
                             <div class="reservation-date">{{dateLabel}}</div>
                             <div class="reservation-time">{{timeLabel}}</div>
                           </div>
-                        {{/each}}
+                        </div>
+                      {{/each}}
                     </div>
                   {{else}}
                     <p class="no-reservations">No active reservations.</p>
@@ -325,10 +323,8 @@
 
                 <div class="outsider-actions">
                   <button
-                    id="closeBtn"
-                    class="btn-outline outsider-close-btn"
+                    class="btn-outline outsider-close-btn profile-close-btn"
                     type="button"
-                    onclick="history.back()"
                   >
                     Close
                   </button>

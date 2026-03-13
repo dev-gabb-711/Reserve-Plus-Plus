@@ -16,16 +16,12 @@ const avatarPreview = document.getElementById('avatarPreview')
 const deleteForm = document.getElementById('deleteProfileForm')
 const deleteBtn = document.getElementById('deleteBtn')
 
-const closeBtn = document.getElementById('closeBtn')
+const closeButtons = document.querySelectorAll('.profile-close-btn')
 
 /* =====================================================
    AVATAR UPLOAD PREVIEW
    ===================================================== */
 
-/**
- * Updates the visible avatar preview when the user selects
- * a new image file in edit mode.
- */
 if (avatarFile && avatarPreview) {
   avatarFile.addEventListener('change', event => {
     const file = event.target.files && event.target.files[0]
@@ -40,10 +36,6 @@ if (avatarFile && avatarPreview) {
    DELETE ACCOUNT CONFIRMATION
    ===================================================== */
 
-/**
- * Prevents accidental account deletion by asking the user
- * to confirm before the delete form is submitted.
- */
 if (deleteBtn && deleteForm) {
   deleteBtn.addEventListener('click', event => {
     event.preventDefault()
@@ -62,31 +54,29 @@ if (deleteBtn && deleteForm) {
    CLOSE BUTTON HANDLER
    ===================================================== */
 
-/**
- * Sends the user back to the previous page.
- * If there is no previous page in history, fall back
- * to the dashboard.
- */
-if (closeBtn) {
-  closeBtn.addEventListener('click', () => {
+closeButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
     if (window.history.length > 1) {
       window.history.back()
     } else {
       window.location.href = '/dashboard'
     }
   })
-}
+})
 
+/* =====================================================
+   HORIZONTAL SCROLL FOR RESERVATION ROWS
+   ===================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
   const scrollRows = document.querySelectorAll(
     '.reservations-grid--outsider, .reservations-grid--owner'
   )
 
-  scrollRows.forEach((row) => {
+  scrollRows.forEach(row => {
     row.addEventListener(
       'wheel',
-      (e) => {
+      e => {
         e.preventDefault()
         row.scrollBy({
           left: e.deltaY * 1.2,
