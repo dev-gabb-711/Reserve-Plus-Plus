@@ -806,31 +806,105 @@ function clearEditMode () {
    Hover Popover Logic & Auto-Refresh Timer
    ===================================================== */
 const popover = document.getElementById('userPopover')
-let popoverTimer // <-- NEW: Timer variable to prevent flickering
+let popoverTimer
 
 function showPopover (e, user) {
   if (!popover) return
-  clearTimeout(popoverTimer) // Cancel any pending commands to hide the popover
+  clearTimeout(popoverTimer)
 
   const rect = e.currentTarget.getBoundingClientRect()
 
-  document.getElementById('popAvatar').src =
-    user.avatar || '../img/default-avatar.png'
-  document.getElementById('popName').innerText = user.name || 'Unknown User'
-  document.getElementById('popName').href = `/profile/${user.userId}`
+  // 1. Update UI Elements
+  const popAvatar = document.getElementById('popAvatar')
+  const popName = document.getElementById('popName')
+  const btnCancelNoShow = document.getElementById('btnCancelNoShow')
 
+  if (popAvatar) popAvatar.src = user.avatar || '../img/default-avatar.png'
+
+  if (popName) {
+    // Show 'ANON' badge to Admin if user is anonymous
+    if (user.isAnonymous && localStorage.getItem('reserveRole') === 'Admin') {
+      popName.innerHTML = `${user.name} <span style="font-size:0.6rem; background:#444; color:white; padding:2px 5px; border-radius:4px; margin-left:5px;">ANON</span>`
+    } else {
+      popName.innerText = user.name || 'Unknown User'
+    }
+    popName.href = user.userId ? `/profile/${user.userId}` : '#'
+  }
+
+  // 2. No-Show Logic (Try/Catch ensures popover still shows if time parsing fails)
+  if (btnCancelNoShow) {
+    btnCancelNoShow.style.display = 'none'
+    btnCancelNoShow.onclick = null
+
+    if (localStorage.getItem('reserveRole') === 'Admin' && user.resId) {
+      try {
+        const slotTimeStr = e.currentTarget.innerText.trim() // e.g. "10:00 AM"
+        const [time, modifier] = slotTimeStr.split(' ')
+        let [hours, minutes] = time.split(':').map(Number)
+
+        if (hours === 12) hours = 0
+        if (modifier === 'PM') hours += 12
+
+        const slotDate = new Date(appState.selectedDate)
+        slotDate.setHours(hours, minutes, 0, 0)
+
+        const now = new Date()
+        const diffMins = (now - slotDate) / 1000 / 60
+
+        // SPEC: Student has 10 mins to show up. Admin has 10 mins window AFTER that.
+        // Button appears between Minute 10 and Minute 20 of the reservation.
+        if (diffMins >= 10 && diffMins <= 20) {
+          btnCancelNoShow.style.display = 'block'
+          btnCancelNoShow.onclick = () => executeNoShowCancel(user.resId)
+        }
+      } catch (err) {
+        console.error('Time logic error:', err)
+      }
+    }
+  }
+
+  // 3. Final Display & Position
   popover.style.display = 'flex'
 
-  // Smart Positioning: Place it 60px above the chip
-  let topPos = rect.top - 60
-
-  // QoL check: If it's too close to the top of the screen, flip it below the chip!
+  let topPos = rect.top - popover.offsetHeight - 10
   if (topPos < 10) {
     topPos = rect.bottom + 10
   }
 
   popover.style.top = `${topPos}px`
   popover.style.left = `${rect.left}px`
+}
+
+// Submits the cancellation to your existing DELETE route
+async function executeNoShowCancel (reservationId) {
+  const isConfirmed = confirm('Mark student as No-Show and cancel reservation?')
+  if (!isConfirmed) return
+
+  try {
+    // Add the query parameter so the backend knows it's a No-Show cancellation
+    const res = await fetch(
+      `/api/reservations/${reservationId}?reason=noshow`,
+      {
+        method: 'DELETE'
+      }
+    )
+
+    if (res.ok) {
+      hidePopover()
+      appState.bookedSlots = [] // Force UI clear
+      await fetchBookedSlots()
+      await fetchMyReservations()
+
+      // Use your existing cancellation modal!
+      bootstrap.Modal.getOrCreateInstance(
+        document.getElementById('cancelSuccessModal')
+      ).show()
+    } else {
+      alert('Failed to cancel the reservation.')
+    }
+  } catch (err) {
+    console.error('No-Show Cancel Error:', err)
+  }
 }
 
 function hidePopover () {

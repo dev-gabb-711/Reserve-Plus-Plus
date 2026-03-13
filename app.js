@@ -65,18 +65,18 @@ const Notification = require('./models/Notification')
    5. HELPER FUNCTIONS
    ========================================== */
 
-function normalizeRoomCode(value) {
+function normalizeRoomCode (value) {
   return String(value || '').replace(/^[A-Za-z]+/, '')
 }
 
-function requireLogin(req, res, next) {
+function requireLogin (req, res, next) {
   if (!req.session.user) {
     return res.redirect('/login')
   }
   next()
 }
 
-function requireAdmin(req, res, next) {
+function requireAdmin (req, res, next) {
   if (!req.session.user) {
     return res.redirect('/login')
   }
@@ -88,7 +88,7 @@ function requireAdmin(req, res, next) {
   next()
 }
 
-function makeAvatar(color) {
+function makeAvatar (color) {
   return `
   data:image/svg+xml,
   <svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'>
@@ -99,7 +99,7 @@ function makeAvatar(color) {
   `
 }
 
-function getNotificationAvatar(type, senderAvatar) {
+function getNotificationAvatar (type, senderAvatar) {
   if (senderAvatar && String(senderAvatar).trim() !== '') {
     return senderAvatar
   }
@@ -109,7 +109,7 @@ function getNotificationAvatar(type, senderAvatar) {
   return makeAvatar('blue')
 }
 
-function formatNotificationForClient(notif) {
+function formatNotificationForClient (notif) {
   return {
     id: String(notif._id),
     _id: String(notif._id),
@@ -125,7 +125,7 @@ function formatNotificationForClient(notif) {
   }
 }
 
-async function createNotificationSafe(data) {
+async function createNotificationSafe (data) {
   try {
     await Notification.create(data)
   } catch (err) {
@@ -133,7 +133,7 @@ async function createNotificationSafe(data) {
   }
 }
 
-function formatDateTimeShort(value) {
+function formatDateTimeShort (value) {
   if (!value) return 'No date available'
 
   const date = new Date(value)
@@ -148,7 +148,7 @@ function formatDateTimeShort(value) {
   })
 }
 
-function buildDashboardBuildings(labs, tickets) {
+function buildDashboardBuildings (labs, tickets) {
   return labs.reduce((groups, lab) => {
     let buildingGroup = groups.find(group => group.title === lab.building)
 
@@ -182,7 +182,7 @@ function buildDashboardBuildings(labs, tickets) {
   }, [])
 }
 
-function buildDashboardTickets(tickets) {
+function buildDashboardTickets (tickets) {
   return tickets.slice(0, 6).map((ticket, index) => {
     const firstName = ticket.user?.firstName || ''
     const lastName = ticket.user?.lastName || ''
@@ -201,7 +201,7 @@ function buildDashboardTickets(tickets) {
   })
 }
 
-function buildMiniNotifications(notifications) {
+function buildMiniNotifications (notifications) {
   return notifications.map(notif => ({
     _id: notif._id,
     name: notif.senderName || notif.type || 'System',
@@ -210,7 +210,7 @@ function buildMiniNotifications(notifications) {
   }))
 }
 
-function buildSearchResults(labs) {
+function buildSearchResults (labs) {
   const searchResults = []
 
   labs.forEach(lab => {
@@ -233,7 +233,7 @@ function buildSearchResults(labs) {
   return searchResults
 }
 
-function buildStudentNotifications(notifications) {
+function buildStudentNotifications (notifications) {
   return notifications.map(notif => ({
     ...notif,
     senderName: notif.senderName || notif.type || 'System',
@@ -245,7 +245,7 @@ function buildStudentNotifications(notifications) {
  * Calculates a user-friendly time range (e.g., "09:00 AM - 10:30 AM")
  * from an array of 30-min time slots for the dashboard.
  */
-function calculateTimeRangeServer(slots) {
+function calculateTimeRangeServer (slots) {
   if (!slots || slots.length === 0) return ''
 
   try {
@@ -319,8 +319,8 @@ app.get('/dashboard', async (req, res) => {
       const buildingKey = String(building).toLowerCase().includes('andrew')
         ? 'andrew'
         : String(building).toLowerCase().includes('gokongwei')
-          ? 'gokongwei'
-          : ''
+        ? 'gokongwei'
+        : ''
 
       let calculatedTime = reservation.timeSlot
       try {
@@ -580,19 +580,22 @@ app.get('/api/labs', async (req, res) => {
 /* ==========================================
    7. POST ROUTES
    ========================================== */
-   
+
 app.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body
 
   try {
-    const user = await User.findOne({ email }).lean();
+    const user = await User.findOne({ email }).lean()
 
     if (!user) {
-      return res.render('login', { errorMessage: 'User does not exist.', email });
+      return res.render('login', {
+        errorMessage: 'User does not exist.',
+        email
+      })
     }
 
     if (user.password !== password) {
-      return res.render('login', { errorMessage: 'Incorrect password.', email });
+      return res.render('login', { errorMessage: 'Incorrect password.', email })
     }
 
     // IMPORTANT: I-set ang session para hindi ka ma-kickout ng requireLogin
@@ -600,19 +603,18 @@ app.post('/login', async (req, res) => {
       id: user._id,
       name: user.firstName,
       role: user.role
-    };
+    }
 
     // Redirect base sa role
     if (user.role === 'Admin') {
-      res.redirect('/admin-dashboard');
+      res.redirect('/admin-dashboard')
     } else {
-      res.redirect('/dashboard'); // Dito pumupunta ang students
+      res.redirect('/dashboard') // Dito pumupunta ang students
     }
-
   } catch (err) {
-    res.status(500).render('login', { errorMessage: 'Server error.' });
+    res.status(500).render('login', { errorMessage: 'Server error.' })
   }
-});
+})
 
 app.post('/signup', async (req, res) => {
   try {
@@ -662,43 +664,50 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-app.post('/profile/:id/edit', requireLogin, upload.single('profilePic'), async (req, res) => {
-  try {
-    const viewedUserId = req.params.id
-    const loggedInUserId = req.session.user.id
+app.post(
+  '/profile/:id/edit',
+  requireLogin,
+  upload.single('profilePic'),
+  async (req, res) => {
+    try {
+      const viewedUserId = req.params.id
+      const loggedInUserId = req.session.user.id
 
-    if (String(viewedUserId) !== String(loggedInUserId)) {
-      return res.status(403).json({ success: false, message: 'Unauthorized' })
+      if (String(viewedUserId) !== String(loggedInUserId)) {
+        return res.status(403).json({ success: false, message: 'Unauthorized' })
+      }
+
+      const updates = {
+        firstName: (req.body.firstName || '').trim(),
+        lastName: (req.body.lastName || '').trim(),
+        email: (req.body.email || '').trim().toLowerCase(),
+        description: (req.body.description || '').trim()
+      }
+
+      if (req.body.password) {
+        updates.password = req.body.password.trim()
+      }
+
+      if (req.file) {
+        updates.profilePic = '/uploads/' + req.file.filename
+      }
+
+      await User.findByIdAndUpdate(viewedUserId, updates)
+      req.session.user.name = updates.firstName
+
+      res.json({
+        success: true,
+        profilePic: updates.profilePic,
+        userId: viewedUserId
+      })
+    } catch (err) {
+      console.error('Error updating profile:', err)
+      res
+        .status(500)
+        .json({ success: false, message: 'Error updating profile' })
     }
-
-    const updates = {
-      firstName: (req.body.firstName || '').trim(),
-      lastName: (req.body.lastName || '').trim(),
-      email: (req.body.email || '').trim().toLowerCase(),
-      description: (req.body.description || '').trim()
-    }
-
-    if (req.body.password) {
-      updates.password = req.body.password.trim()
-    }
-
-    if (req.file) {
-      updates.profilePic = '/uploads/' + req.file.filename
-    }
-
-    await User.findByIdAndUpdate(viewedUserId, updates)
-    req.session.user.name = updates.firstName
-
-    res.json({
-      success: true,
-      profilePic: updates.profilePic,
-      userId: viewedUserId
-    })
-  } catch (err) {
-    console.error('Error updating profile:', err)
-    res.status(500).json({ success: false, message: 'Error updating profile' })
   }
-})
+)
 
 app.post('/profile/:id/delete', requireLogin, async (req, res) => {
   try {
@@ -808,9 +817,7 @@ app.post('/submit-ticket', requireLogin, async (req, res) => {
 
 app.post('/resolve-ticket/:id', requireAdmin, async (req, res) => {
   try {
-    const ticket = await Ticket.findById(req.params.id)
-      .populate('lab')
-      .lean()
+    const ticket = await Ticket.findById(req.params.id).populate('lab').lean()
 
     if (!ticket) {
       return res.status(404).send('Ticket not found')
@@ -1129,6 +1136,7 @@ app.get('/api/reservations/booked', async (req, res) => {
             } else {
               bookedData[slot] = {
                 userId: booking.user._id,
+                resId: booking._id,
                 name: `${booking.user.firstName} ${booking.user.lastName}`.trim(),
                 email: booking.user.email || '',
                 avatar: booking.user.profilePic || '/img/def_avatar.jpg'
@@ -1148,6 +1156,7 @@ app.get('/api/reservations/booked', async (req, res) => {
   }
 })
 
+// 4. Cancel a reservation
 app.delete('/api/reservations/:id', async (req, res) => {
   try {
     if (!req.session.user) {
@@ -1164,14 +1173,30 @@ app.delete('/api/reservations/:id', async (req, res) => {
       return res.status(404).json({ error: 'Reservation not found' })
     }
 
+    // NEW: Check if this was triggered by the Admin No-Show button
+    const isNoShow = req.query.reason === 'noshow'
+
+    const notifTitle = isNoShow
+      ? 'Reservation Cancelled (No-Show)'
+      : 'Reservation Cancelled'
+    const notifMessage = isNoShow
+      ? `Your reservation for Room ${
+          cancelledReservation.lab?.labCode || ''
+        }, Seat ${
+          cancelledReservation.seatNumber
+        } has been cancelled by an Admin due to a no-show.`
+      : `Your reservation for Room ${
+          cancelledReservation.lab?.labCode || ''
+        }, Seat ${
+          cancelledReservation.seatNumber
+        } has been successfully cancelled.`
+
     await createNotificationSafe({
-      recipient: req.session.user.id,
+      recipient: cancelledReservation.user, // <--- FIX: This now accurately targets the student!
       senderName: 'Reserve++ Team',
       senderRole: 'Reservation System',
-      title: 'Reservation Cancelled',
-      message: `Your reservation for Room ${
-        cancelledReservation.lab?.labCode || ''
-      }, Seat ${cancelledReservation.seatNumber} has been cancelled.`,
+      title: notifTitle,
+      message: notifMessage,
       type: 'Reservation'
     })
 
