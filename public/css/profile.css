@@ -250,6 +250,7 @@ body{
    ================================================ */
 .reservations-block{
   margin-top:34px;
+  min-height:0;
 }
 
 .reservations-title{
@@ -259,21 +260,22 @@ body{
   line-height:1.2;
   margin:0 0 14px 0;
   color:#fff;
+  flex-shrink:0;
 }
 
 .reservation-card{
   display:flex;
   align-items:stretch;
-  gap:12px;
+  gap:10px;
   background:rgba(220,210,225,.32);
   border-radius:22px;
-  padding:14px 16px;
-  min-height:92px;
+  padding:12px 14px;
+  min-height:82px;
   overflow:hidden;
 }
 
 .reservation-accent{
-  width:14px;
+  width:12px;
   border-radius:999px;
   background:linear-gradient(180deg,#ff7a45,#ff4d67);
   flex-shrink:0;
@@ -287,21 +289,24 @@ body{
 }
 
 .reservation-room{
-  font-size:16px;
+  font-size:12.5px;
   font-weight:800;
   color:#fff;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
+  line-height:1.25;
 }
 
 .reservation-date,
 .reservation-time{
-  font-size:14px;
+  font-size:11px;
   color:rgba(255,255,255,.92);
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
+  line-height:1.25;
+  margin-top:2px;
 }
 
 .no-reservations{
@@ -329,7 +334,7 @@ body{
 
 .reservations-grid--owner .reservation-card,
 .reservations-grid--outsider .reservation-card{
-  flex:0 0 260px;
+  flex:0 0 250px;
 }
 
 /* ================================================
@@ -435,15 +440,17 @@ body{
   min-height:0;
   padding:20px 24px 20px;
   overflow:hidden;
+  display:flex;
+  flex-direction:column;
 }
 
 .edit-bottom-grid{
   display:grid;
   grid-template-columns:minmax(0,1.05fr) minmax(300px,.85fr);
   gap:24px;
-  height:100%;
+  flex:1;
   min-height:0;
-  align-items:start;
+  align-items:stretch;
 }
 
 .edit-form-col{
@@ -501,17 +508,22 @@ body{
 }
 
 .edit-textarea{
-  min-height:84px;
-  max-height:84px;
+  min-height:92px;
+  height:92px;
+  max-height:92px;
   resize:none;
 }
 
 .edit-actions{
   display:flex;
-  justify-content:flex-end;
   gap:18px;
-  margin-top:auto;
-  padding-top:22px;
+}
+
+.edit-actions--panel{
+  justify-content:flex-end;
+  margin-top:18px;
+  padding-top:4px;
+  flex-shrink:0;
 }
 
 .edit-reservations-col{
@@ -524,26 +536,37 @@ body{
 .edit-reservations{
   width:100%;
   margin-top:10px;
-  min-height:0;
   display:flex;
   flex-direction:column;
+  height:calc(100% - 25px);
+  min-height:0;
 }
 
 .edit-reservations-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:16px;
+  gap:14px;
+  min-height:0;
+  flex:1;
   overflow-y:auto;
   overflow-x:hidden;
-  padding-right:6px;
-  min-height:0;
-  max-height:100%;
+  padding-right:2px;
+  padding-bottom:2px;
   scrollbar-width:none;
   -ms-overflow-style:none;
 }
 
 .edit-reservations-grid::-webkit-scrollbar{
   display:none;
+}
+
+.edit-reservations-grid::-webkit-scrollbar-track{
+  background:transparent;
+}
+
+.edit-reservations-grid::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.22);
+  border-radius:999px;
 }
 
 .edit-reservations-grid .reservation-card{
@@ -802,6 +825,7 @@ body{
   .edit-bottom-grid{
     grid-template-columns:1fr;
     gap:24px;
+    flex:none;
     height:auto;
   }
 
@@ -810,13 +834,14 @@ body{
     height:auto;
   }
 
-  .edit-actions{
+  .edit-actions--panel{
     margin-top:26px;
     padding-top:0;
   }
 
   .edit-reservations{
     margin-top:0;
+    height:auto;
   }
 
   .edit-reservations-grid{

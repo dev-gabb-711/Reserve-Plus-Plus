@@ -86,7 +86,13 @@
             <div class="edit-bottom">
               <div class="edit-bottom-grid">
                 <div class="edit-form-col">
-                  <form class="edit-form" method="POST" action="/profile/{{profileUser._id}}/edit" autocomplete="off">
+                  <form
+                    id="editProfileForm"
+                    class="edit-form"
+                    method="POST"
+                    action="/profile/{{profileUser._id}}/edit"
+                    autocomplete="off"
+                  >
                     <div class="edit-form-row edit-form-row--double">
                       <div class="field">
                         <div class="label">First Name</div>
@@ -113,11 +119,6 @@
                       <div class="label">Description</div>
                       <textarea class="edit-input edit-textarea" name="description" rows="4">{{profileUser.description}}</textarea>
                     </div>
-
-                    <div class="edit-actions">
-                      <button class="btn-outline wide" type="submit">Save</button>
-                      <button class="btn-outline wide" type="button" onclick="location.href='/profile/{{profileUser._id}}'">Cancel</button>
-                    </div>
                   </form>
                 </div>
 
@@ -143,6 +144,17 @@
                     {{/if}}
                   </div>
                 </div>
+              </div>
+
+              <div class="edit-actions edit-actions--panel">
+                <button class="btn-outline wide" type="submit" form="editProfileForm">Save</button>
+                <button
+                  class="btn-outline wide"
+                  type="button"
+                  onclick="location.href='/profile/{{profileUser._id}}'"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>
@@ -304,8 +316,7 @@
                             <div class="reservation-date">{{dateLabel}}</div>
                             <div class="reservation-time">{{timeLabel}}</div>
                           </div>
-                        </div>
-                      {{/each}}
+                        {{/each}}
                     </div>
                   {{else}}
                     <p class="no-reservations">No active reservations.</p>
