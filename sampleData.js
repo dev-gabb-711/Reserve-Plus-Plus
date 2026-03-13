@@ -10,7 +10,7 @@ const Notification = require('./models/Notification')
    ========================================== */
 mongoose
   .connect('mongodb://127.0.0.1:27017/ReserveDB')
-  .then(seedDatabase)
+  .then(() => seedDatabase())
   .catch(err => console.error(err))
 
 /* ==========================================
@@ -39,7 +39,6 @@ async function seedDatabase () {
     }
 
     function formatDateKey (dateObj) {
-      // Formats as "Mar 15, 2026" to perfectly match your frontend calendar format!
       return dateObj.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
@@ -52,9 +51,7 @@ async function seedDatabase () {
       let displayHour = hours % 12
       if (displayHour === 0) displayHour = 12
 
-      return `${String(displayHour).padStart(2, '0')}:${String(
-        minutes
-      ).padStart(2, '0')} ${suffix}`
+      return `${String(displayHour).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${suffix}`
     }
 
     function buildSlotsArray (startHour, startMinute, numberOfSlots) {
@@ -101,7 +98,6 @@ async function seedDatabase () {
       return `${start} - ${end}`
     }
 
-    // FIX: Updated payload to include date, timeSlot (stringified array), and isAnonymous
     function makeReservationPayload ({
       userId,
       labId,
@@ -117,12 +113,12 @@ async function seedDatabase () {
         lab: labId,
         labCode,
         seatNumber: seatNumbers,
-        date: date,
-        timeSlot: JSON.stringify(slotsArray), // Dashboard looks for this!
-        slotsArray: slotsArray,
+        date,
+        timeSlot: JSON.stringify(slotsArray),
+        slotsArray,
         timeRange: buildTimeRangeFromSlots(slotsArray),
-        isAnonymous: isAnonymous,
-        status: status
+        isAnonymous,
+        status
       }
     }
 
@@ -170,8 +166,8 @@ async function seedDatabase () {
         firstName: 'Nicolo',
         lastName: 'Tartaglia',
         email: 'nicolo@dlsu.edu.ph',
-        role: 'Admin',
         password: '123',
+        role: 'Admin',
         profilePic: '/img/def_avatar.jpg',
         description: 'Reserve++ system administrator.'
       },
@@ -385,68 +381,141 @@ async function seedDatabase () {
         labId: labMap.G202._id,
         labCode: labMap.G202.labCode,
         seatNumbers: [10],
-        date: todayDate, // FIX: Added Date
+        date: todayDate,
         slotsArray: gabrielPastSlots,
         status: 'Completed'
       }),
+
       makeReservationPayload({
         userId: userMap.gabby._id,
         labId: labMap.A1904._id,
         labCode: labMap.A1904.labCode,
         seatNumbers: [6],
-        date: gabbyPendingDate, // FIX: Added Date
+        date: gabbyPendingDate,
         slotsArray: gabbyPendingSlots,
         status: 'Active'
       }),
+
+      /* ------------------------------------------
+         MARION - MANY ACTIVE RESERVATIONS
+         ------------------------------------------ */
       makeReservationPayload({
         userId: userMap.marion._id,
         labId: labMap.A1707._id,
         labCode: labMap.A1707.labCode,
         seatNumbers: [19],
-        date: todayDate, // FIX: Added Date
+        date: todayDate,
         slotsArray: marionActiveSlots,
-        isAnonymous: true, // Example of an anonymous mock booking!
+        isAnonymous: true,
         status: 'Active'
       }),
+      makeReservationPayload({
+        userId: userMap.marion._id,
+        labId: labMap.G203._id,
+        labCode: labMap.G203.labCode,
+        seatNumbers: [4],
+        date: tomorrowDate,
+        slotsArray: buildSlotsArray(9, 0, 3),
+        status: 'Active'
+      }),
+      makeReservationPayload({
+        userId: userMap.marion._id,
+        labId: labMap.G201._id,
+        labCode: labMap.G201.labCode,
+        seatNumbers: [12],
+        date: tomorrowDate,
+        slotsArray: buildSlotsArray(13, 0, 2),
+        status: 'Active'
+      }),
+      makeReservationPayload({
+        userId: userMap.marion._id,
+        labId: labMap.G305._id,
+        labCode: labMap.G305.labCode,
+        seatNumbers: [8],
+        date: tomorrowDate,
+        slotsArray: buildSlotsArray(15, 30, 2),
+        status: 'Active'
+      }),
+      makeReservationPayload({
+        userId: userMap.marion._id,
+        labId: labMap.A1103._id,
+        labCode: labMap.A1103.labCode,
+        seatNumbers: [3],
+        date: dayAfterTomorrowDate,
+        slotsArray: buildSlotsArray(8, 0, 2),
+        status: 'Active'
+      }),
+      makeReservationPayload({
+        userId: userMap.marion._id,
+        labId: labMap.A1904._id,
+        labCode: labMap.A1904.labCode,
+        seatNumbers: [21],
+        date: dayAfterTomorrowDate,
+        slotsArray: buildSlotsArray(10, 30, 3),
+        status: 'Active'
+      }),
+      makeReservationPayload({
+        userId: userMap.marion._id,
+        labId: labMap.A1503._id,
+        labCode: labMap.A1503.labCode,
+        seatNumbers: [16],
+        date: dayAfterTomorrowDate,
+        slotsArray: buildSlotsArray(14, 0, 2),
+        status: 'Active'
+      }),
+      makeReservationPayload({
+        userId: userMap.marion._id,
+        labId: labMap.G202._id,
+        labCode: labMap.G202.labCode,
+        seatNumbers: [27],
+        date: dayAfterTomorrowDate,
+        slotsArray: buildSlotsArray(16, 0, 2),
+        status: 'Active'
+      }),
+
       makeReservationPayload({
         userId: userMap.alyssa._id,
         labId: labMap.A1103._id,
         labCode: labMap.A1103.labCode,
         seatNumbers: [4],
-        date: tomorrowDate, // FIX: Added Date
+        date: tomorrowDate,
         slotsArray: alyssaFutureSlots,
         status: 'Active'
       }),
+
       makeReservationPayload({
         userId: userMap.daniel._id,
         labId: labMap.G305._id,
         labCode: labMap.G305.labCode,
         seatNumbers: [14],
-        date: tomorrowDate, // FIX: Added Date
+        date: tomorrowDate,
         slotsArray: danielFutureSlots,
         status: 'Active'
       }),
+
       makeReservationPayload({
         userId: userMap.patricia._id,
         labId: labMap.G203._id,
         labCode: labMap.G203.labCode,
         seatNumbers: [22, 23],
-        date: tomorrowDate, // FIX: Added Date
+        date: tomorrowDate,
         slotsArray: patriciaFutureSlots,
         status: 'Active'
       }),
+
       makeReservationPayload({
         userId: userMap.nicolo._id,
         labId: labMap.G201._id,
         labCode: labMap.G201.labCode,
         seatNumbers: [2],
-        date: todayDate, // FIX: Added Date
+        date: todayDate,
         slotsArray: buildSlotsArray(16, 0, 2),
         status: 'Cancelled'
       })
+
       /*
         Ross intentionally has NO reservation
-        so his dashboard can show the "No Reservation" state.
+        so her dashboard can show the "No Reservation" state.
       */
     ])
 
@@ -479,9 +548,7 @@ async function seedDatabase () {
         senderRole: 'Reservation System',
         senderAvatar: '/img/def_avatar.jpg',
         title: 'Reservation Reminder',
-        message: `Reminder: Your reservation is scheduled around ${buildTimeRangeFromSlots(
-          gabbyPendingSlots
-        )}.`,
+        message: `Reminder: Your reservation is scheduled around ${buildTimeRangeFromSlots(gabbyPendingSlots)}.`,
         type: 'Reservation'
       },
       {
@@ -490,9 +557,7 @@ async function seedDatabase () {
         senderRole: 'Reservation System',
         senderAvatar: '/img/def_avatar.jpg',
         title: 'Reservation Active',
-        message: `You are currently checked in for your reservation at ${buildTimeRangeFromSlots(
-          marionActiveSlots
-        )}.`,
+        message: `You are currently checked in for your reservation at ${buildTimeRangeFromSlots(marionActiveSlots)}.`,
         type: 'Reservation'
       },
       {
@@ -538,12 +603,8 @@ async function seedDatabase () {
     console.log(`Today:              ${todayDate}`)
     console.log(`Tomorrow:           ${tomorrowDate}`)
     console.log(`Day after tomorrow: ${dayAfterTomorrowDate}`)
-    console.log(
-      `Marion (ACTIVE):    ${buildTimeRangeFromSlots(marionActiveSlots)}`
-    )
-    console.log(
-      `Gabby (PENDING):    ${buildTimeRangeFromSlots(gabbyPendingSlots)}`
-    )
+    console.log(`Marion (ACTIVE):    ${buildTimeRangeFromSlots(marionActiveSlots)}`)
+    console.log(`Gabby (PENDING):    ${buildTimeRangeFromSlots(gabbyPendingSlots)}`)
     console.log('Ross (NONE):        no reservation')
     console.log('Extra users added:  Alyssa, Daniel, Patricia')
     console.log('Extra labs added:   A1103, G305')

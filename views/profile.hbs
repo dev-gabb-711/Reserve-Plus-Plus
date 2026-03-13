@@ -58,124 +58,122 @@
         </div>
       </div>
 
-      <div class="profile-shell {{#unless isOwner}}profile-shell--outsider{{/unless}}">
+      <div class="profile-shell {{#if isEditMode}}profile-shell--owner{{else}}{{#if isOwner}}profile-shell--owner{{else}}profile-shell--outsider{{/if}}{{/if}}">
         {{#if isEditMode}}
 
-          <div class="profile-grid">
-            <div class="profile-left">
-              <img
-                id="avatarPreview"
-                class="profile-avatar"
-                src="{{profileUser.profilePic}}"
-                alt="{{profileUser.fullName}}"
-              >
+          <div class="edit-view">
+            <div class="edit-header">
+              <div class="edit-avatar-wrap">
+                <img
+                  id="avatarPreview"
+                  class="edit-avatar"
+                  src="{{profileUser.profilePic}}"
+                  alt="{{profileUser.fullName}}"
+                >
 
-              <div class="left-actions">
-                <label class="btn-outline file-btn" for="avatarFile">Change Photo</label>
+                <label class="edit-avatar-overlay" for="avatarFile" aria-label="Change photo">
+                  <span class="material-symbols-rounded">photo_camera</span>
+                </label>
                 <input id="avatarFile" class="file-input" type="file" accept="image/*">
+              </div>
+
+              <div class="edit-header-main">
+                <div class="edit-header-name">{{profileUser.fullName}}</div>
+                <div class="edit-header-role">{{profileUser.displayRole}}</div>
               </div>
             </div>
 
-            <div class="profile-right">
-              <form class="mode" method="POST" action="/profile/{{profileUser._id}}/edit" autocomplete="off">
-                <div class="field">
-                  <div class="label">First Name</div>
-                  <input class="edit-input" type="text" name="firstName" value="{{profileUser.firstName}}" required>
+            <div class="edit-bottom">
+              <div class="edit-bottom-grid">
+                <div class="edit-form-col">
+                  <form class="edit-form" method="POST" action="/profile/{{profileUser._id}}/edit" autocomplete="off">
+                    <div class="edit-form-row edit-form-row--double">
+                      <div class="field">
+                        <div class="label">First Name</div>
+                        <input class="edit-input" type="text" name="firstName" value="{{profileUser.firstName}}" required>
+                      </div>
+
+                      <div class="field">
+                        <div class="label">Last Name</div>
+                        <input class="edit-input" type="text" name="lastName" value="{{profileUser.lastName}}" required>
+                      </div>
+                    </div>
+
+                    <div class="field">
+                      <div class="label">Email</div>
+                      <input class="edit-input" type="email" name="email" value="{{profileUser.email}}" required>
+                    </div>
+
+                    <div class="field">
+                      <div class="label">Password</div>
+                      <input class="edit-input" type="password" name="password" placeholder="Enter new password">
+                    </div>
+
+                    <div class="field">
+                      <div class="label">Description</div>
+                      <textarea class="edit-input edit-textarea" name="description" rows="4">{{profileUser.description}}</textarea>
+                    </div>
+
+                    <div class="edit-actions">
+                      <button class="btn-outline wide" type="submit">Save</button>
+                      <button class="btn-outline wide" type="button" onclick="location.href='/profile/{{profileUser._id}}'">Cancel</button>
+                    </div>
+                  </form>
                 </div>
 
-                <div class="field">
-                  <div class="label">Last Name</div>
-                  <input class="edit-input" type="text" name="lastName" value="{{profileUser.lastName}}" required>
-                </div>
+                <div class="edit-reservations-col">
+                  <div class="reservations-block edit-reservations">
+                    <h2 class="reservations-title">Your Reservations</h2>
 
-                <div class="field">
-                  <div class="label">Role</div>
-                  <div class="value">{{profileUser.displayRole}}</div>
+                    {{#if reservations.length}}
+                      <div class="reservations-grid edit-reservations-grid">
+                        {{#each reservations}}
+                          <div class="reservation-card">
+                            <div class="reservation-accent"></div>
+                            <div class="reservation-info">
+                              <div class="reservation-room">{{roomLabel}}</div>
+                              <div class="reservation-date">{{dateLabel}}</div>
+                              <div class="reservation-time">{{timeLabel}}</div>
+                            </div>
+                          </div>
+                        {{/each}}
+                      </div>
+                    {{else}}
+                      <p class="no-reservations">No active reservations.</p>
+                    {{/if}}
+                  </div>
                 </div>
-
-                <div class="field">
-                  <div class="label">Email</div>
-                  <input class="edit-input" type="email" name="email" value="{{profileUser.email}}" required>
-                </div>
-
-                <div class="field">
-                  <div class="label">Password</div>
-                  <input class="edit-input" type="password" name="password" placeholder="Enter new password">
-                </div>
-
-                <div class="field">
-                  <div class="label">Description</div>
-                  <textarea class="edit-input" name="description" rows="4">{{profileUser.description}}</textarea>
-                </div>
-
-                <div class="edit-actions">
-                  <button class="btn-outline wide" type="submit">Save</button>
-                  <button class="btn-outline wide" type="button" onclick="location.href='/profile/{{profileUser._id}}'">Cancel</button>
-                </div>
-              </form>
+              </div>
             </div>
           </div>
 
         {{else}}
 
           {{#if isOwner}}
-            <div class="mode">
-              <div class="owner-hero">
-                <div class="owner-hero__band"></div>
-
-                <div class="owner-hero__content">
-                  <div class="owner-hero__avatar">
-                    <img
-                      id="avatarPreview"
-                      class="profile-avatar profile-avatar--owner"
-                      src="{{profileUser.profilePic}}"
-                      alt="{{profileUser.fullName}}"
-                    >
-                  </div>
-
-                  <div class="owner-hero__info">
-                    <div class="p-name">{{profileUser.fullName}}</div>
-                    <div class="p-role">{{profileUser.displayRole}}</div>
-
-                    <div class="owner-email-row">
-                      <span class="material-symbols-rounded owner-email-icon">mail</span>
-                      <span>{{profileUser.email}}</span>
-                    </div>
-
-                    <div class="owner-desc">
-                      {{#if profileUser.description}}
-                        {{profileUser.description}}
-                      {{else}}
-                        No description added yet.
-                      {{/if}}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="reservations-block">
-                <h2 class="reservations-title">Your Reservations</h2>
-
-                <div class="reservations-grid">
-                  {{#if reservations.length}}
-                    {{#each reservations}}
-                      <div class="reservation-card">
-                        <div class="reservation-accent"></div>
-                        <div class="reservation-info">
-                          <div class="reservation-room">{{roomLabel}}</div>
-                          <div class="reservation-date">{{dateLabel}}</div>
-                          <div class="reservation-time">{{timeLabel}}</div>
-                        </div>
-                      </div>
-                    {{/each}}
-                  {{else}}
-                    <p class="no-reservations">No active reservations.</p>
-                  {{/if}}
+            <div class="owner-view">
+              <div class="owner-header">
+                <div class="owner-avatar-wrap">
+                  <img
+                    id="avatarPreview"
+                    class="owner-avatar"
+                    src="{{profileUser.profilePic}}"
+                    alt="{{profileUser.fullName}}"
+                  >
                 </div>
 
-                <div class="owner-actions-inline">
+                <div class="owner-main">
+                  <div class="owner-name">{{profileUser.fullName}}</div>
+                  <div class="owner-role">{{profileUser.displayRole}}</div>
+
+                  <div class="owner-email">
+                    <span class="material-symbols-rounded owner-email-icon">mail</span>
+                    <span>{{profileUser.email}}</span>
+                  </div>
+                </div>
+
+                <div class="owner-header-actions">
                   <button
-                    class="icon-circle-btn"
+                    class="icon-circle-btn owner-header-btn"
                     type="button"
                     onclick="location.href='/profile/{{profileUser._id}}?edit=true'"
                     aria-label="Edit profile"
@@ -187,11 +185,11 @@
                     id="deleteProfileForm"
                     method="POST"
                     action="/profile/{{profileUser._id}}/delete"
-                    style="display:inline;"
+                    class="owner-delete-form"
                   >
                     <button
                       id="deleteBtn"
-                      class="icon-circle-btn"
+                      class="icon-circle-btn owner-header-btn"
                       type="button"
                       aria-label="Delete account"
                     >
@@ -201,7 +199,53 @@
 
                   <button
                     id="closeBtn"
-                    class="btn-outline wide close-btn-inline"
+                    class="icon-circle-btn owner-header-btn"
+                    type="button"
+                    onclick="history.back()"
+                    aria-label="Close profile"
+                  >
+                    <span class="material-symbols-rounded">logout</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="owner-bottom">
+                <div class="owner-description-row">
+                  <div class="owner-description-spacer"></div>
+
+                  <div class="owner-description">
+                    {{#if profileUser.description}}
+                      {{profileUser.description}}
+                    {{else}}
+                      No description added yet.
+                    {{/if}}
+                  </div>
+                </div>
+
+                <div class="reservations-block owner-reservations">
+                  <h2 class="reservations-title">Your Reservations</h2>
+
+                  {{#if reservations.length}}
+                    <div class="reservations-grid reservations-grid--owner">
+                      {{#each reservations}}
+                        <div class="reservation-card">
+                          <div class="reservation-accent"></div>
+                          <div class="reservation-info">
+                            <div class="reservation-room">{{roomLabel}}</div>
+                            <div class="reservation-date">{{dateLabel}}</div>
+                            <div class="reservation-time">{{timeLabel}}</div>
+                          </div>
+                        </div>
+                      {{/each}}
+                    </div>
+                  {{else}}
+                    <p class="no-reservations">No active reservations.</p>
+                  {{/if}}
+                </div>
+
+                <div class="owner-actions">
+                  <button
+                    class="btn-outline owner-close-btn"
                     type="button"
                     onclick="history.back()"
                   >
@@ -213,7 +257,6 @@
 
           {{else}}
             <div class="outsider-view">
-
               <div class="outsider-header">
                 <div class="outsider-avatar-wrap">
                   <img
@@ -236,27 +279,8 @@
               </div>
 
               <div class="outsider-bottom">
-                <div class="outsider-content-row">
-                  <div class="reservations-block outsider-reservations">
-                    <h2 class="reservations-title">{{profileUser.firstName}}'s Reservations</h2>
-
-                    {{#if reservations.length}}
-                      <div class="reservations-grid reservations-grid--outsider">
-                        {{#each reservations}}
-                          <div class="reservation-card">
-                            <div class="reservation-accent"></div>
-                            <div class="reservation-info">
-                              <div class="reservation-room">{{roomLabel}}</div>
-                              <div class="reservation-date">{{dateLabel}}</div>
-                              <div class="reservation-time">{{timeLabel}}</div>
-                            </div>
-                          </div>
-                        {{/each}}
-                      </div>
-                    {{else}}
-                      <p class="no-reservations">No active reservations.</p>
-                    {{/if}}
-                  </div>
+                <div class="outsider-description-row">
+                  <div class="outsider-description-spacer"></div>
 
                   <div class="outsider-description">
                     {{#if profileUser.description}}
@@ -265,6 +289,27 @@
                       No description added yet.
                     {{/if}}
                   </div>
+                </div>
+
+                <div class="reservations-block outsider-reservations">
+                  <h2 class="reservations-title">{{profileUser.firstName}}'s Reservations</h2>
+
+                  {{#if reservations.length}}
+                    <div class="reservations-grid reservations-grid--outsider">
+                      {{#each reservations}}
+                        <div class="reservation-card">
+                          <div class="reservation-accent"></div>
+                          <div class="reservation-info">
+                            <div class="reservation-room">{{roomLabel}}</div>
+                            <div class="reservation-date">{{dateLabel}}</div>
+                            <div class="reservation-time">{{timeLabel}}</div>
+                          </div>
+                        </div>
+                      {{/each}}
+                    </div>
+                  {{else}}
+                    <p class="no-reservations">No active reservations.</p>
+                  {{/if}}
                 </div>
 
                 <div class="outsider-actions">
@@ -278,7 +323,6 @@
                   </button>
                 </div>
               </div>
-
             </div>
           {{/if}}
 

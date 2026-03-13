@@ -76,3 +76,24 @@ if (closeBtn) {
     }
   })
 }
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const scrollRows = document.querySelectorAll(
+    '.reservations-grid--outsider, .reservations-grid--owner'
+  )
+
+  scrollRows.forEach((row) => {
+    row.addEventListener(
+      'wheel',
+      (e) => {
+        e.preventDefault()
+        row.scrollBy({
+          left: e.deltaY * 1.2,
+          behavior: 'smooth'
+        })
+      },
+      { passive: false }
+    )
+  })
+})
