@@ -20,6 +20,7 @@ Reserve++ is built using Node.js, Express.js, MongoDB, Mongoose, and Handlebars,
     npm install express 
     npm install express-handlebars 
     npm install mongoose
+    npm install multer
     ```
 3. Ensure MongoDB is running
 
