@@ -193,26 +193,24 @@
                     <span class="material-symbols-rounded">edit_square</span>
                   </button>
 
-                  <form
-                    id="deleteProfileForm"
-                    method="POST"
-                    action="/profile/{{profileUser._id}}/delete"
-                    class="owner-delete-form"
+                  <button
+                    id="deleteBtn"
+                    class="icon-circle-btn owner-header-btn"
+                    type="button"
+                    aria-label="Delete account"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteAccountModal"
                   >
-                    <button
-                      id="deleteBtn"
-                      class="icon-circle-btn owner-header-btn"
-                      type="button"
-                      aria-label="Delete account"
-                    >
-                      <span class="material-symbols-rounded">delete</span>
-                    </button>
-                  </form>
+                    <span class="material-symbols-rounded">delete</span>
+                  </button>
 
                   <button
-                    class="icon-circle-btn owner-header-btn profile-close-btn"
+                    id="logoutBtn"
+                    class="icon-circle-btn owner-header-btn"
                     type="button"
-                    aria-label="Close profile"
+                    aria-label="Log out"
+                    data-bs-toggle="modal"
+                    data-bs-target="#logoutModal"
                   >
                     <span class="material-symbols-rounded">logout</span>
                   </button>
@@ -263,6 +261,13 @@
                 </div>
               </div>
             </div>
+
+            <form
+              id="deleteProfileForm"
+              method="POST"
+              action="/profile/{{profileUser._id}}/delete"
+              class="d-none"
+            ></form>
 
           {{else}}
             <div class="outsider-view">
@@ -338,6 +343,57 @@
     </main>
   </div>
 
+  {{#if isOwner}}
+    <!--========================= LOGOUT MODAL =========================-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border border-light-subtle">
+          <div class="modal-body text-center p-4">
+            <h5 class="mb-3">Confirm Logout</h5>
+            <p class="mb-4">Are you sure you want to log out?</p>
+            <div class="d-flex justify-content-center gap-3">
+              <button class="btn btn-outline-light" type="button" data-bs-dismiss="modal">
+                Cancel
+              </button>
+              <button
+                class="btn btn-danger"
+                type="button"
+                onclick="window.location.href='/logout'"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--========================= DELETE ACCOUNT MODAL =========================-->
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border border-light-subtle">
+          <div class="modal-body text-center p-4">
+            <h5 class="mb-3">Delete Account</h5>
+            <p class="mb-4">Are you sure you want to delete your account? This action cannot be undone.</p>
+            <div class="d-flex justify-content-center gap-3">
+              <button class="btn btn-outline-light" type="button" data-bs-dismiss="modal">
+                Cancel
+              </button>
+              <button
+                id="confirmDeleteBtn"
+                class="btn btn-danger"
+                type="button"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {{/if}}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/profile.js"></script>
   <script src="/js/search.js"></script>
 </body>
