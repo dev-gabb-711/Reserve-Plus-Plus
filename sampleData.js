@@ -133,7 +133,7 @@ async function seedDatabase () {
         password: '123',
         role: 'Student',
         profilePic: '/img/def_avatar.jpg',
-        description: 'Prefers quiet labs and morning study sessions.'
+        description: 'Scenario account: no reservation for today.'
       },
       {
         firstName: 'Gabriel',
@@ -151,7 +151,7 @@ async function seedDatabase () {
         password: '123',
         role: 'Student',
         profilePic: '/img/def_avatar.jpg',
-        description: 'Loves polished interfaces and well-designed systems.'
+        description: 'Scenario account: has a reservation later today.'
       },
       {
         firstName: 'Marion',
@@ -160,7 +160,7 @@ async function seedDatabase () {
         password: '123',
         role: 'Student',
         profilePic: '/img/def_avatar.jpg',
-        description: 'Often books seats for afternoon classes.'
+        description: 'Scenario account: currently inside the active reservation window.'
       },
       {
         firstName: 'Nicolo',
@@ -272,7 +272,6 @@ async function seedDatabase () {
        4. TIME SETUP
        ========================================== */
     const now = new Date()
-    const currentHour = now.getHours()
 
     const today = new Date(now)
     const tomorrow = new Date(now)
@@ -285,22 +284,45 @@ async function seedDatabase () {
     const tomorrowDate = formatDateKey(tomorrow)
     const dayAfterTomorrowDate = formatDateKey(dayAfterTomorrow)
 
-    const marionActiveSlots = buildSlotsArray(currentHour, 0, 2)
+    /* ==========================================
+       4A. SCENARIO CONTROL BLOCK
+       Edit these values whenever you want to
+       test different live reservation states.
+       ========================================== */
 
-    let gabbyPendingSlots = []
-    let gabbyPendingDate = todayDate
+    // 1) NO RESERVATION TODAY
+    // Ross will intentionally have no reservation for today.
 
-    if (currentHour <= 20) {
-      gabbyPendingSlots = buildSlotsArray(currentHour + 2, 0, 2)
+    // 2) RESERVATION LATER TODAY
+    // Gabby gets a future reservation later than the current time.
+    let gabbyLaterTodayDate = todayDate
+    let gabbyLaterTodaySlots = []
+
+    const gabbyStart = new Date(now)
+    gabbyStart.setMinutes(0, 0, 0)
+    gabbyStart.setHours(gabbyStart.getHours() + 2)
+
+    if (gabbyStart.getDate() !== today.getDate()) {
+      gabbyLaterTodayDate = tomorrowDate
+      gabbyLaterTodaySlots = buildSlotsArray(9, 0, 1) // 30 mins tomorrow if already too late today
     } else {
-      gabbyPendingDate = tomorrowDate
-      gabbyPendingSlots = buildSlotsArray(9, 0, 2)
+      gabbyLaterTodaySlots = buildSlotsArray(gabbyStart.getHours(), gabbyStart.getMinutes(), 1)
     }
 
+    // 3) CURRENTLY USING THE LAB
+    // Marion gets a reservation that started at the current half-hour block
+    // and lasts for 30 minutes, so the account is "currently active".
+    const marionActiveStartHour = now.getHours()
+    const marionActiveStartMinute = now.getMinutes() < 30 ? 0 : 30
+    const marionActiveSlots = buildSlotsArray(marionActiveStartHour, marionActiveStartMinute, 1)
+
+    /* ==========================================
+       Extra sample reservations for other users
+       ========================================== */
+    const gabrielPastSlots = buildSlotsArray(10, 0, 2)
+    const alyssaFutureSlots = buildSlotsArray(8, 0, 2)
     const danielFutureSlots = buildSlotsArray(14, 0, 3)
     const patriciaFutureSlots = buildSlotsArray(10, 30, 4)
-    const alyssaFutureSlots = buildSlotsArray(8, 0, 2)
-    const gabrielPastSlots = buildSlotsArray(10, 0, 2)
 
     /* ==========================================
        5. SAMPLE TICKETS
@@ -376,6 +398,9 @@ async function seedDatabase () {
        6. SAMPLE RESERVATIONS
        ========================================== */
     await Reservation.insertMany([
+      /* ------------------------------------------
+         GABRIEL - old completed reservation
+         ------------------------------------------ */
       makeReservationPayload({
         userId: userMap.gabriel._id,
         labId: labMap.G202._id,
@@ -386,18 +411,21 @@ async function seedDatabase () {
         status: 'Completed'
       }),
 
+      /* ------------------------------------------
+         GABBY - reservation later today
+         ------------------------------------------ */
       makeReservationPayload({
         userId: userMap.gabby._id,
         labId: labMap.A1904._id,
         labCode: labMap.A1904.labCode,
         seatNumbers: [6],
-        date: gabbyPendingDate,
-        slotsArray: gabbyPendingSlots,
+        date: gabbyLaterTodayDate,
+        slotsArray: gabbyLaterTodaySlots,
         status: 'Active'
       }),
 
       /* ------------------------------------------
-         MARION - MANY ACTIVE RESERVATIONS
+         MARION - currently active 30-minute slot
          ------------------------------------------ */
       makeReservationPayload({
         userId: userMap.marion._id,
@@ -409,70 +437,10 @@ async function seedDatabase () {
         isAnonymous: true,
         status: 'Active'
       }),
-      makeReservationPayload({
-        userId: userMap.marion._id,
-        labId: labMap.G203._id,
-        labCode: labMap.G203.labCode,
-        seatNumbers: [4],
-        date: tomorrowDate,
-        slotsArray: buildSlotsArray(9, 0, 3),
-        status: 'Active'
-      }),
-      makeReservationPayload({
-        userId: userMap.marion._id,
-        labId: labMap.G201._id,
-        labCode: labMap.G201.labCode,
-        seatNumbers: [12],
-        date: tomorrowDate,
-        slotsArray: buildSlotsArray(13, 0, 2),
-        status: 'Active'
-      }),
-      makeReservationPayload({
-        userId: userMap.marion._id,
-        labId: labMap.G305._id,
-        labCode: labMap.G305.labCode,
-        seatNumbers: [8],
-        date: tomorrowDate,
-        slotsArray: buildSlotsArray(15, 30, 2),
-        status: 'Active'
-      }),
-      makeReservationPayload({
-        userId: userMap.marion._id,
-        labId: labMap.A1103._id,
-        labCode: labMap.A1103.labCode,
-        seatNumbers: [3],
-        date: dayAfterTomorrowDate,
-        slotsArray: buildSlotsArray(8, 0, 2),
-        status: 'Active'
-      }),
-      makeReservationPayload({
-        userId: userMap.marion._id,
-        labId: labMap.A1904._id,
-        labCode: labMap.A1904.labCode,
-        seatNumbers: [21],
-        date: dayAfterTomorrowDate,
-        slotsArray: buildSlotsArray(10, 30, 3),
-        status: 'Active'
-      }),
-      makeReservationPayload({
-        userId: userMap.marion._id,
-        labId: labMap.A1503._id,
-        labCode: labMap.A1503.labCode,
-        seatNumbers: [16],
-        date: dayAfterTomorrowDate,
-        slotsArray: buildSlotsArray(14, 0, 2),
-        status: 'Active'
-      }),
-      makeReservationPayload({
-        userId: userMap.marion._id,
-        labId: labMap.G202._id,
-        labCode: labMap.G202.labCode,
-        seatNumbers: [27],
-        date: dayAfterTomorrowDate,
-        slotsArray: buildSlotsArray(16, 0, 2),
-        status: 'Active'
-      }),
 
+      /* ------------------------------------------
+         Extra sample reservations
+         ------------------------------------------ */
       makeReservationPayload({
         userId: userMap.alyssa._id,
         labId: labMap.A1103._id,
@@ -514,8 +482,8 @@ async function seedDatabase () {
       })
 
       /*
-        Ross intentionally has NO reservation
-        so her dashboard can show the "No Reservation" state.
+        ROSS intentionally has NO reservation today
+        so her dashboard shows the "none" state.
       */
     ])
 
@@ -548,7 +516,7 @@ async function seedDatabase () {
         senderRole: 'Reservation System',
         senderAvatar: '/img/def_avatar.jpg',
         title: 'Reservation Reminder',
-        message: `Reminder: Your reservation is scheduled around ${buildTimeRangeFromSlots(gabbyPendingSlots)}.`,
+        message: `Reminder: Your reservation is scheduled at ${buildTimeRangeFromSlots(gabbyLaterTodaySlots)}.`,
         type: 'Reservation'
       },
       {
@@ -600,14 +568,18 @@ async function seedDatabase () {
 
     console.log('Sample data inserted successfully.')
     console.log('------------------------------------------')
-    console.log(`Today:              ${todayDate}`)
-    console.log(`Tomorrow:           ${tomorrowDate}`)
-    console.log(`Day after tomorrow: ${dayAfterTomorrowDate}`)
-    console.log(`Marion (ACTIVE):    ${buildTimeRangeFromSlots(marionActiveSlots)}`)
-    console.log(`Gabby (PENDING):    ${buildTimeRangeFromSlots(gabbyPendingSlots)}`)
-    console.log('Ross (NONE):        no reservation')
-    console.log('Extra users added:  Alyssa, Daniel, Patricia')
-    console.log('Extra labs added:   A1103, G305')
+    console.log(`Today:                    ${todayDate}`)
+    console.log(`Tomorrow:                 ${tomorrowDate}`)
+    console.log(`Day after tomorrow:       ${dayAfterTomorrowDate}`)
+    console.log('------------------------------------------')
+    console.log(`ROSS (NONE):              no reservation today`)
+    console.log(`GABBY (LATER TODAY):      ${buildTimeRangeFromSlots(gabbyLaterTodaySlots)} | ${gabbyLaterTodayDate}`)
+    console.log(`MARION (ACTIVE NOW):      ${buildTimeRangeFromSlots(marionActiveSlots)} | ${todayDate}`)
+    console.log('------------------------------------------')
+    console.log('Test accounts:')
+    console.log('ross@dlsu.edu.ph / 123')
+    console.log('gabby@dlsu.edu.ph / 123')
+    console.log('marion@dlsu.edu.ph / 123')
     console.log('------------------------------------------')
   } catch (err) {
     console.error('Sample data seeding failed:', err)
