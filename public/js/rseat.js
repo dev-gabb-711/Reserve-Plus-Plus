@@ -128,6 +128,10 @@ async function fetchBookedSlots () {
     year: 'numeric'
   })
 
+  // FIX 1: Instantly clear out old data to prevent cross-lab UI bleeding during network delays!
+  appState.bookedSlots = []
+  appState.bookedSlotsData = {}
+
   try {
     const res = await fetch(
       `/api/reservations/booked?labId=${labId}&labCode=${labCode}&date=${dateStr}`
@@ -534,18 +538,21 @@ function renderCalendar () {
       year: 'numeric'
     })
 
-    // FIX: Make sure we only count reservations for the CURRENT lab!
+    const activeLabCode = appState.currentBld[0] + appState.currentLab
+
     const userSlotsForDay = appState.reservations
-      .filter(r => {
-        const cleanResLab = String(r.lab).replace(/^[A-Za-z]+/, '')
-        return r.date === checkDate && cleanResLab === appState.currentLab
-      })
+      .filter(r => r.date === checkDate && r.lab === activeLabCode)
       .reduce((acc, r) => acc.concat(r.slots || []), [])
 
-    const totalBookedCount = new Set([
-      ...userSlotsForDay,
-      ...appState.bookedSlots
-    ]).size
+    let totalBookedCount = userSlotsForDay.length
+    if (
+      d === appState.selectedDate.getDate() &&
+      month === appState.selectedDate.getMonth()
+    ) {
+      totalBookedCount = new Set([...userSlotsForDay, ...appState.bookedSlots])
+        .size
+    }
+
     const isDayFullyBooked = totalBookedCount >= 18
 
     dayEl.className = `cal-day ${
@@ -606,7 +613,7 @@ function renderTimeGrid () {
   })
 
   slots.forEach(s => {
-    // FIX: Check if this slot belongs to the reservation currently being edited
+    // Check if this slot belongs to the reservation currently being edited
     const editingRes = appState.editingTargetId
       ? appState.reservations.find(r => r.id === appState.editingTargetId)
       : null
@@ -622,8 +629,8 @@ function renderTimeGrid () {
 
     const isUserReserved = appState.reservations.some(res => {
       const isSameDate = res.date === dateStr
-      const cleanResLab = String(res.lab).replace(/^[A-Za-z]+/, '')
-      const isSameLab = cleanResLab === appState.currentLab
+      const activeLabCode = appState.currentBld[0] + appState.currentLab
+      const isSameLab = res.lab === activeLabCode
       const hasSlot = res.slots && res.slots.includes(s)
       const isNotBeingEdited = res.id !== appState.editingTargetId
 
