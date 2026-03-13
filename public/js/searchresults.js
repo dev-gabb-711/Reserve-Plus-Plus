@@ -13,6 +13,17 @@ const resultList = document.getElementById('resultList')
 const emptyState = document.getElementById('emptyState')
 const searchInput = document.getElementById('searchInput')
 
+const filterBtn = document.getElementById('filterBtn')
+const filterPanel = document.getElementById('filterPanel')
+
+const buildingFilter = document.getElementById('buildingFilter')
+const roomFilter = document.getElementById('roomFilter')
+const dateFilter = document.getElementById('dateFilter')
+const sortFilter = document.getElementById('sortFilter')
+
+const clearFilters = document.getElementById('clearFilters')
+const applyFiltersBtn = document.getElementById('applyFilters')
+
 /* =====================================================
    STATE
    ===================================================== */
@@ -23,12 +34,12 @@ let current = [...DATA]
    URL QUERY HELPERS
    ===================================================== */
 
-function getUrlQuery () {
+function getUrlQuery() {
   const params = new URLSearchParams(window.location.search)
   return (params.get('q') || '').trim()
 }
 
-function syncSearchInputWithUrl () {
+function syncSearchInputWithUrl() {
   if (!searchInput) return
   searchInput.value = getUrlQuery()
 }
@@ -37,11 +48,11 @@ function syncSearchInputWithUrl () {
    SEARCH HELPERS
    ===================================================== */
 
-function getSearchQuery () {
+function getSearchQuery() {
   return (searchInput?.value || '').trim().toLowerCase()
 }
 
-function matchesSearch (item, q) {
+function matchesSearch(item, q) {
   if (!q) return true
 
   if (item.type === 'user') {
@@ -64,20 +75,133 @@ function matchesSearch (item, q) {
 }
 
 /* =====================================================
-   FILTER LOGIC
+   FILTER HELPERS
    ===================================================== */
 
-function applyAllFilters () {
+function matchesBuilding(item, building) {
+  if (!building || item.type === 'user') return true
+  return item.buildingCode === building
+}
+
+function matchesRoom(item, room) {
+  if (!room || item.type === 'user') return true
+  return String(item.room).includes(room)
+}
+
+function matchesDate(item, date) {
+  if (!date || item.type === 'user') return true
+  return item.date === date
+}
+
+function sortResults(items, sortValue) {
+  const sorted = [...items]
+
+  if (sortValue === 'room') {
+    sorted.sort((a, b) => {
+      if (a.type === 'user' || b.type === 'user') return 0
+      return Number(a.room) - Number(b.room)
+    })
+  }
+
+  return sorted
+}
+
+/* =====================================================
+   APPLY FILTERS
+   ===================================================== */
+
+function applyAllFilters() {
   const q = getSearchQuery()
-  current = DATA.filter(item => matchesSearch(item, q))
+
+  const building = buildingFilter?.value || ''
+  const room = roomFilter?.value.trim() || ''
+  const date = dateFilter?.value || ''
+  const sort = sortFilter?.value || 'soonest'
+
+  current = DATA.filter(item => {
+    return (
+      matchesSearch(item, q) &&
+      matchesBuilding(item, building) &&
+      matchesRoom(item, room) &&
+      matchesDate(item, date)
+    )
+  })
+
+  current = sortResults(current, sort)
+
   render()
+}
+
+/* =====================================================
+   FILTER PANEL TOGGLE
+   ===================================================== */
+
+function openFilterPanel() {
+  filterPanel.classList.add('show')
+  filterPanel.setAttribute('aria-hidden', 'false')
+}
+
+function closeFilterPanel() {
+  filterPanel.classList.remove('show')
+  filterPanel.setAttribute('aria-hidden', 'true')
+}
+
+function toggleFilterPanel() {
+  if (filterPanel.classList.contains('show')) {
+    closeFilterPanel()
+  } else {
+    openFilterPanel()
+  }
+}
+
+if (filterBtn && filterPanel) {
+  filterBtn.addEventListener('click', e => {
+    e.stopPropagation()
+    toggleFilterPanel()
+  })
+
+  filterPanel.addEventListener('click', e => {
+    e.stopPropagation()
+  })
+
+  document.addEventListener('click', e => {
+    if (!filterPanel.contains(e.target) && !filterBtn.contains(e.target)) {
+      closeFilterPanel()
+    }
+  })
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeFilterPanel()
+  })
+}
+
+/* =====================================================
+   FILTER BUTTONS
+   ===================================================== */
+
+if (clearFilters) {
+  clearFilters.addEventListener('click', () => {
+    buildingFilter.value = ''
+    roomFilter.value = ''
+    dateFilter.value = ''
+    sortFilter.value = 'soonest'
+
+    applyAllFilters()
+  })
+}
+
+if (applyFiltersBtn) {
+  applyFiltersBtn.addEventListener('click', () => {
+    applyAllFilters()
+    closeFilterPanel()
+  })
 }
 
 /* =====================================================
    RENDERING RESULTS
    ===================================================== */
 
-function render () {
+function render() {
   resultList.innerHTML = ''
 
   if (!current.length) {
@@ -90,8 +214,6 @@ function render () {
   current.forEach(item => {
     const card = document.createElement('div')
     card.className = 'result-item'
-
-    /* ================= USER RESULT ================= */
 
     if (item.type === 'user') {
       card.innerHTML = `
@@ -107,11 +229,7 @@ function render () {
       card.addEventListener('click', () => {
         window.location.href = `/profile/${item.userId}`
       })
-    }
-
-    /* ================= LAB RESULT ================= */
-
-    else {
+    } else {
       const barClass = item.buildingCode === 'G' ? 'bld-g' : 'bld-a'
       const title = `Room ${item.room} • Seat ${item.seat}`
 
@@ -138,10 +256,8 @@ function render () {
    ===================================================== */
 
 if (searchInput) {
-  /* Live filter on current results while typing */
   searchInput.addEventListener('input', applyAllFilters)
 
-  /* Real database search on Enter */
   searchInput.addEventListener('keydown', event => {
     if (event.key === 'Enter') {
       event.preventDefault()
@@ -153,7 +269,8 @@ if (searchInput) {
         return
       }
 
-      window.location.href = '/search-results?q=' + encodeURIComponent(q)
+      window.location.href =
+        '/search-results?q=' + encodeURIComponent(q)
     }
   })
 }
