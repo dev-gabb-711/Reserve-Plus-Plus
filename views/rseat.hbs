@@ -25,7 +25,7 @@
     <!--========================= SIDEBAR NAV =========================-->
     <aside class="side-nav">
       <div class="side-icons">
-            <button class="side-btn" type="button" onclick="location.href='/dashboard'">
+            <button class="side-btn" type="button" onclick="navToHome()">
           <span class="material-symbols-rounded">home</span>
         </button>
 
@@ -33,7 +33,7 @@
           <span class="material-symbols-rounded">computer</span>
         </button>
 
-        <button class="side-btn" type="button" onclick="location.href='/it-assist'">
+        <button class="side-btn" type="button" onclick="navToITAssist()">
           <span class="material-symbols-rounded">report</span>
         </button>
 
@@ -298,6 +298,25 @@
   <!--========================= SCRIPTS =========================-->
   <script>
     window.DB_LABS = {{{json labs}}};
+    // Script for the switching of tabs
+    // 1. Detect the current URL to automatically save the user's role
+    const path = window.location.pathname;
+    if (path === '/admin-dashboard' || path === '/it-assist-admin') {
+      localStorage.setItem('reserveRole', 'Admin');
+    } else if (path === '/dashboard' || path === '/it-assist') {
+      localStorage.setItem('reserveRole', 'Student');
+    }
+
+    // 2. Dynamic Navigation Functions
+    function navToHome() {
+      const role = localStorage.getItem('reserveRole');
+      window.location.href = role === 'Admin' ? '/admin-dashboard' : '/dashboard';
+    }
+
+    function navToITAssist() {
+      const role = localStorage.getItem('reserveRole');
+      window.location.href = role === 'Admin' ? '/it-assist-admin' : '/it-assist';
+    }
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
