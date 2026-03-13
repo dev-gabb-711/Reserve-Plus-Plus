@@ -148,6 +148,8 @@ function renderNotifications(list) {
     item.onclick = async function () {
     await fetch(`/api/notifications/${n.id}/read`, { method: 'PATCH' });
     n.isRead = true;
+    
+    selectNotification(n.id);
     renderNotifications(getFilteredNotifications());
     };
 

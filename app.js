@@ -924,7 +924,7 @@ app.patch('/api/notifications/:id/read', requireLogin, async (req, res) => {
         recipient: userId
       },
       { isRead: true },
-      { new: true }
+      { returnDocument: 'after' }
     )
 
     if (!updatedNotification) {

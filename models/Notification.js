@@ -18,7 +18,7 @@ const notificationSchema = new mongoose.Schema({
     
     type: { 
         type: String, 
-        enum: ['Reservation', 'IT Assist', 'System'], 
+        enum: ['Reservation', 'IT Assist', 'System', 'Announcement'], 
         default: 'System' 
     }
 }, { timestamps: true }); 
