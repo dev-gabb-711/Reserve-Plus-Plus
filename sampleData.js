@@ -310,55 +310,55 @@ async function seedDatabase () {
         user: userMap.ross._id,
         lab: labMap.A1103._id,
         seatNumber: 5,
-        concernCategory: 'PC Unresponsive',
+        concernCategory: 'PC Unresponsive / Frozen',
         description: 'Computer freezes after logging in.',
-        status: 'Pending'
+        status: 'Unresolved'
       },
       {
         user: userMap.gabriel._id,
         lab: labMap.G201._id,
         seatNumber: 3,
-        concernCategory: 'Software',
+        concernCategory: 'Software/App Crashing',
         description: 'Required software is missing from the desktop.',
-        status: 'Pending'
+        status: 'Unresolved'
       },
       {
         user: userMap.gabby._id,
         lab: labMap.G201._id,
         seatNumber: 7,
-        concernCategory: 'Audio',
+        concernCategory: 'Audio / Headphone Jack Issue',
         description: 'Headphone jack is not working properly.',
-        status: 'Pending'
+        status: 'Unresolved'
       },
       {
         user: userMap.marion._id,
         lab: labMap.G202._id,
         seatNumber: 19,
-        concernCategory: 'Software',
+        concernCategory: 'Software/App Crashing',
         description: 'IDE keeps crashing during class.',
-        status: 'Pending'
+        status: 'Unresolved'
       },
       {
         user: userMap.nicolo._id,
         lab: labMap.A1707._id,
         seatNumber: 6,
-        concernCategory: 'Keyboard Not Working',
+        concernCategory: 'Keyboard / Mouse Not Working',
         description: 'Several keys do not respond.',
-        status: 'In Progress'
+        status: 'Unresolved'
       },
       {
         user: userMap.alyssa._id,
         lab: labMap.A1904._id,
         seatNumber: 12,
-        concernCategory: 'Monitor',
+        concernCategory: 'Monitor No Display',
         description: 'Screen flickers every few seconds.',
-        status: 'Pending'
+        status: 'Unresolved'
       },
       {
         user: userMap.daniel._id,
         lab: labMap.G305._id,
         seatNumber: 8,
-        concernCategory: 'Internet Connection',
+        concernCategory: 'No Internet Connection',
         description: 'Cannot access online course tools.',
         status: 'Resolved'
       },
@@ -366,9 +366,9 @@ async function seedDatabase () {
         user: userMap.patricia._id,
         lab: labMap.G203._id,
         seatNumber: 21,
-        concernCategory: 'Mouse',
+        concernCategory: 'Keyboard / Mouse Not Working',
         description: 'Mouse cursor moves inconsistently.',
-        status: 'Pending'
+        status: 'Unresolved'
       }
     ])
 

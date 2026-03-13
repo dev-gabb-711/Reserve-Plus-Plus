@@ -182,6 +182,12 @@ body{
 }
 
 /*----------------Filter Button------------------*/
+.filter-wrap{
+  position:relative;
+  display:flex;
+  align-items:flex-start;
+}
+
 .filter-btn{
   width:48px;
   height:48px;
@@ -202,6 +208,89 @@ body{
 .filter-btn:hover{
   background:rgba(255,255,255,0.12);
   transform:translateY(-1px);
+}
+
+
+
+/*================================================
+  FILTER POPUP
+  ================================================ */
+.filter-pop{
+  position:absolute;
+  top:58px;
+  right:0;
+  width:300px;
+  border-radius:22px;
+  padding:18px;
+  background:rgba(18,18,24,0.92);
+  border:1px solid rgba(255,255,255,0.12);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow:0 18px 40px rgba(0,0,0,0.35);
+  z-index:50;
+}
+
+.filter-pop[hidden]{
+  display:none !important;
+}
+
+.filter-pop-head h3{
+  margin:0 0 14px;
+  font-size:18px;
+  font-weight:800;
+  color:rgba(255,255,255,0.96);
+}
+
+.filter-pop-body{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.filter-label{
+  font-size:13px;
+  font-weight:700;
+  color:rgba(255,255,255,0.78);
+  margin-top:2px;
+}
+
+.filter-input{
+  width:100%;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.08);
+  color:#fff;
+  padding:10px 12px;
+  font-size:14px;
+  outline:none;
+  transition:border-color 0.18s ease, background 0.18s ease;
+}
+
+.filter-input:focus{
+  border-color:rgba(255,255,255,0.28);
+  background:rgba(255,255,255,0.12);
+}
+
+.filter-input option{
+  background:#17171d;
+  color:#fff;
+}
+
+.filter-pop-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:16px;
+}
+
+.ghost-btn{
+  background:rgba(255,255,255,0.10);
+  color:#fff;
+  box-shadow:none;
+}
+
+.ghost-btn:hover{
+  background:rgba(255,255,255,0.14);
 }
 
 
@@ -256,6 +345,14 @@ body{
   flex-direction:column;
 }
 
+/*----------------Empty State------------------*/
+.ticket-card.empty-state{
+  min-height:160px;
+  justify-content:center;
+  align-items:flex-start;
+  background:rgba(255,255,255,0.06);
+}
+
 /*----------------Ticket Text------------------*/
 .t-title{
   font-size:22px;
@@ -279,13 +376,20 @@ body{
 }
 
 .ticket-body{
-  font-size:18px;
-  line-height:1.25;
+  font-size:17px;
+  line-height:1.4;
   color:rgba(255,255,255,0.95);
   flex:1;
 }
 
-.ticket-body .k{ font-weight:900; }
+.ticket-body > div{
+  margin-bottom:8px;
+  word-break:break-word;
+}
+
+.ticket-body .k{
+  font-weight:900;
+}
 
 .ticket-actions{
   display:flex;
@@ -304,7 +408,7 @@ body{
   background:linear-gradient(90deg, rgba(150, 90, 255, .9), rgba(255, 140, 90, .9));
   box-shadow:0 10px 22px rgba(0,0,0,0.25);
   cursor:pointer;
-  transition:transform 0.12s ease, filter 0.18s ease;
+  transition:transform 0.12s ease, filter 0.18s ease, background 0.18s ease;
 }
 
 .pill-btn:hover{
@@ -319,7 +423,31 @@ body{
   ================================================ */
 @media (max-width: 900px){
   body{ overflow:auto; }
-  .page-wrap{ grid-template-columns: 76px 1fr; }
+  .page-wrap{ grid-template-columns:76px 1fr; }
   .main-area{ height:auto; overflow:visible; padding:28px 18px; }
   .tickets-shell{ min-height:520px; }
+
+  .filter-pop{
+    width:260px;
+    top:54px;
+  }
+}
+
+@media (max-width: 640px){
+  .top-row{
+    gap:14px;
+  }
+
+  .page-title{
+    letter-spacing:2px;
+  }
+
+  .ticket-grid{
+    grid-template-columns:1fr;
+  }
+
+  .filter-pop{
+    right:0;
+    width:min(260px, calc(100vw - 40px));
+  }
 }

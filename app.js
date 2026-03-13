@@ -9,7 +9,6 @@ const app = express()
 /*===========================================
  * SESSION CREATION
  ============================================ */
-
 app.use(
   session({
     secret: 'sikretLangDaw',
@@ -76,6 +75,18 @@ function requireLogin (req, res, next) {
   next()
 }
 
+function requireAdmin (req, res, next) {
+  if (!req.session.user) {
+    return res.redirect('/login')
+  }
+
+  if (req.session.user.role !== 'Admin') {
+    return res.status(403).send('Unauthorized')
+  }
+
+  next()
+}
+
 function makeAvatar (color) {
   return `
   data:image/svg+xml,
@@ -121,6 +132,21 @@ async function createNotificationSafe (data) {
   }
 }
 
+function formatDateTimeShort (value) {
+  if (!value) return 'No date available'
+
+  const date = new Date(value)
+  if (isNaN(date.getTime())) return 'No date available'
+
+  return date.toLocaleString('en-PH', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  })
+}
+
 function buildDashboardBuildings (labs, tickets) {
   return labs.reduce((groups, lab) => {
     let buildingGroup = groups.find(group => group.title === lab.building)
@@ -134,13 +160,16 @@ function buildDashboardBuildings (labs, tickets) {
       groups.push(buildingGroup)
     }
 
-    const unresolvedTickets = tickets.filter(
-      ticket =>
-        ticket.building === lab.building &&
-        normalizeRoomCode(ticket.roomNumber) ===
-          normalizeRoomCode(lab.labCode) &&
-        ticket.status !== 'Resolved'
-    )
+    const unresolvedTickets = tickets.filter(ticket => {
+      const ticketBuilding = ticket.lab?.building || ''
+      const ticketRoom = ticket.lab?.labCode || ''
+
+      return (
+        ticket.status === 'Unresolved' &&
+        ticketBuilding === lab.building &&
+        normalizeRoomCode(ticketRoom) === normalizeRoomCode(lab.labCode)
+      )
+    })
 
     buildingGroup.rooms.push({
       name: `Room ${lab.labCode}`,
@@ -153,16 +182,22 @@ function buildDashboardBuildings (labs, tickets) {
 }
 
 function buildDashboardTickets (tickets) {
-  return tickets.slice(0, 6).map((ticket, index) => ({
-    _id: ticket._id,
-    displayId: index + 1,
-    roomLabel: `Room ${ticket.roomNumber}`,
-    seatLabel: `Seat ${ticket.seatNumber}`,
-    issue: ticket.concernCategory,
-    status: ticket.status,
-    priority:
-      ticket.status === 'Pending' ? 1 : ticket.status === 'In Progress' ? 2 : 3
-  }))
+  return tickets.slice(0, 6).map((ticket, index) => {
+    const firstName = ticket.user?.firstName || ''
+    const lastName = ticket.user?.lastName || ''
+    const fullName = `${firstName} ${lastName}`.trim()
+
+    return {
+      _id: ticket._id,
+      displayId: index + 1,
+      roomLabel: `Room ${ticket.lab?.labCode || 'Unknown'}`,
+      seatLabel: `Seat ${ticket.seatNumber}`,
+      studentName: fullName || ticket.user?.email || 'Unknown User',
+      submittedAt: formatDateTimeShort(ticket.createdAt),
+      issue: ticket.concernCategory,
+      status: ticket.status
+    }
+  })
 }
 
 function buildMiniNotifications (notifications) {
@@ -313,16 +348,17 @@ app.get('/dashboard', async (req, res) => {
   }
 })
 
-app.get('/admin-dashboard', async (req, res) => {
+app.get('/admin-dashboard', requireAdmin, async (req, res) => {
   try {
-    const userId = req.query.userId
-
-    const adminUser = userId
-      ? await User.findById(userId).lean()
-      : await User.findOne({ role: 'Admin' }).lean()
-
+    const adminUser = await User.findById(req.session.user.id).lean()
     const labs = await Lab.find().lean()
-    const allTickets = await Ticket.find().populate('user').lean()
+
+    const allTickets = await Ticket.find()
+      .populate('user')
+      .populate('lab')
+      .sort({ createdAt: -1 })
+      .lean()
+
     const rawNotifications = await Notification.find()
       .sort({ createdAt: -1 })
       .limit(4)
@@ -331,7 +367,7 @@ app.get('/admin-dashboard', async (req, res) => {
     const dashboardBuildings = buildDashboardBuildings(labs, allTickets)
 
     const dashboardTickets = buildDashboardTickets(
-      allTickets.filter(ticket => ticket.status !== 'Resolved')
+      allTickets.filter(ticket => ticket.status === 'Unresolved')
     )
 
     const miniNotifications = buildMiniNotifications(rawNotifications)
@@ -360,10 +396,28 @@ app.get('/reserve', async (req, res) => {
 
 app.get('/it-assist', requireLogin, (req, res) => res.render('itassist'))
 
-app.get('/it-assist-admin', async (req, res) => {
+app.get('/it-assist-admin', requireAdmin, async (req, res) => {
   try {
-    const allTickets = await Ticket.find().populate('user').lean()
-    res.render('itassistadmin', { tickets: allTickets })
+    const { ticketId } = req.query
+
+    let query = { status: 'Unresolved' }
+
+    if (ticketId) {
+      query = {
+        _id: ticketId,
+        status: 'Unresolved'
+      }
+    }
+
+    const allTickets = await Ticket.find(query)
+      .populate('user')
+      .populate('lab')
+      .sort({ createdAt: -1 })
+      .lean()
+
+    res.render('itassistadmin', {
+      ticketsJson: JSON.stringify(allTickets || [])
+    })
   } catch (err) {
     console.error('Error loading admin tickets:', err)
     res.status(500).send('Error loading admin tickets')
@@ -645,13 +699,13 @@ app.post('/profile/:id/delete', requireLogin, async (req, res) => {
   }
 })
 
-// Submit ticket
-app.post('/submit-ticket', async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.status(401).json({ error: 'Please log in first.' })
-    }
+/* ==========================================
+   IT ASSIST ROUTES
+   ========================================== */
 
+// Submit ticket
+app.post('/submit-ticket', requireLogin, async (req, res) => {
+  try {
     const building = (req.body.building || '').trim()
     const room = (req.body.room || '').trim().toUpperCase()
     const seat = Number(req.body.seat)
@@ -678,13 +732,24 @@ app.post('/submit-ticket', async (req, res) => {
       })
     }
 
+    const matchedLab = await Lab.findOne({
+      building: building,
+      labCode: room
+    })
+
+    if (!matchedLab) {
+      return res.status(404).json({
+        error: 'Selected lab was not found in the database.'
+      })
+    }
+
     const newTicket = new Ticket({
       user: req.session.user.id,
-      building,
-      roomNumber: room,
+      lab: matchedLab._id,
       seatNumber: seat,
       concernCategory: concern || 'Other',
-      description: message
+      description: message,
+      status: 'Unresolved'
     })
 
     await newTicket.save()
@@ -694,7 +759,7 @@ app.post('/submit-ticket', async (req, res) => {
       senderName: 'IT Assist',
       senderRole: 'Support Desk',
       title: 'Ticket Submitted',
-      message: `Your concern for Room ${room}, Seat ${seat} has been submitted successfully.`,
+      message: `Your concern for Room ${matchedLab.labCode}, Seat ${seat} has been submitted successfully.`,
       type: 'IT Assist'
     })
 
@@ -709,25 +774,29 @@ app.post('/submit-ticket', async (req, res) => {
   }
 })
 
-// Resolve ticket
-app.post('/resolve-ticket/:id', async (req, res) => {
+// Resolve ticket: notify then delete
+app.post('/resolve-ticket/:id', requireAdmin, async (req, res) => {
   try {
-    const updatedTicket = await Ticket.findByIdAndUpdate(
-      req.params.id,
-      { status: 'Resolved' },
-      { new: true }
-    )
+    const ticket = await Ticket.findById(req.params.id)
+      .populate('lab')
+      .lean()
 
-    if (updatedTicket && updatedTicket.user) {
-      await createNotificationSafe({
-        recipient: updatedTicket.user,
-        senderName: 'IT Assist',
-        senderRole: 'Lab Technician',
-        title: 'Concern Resolved',
-        message: 'Your PC concern has been successfully resolved.',
-        type: 'IT Assist'
-      })
+    if (!ticket) {
+      return res.status(404).send('Ticket not found')
     }
+
+    await createNotificationSafe({
+      recipient: ticket.user,
+      senderName: 'IT Assist',
+      senderRole: 'Lab Technician',
+      title: 'Concern Resolved',
+      message: `Your concern for Room ${
+        ticket.lab?.labCode || 'Unknown'
+      }, Seat ${ticket.seatNumber} has been resolved.`,
+      type: 'IT Assist'
+    })
+
+    await Ticket.findByIdAndDelete(req.params.id)
 
     res.redirect(req.get('Referrer') || '/it-assist-admin')
   } catch (err) {
@@ -736,18 +805,59 @@ app.post('/resolve-ticket/:id', async (req, res) => {
   }
 })
 
+// Post announcement to all lab users
+app.post('/admin/announcements', requireAdmin, async (req, res) => {
+  try {
+    const message = (req.body.message || '').trim()
+
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        error: 'Announcement message is required.'
+      })
+    }
+
+    const studentUsers = await User.find({
+      role: { $ne: 'Admin' }
+    })
+      .select('_id')
+      .lean()
+
+    const notificationsToInsert = studentUsers.map(user => ({
+      recipient: user._id,
+      senderName: 'Reserve++ Team',
+      senderRole: 'System Announcement',
+      senderAvatar: '/img/system_profile.png',
+      title: 'Announcement',
+      message: message,
+      type: 'Announcement'
+    }))
+
+    await Notification.insertMany(notificationsToInsert)
+
+    res.json({
+      success: true,
+      message: 'Announcement sent successfully.'
+    })
+  } catch (err) {
+    console.error('Announcement posting failed:', err)
+
+    res.status(500).json({
+      success: false,
+      error: 'Failed to post announcement.'
+    })
+  }
+})
+
 /* ==========================================
    API ROUTES (TICKETS)
    ========================================== */
 
 // Fetch current logged-in user's tickets
-app.get('/api/tickets/me', async (req, res) => {
+app.get('/api/tickets/me', requireLogin, async (req, res) => {
   try {
-    if (!req.session.user) {
-      return res.status(401).json({ error: 'Unauthorized' })
-    }
-
     const tickets = await Ticket.find({ user: req.session.user.id })
+      .populate('lab')
       .sort({ createdAt: -1 })
       .lean()
 
@@ -763,12 +873,8 @@ app.get('/api/tickets/me', async (req, res) => {
    ========================================== */
 
 // Fetch current logged-in user's notifications
-app.get('/api/notifications/me', async (req, res) => {
+app.get('/api/notifications/me', requireLogin, async (req, res) => {
   try {
-    if (!req.session.user) {
-      return res.status(401).json({ error: 'Unauthorized' })
-    }
-
     const userId = req.session.user.id
 
     const notifications = await Notification.find({ recipient: userId })
@@ -787,12 +893,8 @@ app.get('/api/notifications/me', async (req, res) => {
 })
 
 // Delete a notification owned by the current user
-app.delete('/api/notifications/:id', async (req, res) => {
+app.delete('/api/notifications/:id', requireLogin, async (req, res) => {
   try {
-    if (!req.session.user) {
-      return res.status(401).json({ error: 'Unauthorized' })
-    }
-
     const userId = req.session.user.id
 
     const deletedNotification = await Notification.findOneAndDelete({
@@ -812,12 +914,8 @@ app.delete('/api/notifications/:id', async (req, res) => {
 })
 
 // Mark a notification as read
-app.patch('/api/notifications/:id/read', async (req, res) => {
+app.patch('/api/notifications/:id/read', requireLogin, async (req, res) => {
   try {
-    if (!req.session.user) {
-      return res.status(401).json({ error: 'Unauthorized' })
-    }
-
     const userId = req.session.user.id
 
     const updatedNotification = await Notification.findOneAndUpdate(
@@ -851,7 +949,6 @@ app.post('/api/reservations', async (req, res) => {
       return res.status(401).json({ error: 'Please log in first.' })
     }
 
-    // Extracted timeRange and isAnonymous from req.body
     const { labId, labCode, seats, date, timeRange, slotsArray, isAnonymous } =
       req.body
 
@@ -906,7 +1003,6 @@ app.put('/api/reservations/:id', async (req, res) => {
       return res.status(401).json({ error: 'Please log in first.' })
     }
 
-    // Extracted timeRange and isAnonymous from req.body
     const { labId, labCode, seats, date, timeRange, slotsArray, isAnonymous } =
       req.body
 
@@ -1006,9 +1102,7 @@ app.get('/api/reservations/booked', async (req, res) => {
         try {
           const slots = JSON.parse(booking.timeSlot)
           slots.forEach(slot => {
-            // Check if the booking is anonymous
             if (booking.isAnonymous) {
-              // Null blocks the slot out but won't trigger the hover popover
               bookedData[slot] = null
             } else {
               bookedData[slot] = {

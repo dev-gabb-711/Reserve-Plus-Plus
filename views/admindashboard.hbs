@@ -135,8 +135,11 @@
             <!--========================= ANNOUNCEMENT PANEL =========================-->
             <div class="panel post-panel">
               <div class="panel-title">Post an Announcement</div>
-              <textarea class="post-box" id="announceText"
-                placeholder="Write something for students and staff..."></textarea>
+              <textarea
+                class="post-box"
+                id="announceText"
+                placeholder="Write something for students and staff..."
+              ></textarea>
 
               <div class="post-actions">
                 <button class="pill-btn" id="postBtn" type="button">Post</button>
@@ -147,32 +150,56 @@
             <!--========================= TICKETS CAROUSEL =========================-->
             <div class="ticket-shell">
               <div class="ticket-track" id="ticketTrack">
-                {{#each dashboardTickets}}
+                {{#if dashboardTickets.length}}
+                  {{#each dashboardTickets}}
+                    <article class="ticket-card">
+                      <div class="ticket-bg"></div>
+
+                      <div class="ticket-content">
+                        <div class="ticket-head">
+                          <div class="ticket-title">Assistance Ticket {{displayId}}</div>
+                          <div class="ticket-sub">{{roomLabel}} • {{seatLabel}}</div>
+                        </div>
+
+                        <div class="ticket-divider"></div>
+
+                        <div class="ticket-body">
+                          <div class="kv-row"><span>Lab User : {{studentName}}</span></div>
+                          <div class="kv-row"><span>Submitted : {{submittedAt}}</span></div>
+                          <div class="kv-row"><span>Issue : {{issue}}</span></div>
+                          <div class="kv-row"><span>Status : {{status}}</span></div>
+                        </div>
+
+                        <div class="ticket-foot">
+                          <button
+                            class="ticket-btn"
+                            type="button"
+                            onclick="location.href='/it-assist-admin?ticketId={{_id}}'"
+                          >
+                            Details
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  {{/each}}
+                {{else}}
                   <article class="ticket-card">
                     <div class="ticket-bg"></div>
 
                     <div class="ticket-content">
                       <div class="ticket-head">
-                        <div class="ticket-title">Assistance Ticket {{displayId}}</div>
-                        <div class="ticket-sub">{{roomLabel}} • {{seatLabel}}</div>
+                        <div class="ticket-title">No Active Tickets</div>
+                        <div class="ticket-sub">Everything looks good right now.</div>
                       </div>
 
                       <div class="ticket-divider"></div>
 
                       <div class="ticket-body">
-                        <div class="kv-row"><span>Issue : {{issue}}</span></div>
-                        <div class="kv-row"><span>Status : {{status}}</span></div>
-                        <div class="kv-row"><span>Priority Level : {{priority}}</span></div>
-                      </div>
-
-                      <div class="ticket-foot">
-                        <form action="/resolve-ticket/{{_id}}" method="POST">
-                          <button class="ticket-btn" type="submit">Resolved</button>
-                        </form>
+                        <div class="kv-row"><span>There are currently no unresolved assistance tickets.</span></div>
                       </div>
                     </div>
                   </article>
-                {{/each}}
+                {{/if}}
               </div>
             </div>
 

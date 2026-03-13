@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0">
 
   <!--========================= PAGE STYLES =========================-->
-  <link rel="stylesheet" href="../css/itassistadmin.css">
+  <link rel="stylesheet" href="/css/itassistadmin.css">
 </head>
 
 <body class="page page--itassistadmin">
@@ -45,7 +45,7 @@
       </div>
 
       <div class="side-brand">
-        <img src="../img/logo.png" class="brand-logo" alt="Logo">
+        <img src="/img/logo.png" class="brand-logo" alt="Logo">
       </div>
     </aside>
 
@@ -56,13 +56,44 @@
       <div class="top-row">
         <div>
           <h1 class="page-title">IT Assist</h1>
-          <p class="page-subtitle">View all tickets and reports</p>
+          <p class="page-subtitle">View all unresolved tickets and reports</p>
         </div>
 
         <!------------------Filter Button------------------>
-        <button class="filter-btn" type="button" aria-label="Filters">
-          <span class="material-symbols-rounded">tune</span>
-        </button>
+        <div class="filter-wrap">
+          <button class="filter-btn" id="filterBtn" type="button" aria-label="Filters">
+            <span class="material-symbols-rounded">tune</span>
+          </button>
+
+          <!--========================= FILTER POPUP =========================-->
+          <div class="filter-pop" id="filterPop" hidden>
+            <div class="filter-pop-head">
+              <h3>Filter Tickets</h3>
+            </div>
+
+            <div class="filter-pop-body">
+              <label class="filter-label" for="buildingFilter">Building</label>
+              <select id="buildingFilter" class="filter-input">
+                <option value="">All Buildings</option>
+              </select>
+
+              <label class="filter-label" for="roomFilter">Room</label>
+              <select id="roomFilter" class="filter-input">
+                <option value="">All Rooms</option>
+              </select>
+
+              <label class="filter-label" for="categoryFilter">Category</label>
+              <select id="categoryFilter" class="filter-input">
+                <option value="">All Categories</option>
+              </select>
+            </div>
+
+            <div class="filter-pop-actions">
+              <button type="button" class="pill-btn ghost-btn" id="clearFiltersBtn">Clear</button>
+              <button type="button" class="pill-btn" id="applyFiltersBtn">Apply</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!--========================= TICKETS SHELL =========================-->
@@ -78,7 +109,12 @@
     </main>
   </div>
 
+  <!--========================= SERVER DATA =========================-->
+  <script id="ticketData" type="application/json">
+    {{{ticketsJson}}}
+  </script>
+
   <!--========================= SCRIPTS =========================-->
-  <script src="../js/itassistadmin.js"></script>
+  <script src="/js/itassistadmin.js"></script>
 </body>
 </html>
