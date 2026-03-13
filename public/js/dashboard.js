@@ -26,6 +26,7 @@ const liveStatusBox = document.getElementById("liveStatusBox");
 
 let activeBuildingFilters = new Set(["andrew", "gokongwei"]);
 let viewDate = new Date();
+let liveStatusInterval = null;
 
 /* =====================================================
    Date Utilities
@@ -46,12 +47,58 @@ function mondayIndex(jsDay) {
 function parseDateFromReservation(value) {
   if (!value) return null;
 
-  const parsed = new Date(value);
-  if (!Number.isNaN(parsed.getTime())) {
-    return parsed;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value;
   }
 
-  return null;
+  const raw = String(value).trim();
+  if (!raw) return null;
+
+  const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    const year = Number(isoMatch[1]);
+    const month = Number(isoMatch[2]) - 1;
+    const day = Number(isoMatch[3]);
+    const d = new Date(year, month, day);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  const prettyMatch = raw.match(/^([A-Za-z]{3,9})\s+(\d{1,2}),\s*(\d{4})$/);
+  if (prettyMatch) {
+    const months = {
+      jan: 0, january: 0,
+      feb: 1, february: 1,
+      mar: 2, march: 2,
+      apr: 3, april: 3,
+      may: 4,
+      jun: 5, june: 5,
+      jul: 6, july: 6,
+      aug: 7, august: 7,
+      sep: 8, sept: 8, september: 8,
+      oct: 9, october: 9,
+      nov: 10, november: 10,
+      dec: 11, december: 11
+    };
+
+    const monthName = prettyMatch[1].toLowerCase();
+    const monthIndex = months[monthName];
+    const day = Number(prettyMatch[2]);
+    const year = Number(prettyMatch[3]);
+
+    if (monthIndex !== undefined) {
+      const d = new Date(year, monthIndex, day);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+  }
+
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function normalizeReservationDateToISO(value) {
+  const parsed = parseDateFromReservation(value);
+  if (!parsed) return "";
+  return toISODateKey(parsed);
 }
 
 function formatTimeDisplay(dateObj) {
@@ -59,9 +106,10 @@ function formatTimeDisplay(dateObj) {
     return "";
   }
 
-  return dateObj.toLocaleTimeString([], {
+  return dateObj.toLocaleTimeString("en-US", {
     hour: "numeric",
-    minute: "2-digit"
+    minute: "2-digit",
+    hour12: true
   });
 }
 
@@ -72,15 +120,15 @@ function formatMinutesRemaining(msDiff) {
 
 function formatPendingCountdown(msDiff) {
   const totalSeconds = Math.max(0, Math.floor(msDiff / 1000));
-  const totalMinutes = Math.floor(totalSeconds / 60);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
 
   if (hours > 0) {
-    return `${hours}:${String(minutes).padStart(2, "0")}`;
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   }
 
-  return String(minutes);
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
 /* =====================================================
@@ -117,6 +165,13 @@ function convert12HourTo24Hour(timeStr) {
   return `${pad2(hours)}:${pad2(minutes)}`;
 }
 
+function convert24HourTo12Hour(hours, minutes) {
+  const suffix = hours >= 12 ? "PM" : "AM";
+  let displayHour = hours % 12;
+  if (displayHour === 0) displayHour = 12;
+  return `${displayHour}:${String(minutes).padStart(2, "0")} ${suffix}`;
+}
+
 function normalizeSingleTimeTo24(timeStr) {
   const value = normalizeTimeToken(timeStr);
 
@@ -135,27 +190,96 @@ function normalizeSingleTimeTo24(timeStr) {
   return convert12HourTo24Hour(value);
 }
 
+function addThirtyMinutesToTimeLabel(timeLabel) {
+  const normalized = normalizeSingleTimeTo24(timeLabel);
+  if (!normalized) return null;
+
+  let [hours, minutes] = normalized.split(":").map(Number);
+
+  minutes += 30;
+  if (minutes >= 60) {
+    hours += 1;
+    minutes -= 60;
+  }
+  if (hours >= 24) {
+    hours %= 24;
+  }
+
+  return convert24HourTo12Hour(hours, minutes);
+}
+
+function normalizeTimeRange(rawTime) {
+  const value = normalizeTimeToken(rawTime);
+  if (!value) return "";
+
+  if (value.includes("-")) {
+    const parts = value.split(/\s*-\s*/);
+    if (parts.length === 2) {
+      const start = normalizeTimeToken(parts[0]);
+      const end = normalizeTimeToken(parts[1]);
+
+      if (normalizeSingleTimeTo24(start) && normalizeSingleTimeTo24(end)) {
+        return `${start} - ${end}`;
+      }
+    }
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+
+    if (Array.isArray(parsed) && parsed.length) {
+      const start = normalizeTimeToken(parsed[0]);
+      const last = normalizeTimeToken(parsed[parsed.length - 1]);
+
+      const end = addThirtyMinutesToTimeLabel(last);
+
+      if (start && end) {
+        return `${start} - ${end}`;
+      }
+    }
+  } catch (err) {
+    // Not JSON; continue below
+  }
+
+  const maybeSingle = normalizeSingleTimeTo24(value);
+  if (maybeSingle) {
+    const end = addThirtyMinutesToTimeLabel(value);
+    if (end) {
+      return `${normalizeTimeToken(value)} - ${end}`;
+    }
+  }
+
+  return value;
+}
+
 function buildDateTime(dateStr, timeStr) {
   const normalizedTime = normalizeSingleTimeTo24(timeStr);
   if (!dateStr || !normalizedTime) return null;
 
-  const dateTime = new Date(`${dateStr}T${normalizedTime}:00`);
+  const baseDate = parseDateFromReservation(dateStr);
+  if (!baseDate) return null;
 
-  if (Number.isNaN(dateTime.getTime())) {
-    return null;
-  }
+  const [hours, minutes] = normalizedTime.split(":").map(Number);
 
-  return dateTime;
+  const dateTime = new Date(
+    baseDate.getFullYear(),
+    baseDate.getMonth(),
+    baseDate.getDate(),
+    hours,
+    minutes,
+    0,
+    0
+  );
+
+  return Number.isNaN(dateTime.getTime()) ? null : dateTime;
 }
 
 function parseReservationDateTime(dateStr, timeSlot, whichPart) {
   if (!dateStr || !timeSlot) return null;
 
-  const cleaned = String(timeSlot)
-    .replace(/\u2013|\u2014/g, "-")
-    .trim();
-
+  const cleaned = normalizeTimeRange(timeSlot);
   const slotParts = cleaned.split(/\s*-\s*/);
+
   if (slotParts.length !== 2) return null;
 
   const rawTime = whichPart === "start" ? slotParts[0] : slotParts[1];
@@ -279,7 +403,8 @@ function buildReservationMap() {
   const cards = Array.from(reservationList.querySelectorAll(".res-card"));
 
   cards.forEach(card => {
-    const dateISO = card.dataset.date || "";
+    const rawDate = card.dataset.date || "";
+    const dateISO = normalizeReservationDateToISO(rawDate);
     const buildingKey = card.dataset.bldg || "";
 
     if (!dateISO || !buildingKey) return;
@@ -309,21 +434,11 @@ function setLiveStatusState(state, payload = {}) {
     const activeStart = document.getElementById("liveActiveStart");
     const activeEnd = document.getElementById("liveActiveEnd");
 
-    if (activeCount) {
-      activeCount.textContent = payload.count || "0";
-    }
-
-    if (activeRoom) {
-      activeRoom.textContent = payload.room || "";
-    }
-
-    if (activeStart) {
-      activeStart.textContent = payload.start || "";
-    }
-
-    if (activeEnd) {
-      activeEnd.textContent = payload.end || "";
-    }
+    if (activeCount) activeCount.textContent = payload.count || "0";
+    if (activeRoom) activeRoom.textContent = payload.room || "";
+    if (activeStart) activeStart.textContent = payload.start || "";
+    if (activeEnd) activeEnd.textContent = payload.end || "";
+    return;
   }
 
   if (state === "pending") {
@@ -332,21 +447,11 @@ function setLiveStatusState(state, payload = {}) {
     const pendingStart = document.getElementById("livePendingStart");
     const pendingEnd = document.getElementById("livePendingEnd");
 
-    if (pendingCount) {
-      pendingCount.textContent = payload.count || "0";
-    }
-
-    if (pendingRoom) {
-      pendingRoom.textContent = payload.room || "";
-    }
-
-    if (pendingStart) {
-      pendingStart.textContent = payload.start || "";
-    }
-
-    if (pendingEnd) {
-      pendingEnd.textContent = payload.end || "";
-    }
+    if (pendingCount) pendingCount.textContent = payload.count || "0";
+    if (pendingRoom) pendingRoom.textContent = payload.room || "";
+    if (pendingStart) pendingStart.textContent = payload.start || "";
+    if (pendingEnd) pendingEnd.textContent = payload.end || "";
+    return;
   }
 }
 
@@ -363,17 +468,20 @@ function extractLiveReservations() {
       const roomTextEl = card.querySelector(".res-room");
       const roomText = roomTextEl ? roomTextEl.textContent.trim() : "";
 
-      const dateISO = card.dataset.date || "";
-      const timeSlot = card.dataset.time || "";
+      const rawDate = card.dataset.date || "";
+      const rawTime = card.dataset.time || "";
       const buildingKey = card.dataset.bldg || "";
 
-      const start = parseReservationDateTime(dateISO, timeSlot, "start");
-      const end = parseReservationDateTime(dateISO, timeSlot, "end");
+      const normalizedDate = normalizeReservationDateToISO(rawDate);
+      const normalizedTime = normalizeTimeRange(rawTime);
+
+      const start = parseReservationDateTime(rawDate, normalizedTime, "start");
+      const end = parseReservationDateTime(rawDate, normalizedTime, "end");
 
       return {
         roomText,
-        dateISO,
-        timeSlot,
+        dateISO: normalizedDate,
+        timeSlot: normalizedTime,
         buildingKey,
         start,
         end
@@ -394,7 +502,7 @@ function extractLiveReservations() {
     .sort((a, b) => a.start - b.start);
 }
 
-function initLiveStatusReal() {
+function updateLiveStatus() {
   if (!liveStatusBox) return;
 
   const now = new Date();
@@ -405,19 +513,25 @@ function initLiveStatusReal() {
     return;
   }
 
-  const activeReservation = reservations.find(res => now >= res.start && now < res.end);
+  const activeReservations = reservations.filter(
+    res => now >= res.start && now < res.end
+  );
 
-  if (activeReservation) {
+  if (activeReservations.length) {
+    const currentReservation = activeReservations.sort((a, b) => a.end - b.end)[0];
+
     setLiveStatusState("active", {
-      count: formatMinutesRemaining(activeReservation.end - now),
-      room: activeReservation.roomText,
-      start: `Started: ${formatTimeDisplay(activeReservation.start)}`,
-      end: `Ends: ${formatTimeDisplay(activeReservation.end)}`
+      count: formatMinutesRemaining(currentReservation.end - now),
+      room: currentReservation.roomText,
+      start: `Started: ${formatTimeDisplay(currentReservation.start)}`,
+      end: `Ends: ${formatTimeDisplay(currentReservation.end)}`
     });
     return;
   }
 
-  const pendingReservations = reservations.filter(res => res.start > now);
+  const pendingReservations = reservations
+    .filter(res => res.start > now)
+    .sort((a, b) => a.start - b.start);
 
   if (pendingReservations.length) {
     const nearestPending = pendingReservations[0];
@@ -432,6 +546,17 @@ function initLiveStatusReal() {
   }
 
   setLiveStatusState("none");
+}
+
+function startLiveStatusTimer() {
+  if (!liveStatusBox) return;
+
+  if (liveStatusInterval) {
+    clearInterval(liveStatusInterval);
+  }
+
+  updateLiveStatus();
+  liveStatusInterval = setInterval(updateLiveStatus, 1000);
 }
 
 /* =====================================================
@@ -481,19 +606,21 @@ function renderCalendar() {
     cells.push({ empty: true });
   }
 
-  calGrid.innerHTML = cells.map(cell => {
-    if (cell.empty) {
-      return `<span class="empty"></span>`;
-    }
+  calGrid.innerHTML = cells
+    .map(cell => {
+      if (cell.empty) {
+        return `<span class="empty"></span>`;
+      }
 
-    const classes = [];
+      const classes = [];
 
-    if (cell.key === todayKey) {
-      classes.push("today");
-    }
+      if (cell.key === todayKey) {
+        classes.push("today");
+      }
 
-    return `<span class="${classes.join(" ")}" data-date="${cell.key}">${cell.day}</span>`;
-  }).join("");
+      return `<span class="${classes.join(" ")}" data-date="${cell.key}">${cell.day}</span>`;
+    })
+    .join("");
 
   const daySpans = Array.from(calGrid.querySelectorAll("span[data-date]"));
 
@@ -590,24 +717,14 @@ document.addEventListener("click", e => {
 
 if (prevBtn) {
   prevBtn.addEventListener("click", () => {
-    viewDate = new Date(
-      viewDate.getFullYear(),
-      viewDate.getMonth() - 1,
-      1
-    );
-
+    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
     renderCalendar();
   });
 }
 
 if (nextBtn) {
   nextBtn.addEventListener("click", () => {
-    viewDate = new Date(
-      viewDate.getFullYear(),
-      viewDate.getMonth() + 1,
-      1
-    );
-
+    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
     renderCalendar();
   });
 }
@@ -620,10 +737,4 @@ applyLabBuildingStyles();
 renderLabsByFilter();
 applyReservationStyles();
 renderCalendar();
-initLiveStatusReal();
-
-/* =====================================================
-   Auto Refresh Live Status
-   ===================================================== */
-
-setInterval(initLiveStatusReal, 30000);
+startLiveStatusTimer();
