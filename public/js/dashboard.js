@@ -65,22 +65,6 @@ function formatTimeDisplay(dateObj) {
   });
 }
 
-function parseReservationDateTime(dateStr, timeSlot, whichPart) {
-  if (!dateStr || !timeSlot) return null;
-
-  const slotParts = String(timeSlot).split(" - ");
-  if (slotParts.length !== 2) return null;
-
-  const rawTime = whichPart === "start" ? slotParts[0] : slotParts[1];
-  const fullDateTime = new Date(`${dateStr}T${rawTime}`);
-
-  if (Number.isNaN(fullDateTime.getTime())) {
-    return null;
-  }
-
-  return fullDateTime;
-}
-
 function formatMinutesRemaining(msDiff) {
   const totalMinutes = Math.max(0, Math.ceil(msDiff / 60000));
   return String(totalMinutes);
@@ -97,6 +81,85 @@ function formatPendingCountdown(msDiff) {
   }
 
   return String(minutes);
+}
+
+/* =====================================================
+   Time Parsing Helpers
+   ===================================================== */
+
+function normalizeTimeToken(value) {
+  return String(value || "")
+    .replace(/\u2013|\u2014/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function convert12HourTo24Hour(timeStr) {
+  const value = normalizeTimeToken(timeStr);
+  const match = value.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+
+  if (!match) return null;
+
+  let hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const meridiem = match[3].toUpperCase();
+
+  if (hours < 1 || hours > 12 || minutes < 0 || minutes > 59) {
+    return null;
+  }
+
+  if (meridiem === "AM") {
+    if (hours === 12) hours = 0;
+  } else {
+    if (hours !== 12) hours += 12;
+  }
+
+  return `${pad2(hours)}:${pad2(minutes)}`;
+}
+
+function normalizeSingleTimeTo24(timeStr) {
+  const value = normalizeTimeToken(timeStr);
+
+  if (!value) return null;
+
+  const already24 = value.match(/^(\d{1,2}):(\d{2})$/);
+  if (already24) {
+    const hours = Number(already24[1]);
+    const minutes = Number(already24[2]);
+
+    if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+      return `${pad2(hours)}:${pad2(minutes)}`;
+    }
+  }
+
+  return convert12HourTo24Hour(value);
+}
+
+function buildDateTime(dateStr, timeStr) {
+  const normalizedTime = normalizeSingleTimeTo24(timeStr);
+  if (!dateStr || !normalizedTime) return null;
+
+  const dateTime = new Date(`${dateStr}T${normalizedTime}:00`);
+
+  if (Number.isNaN(dateTime.getTime())) {
+    return null;
+  }
+
+  return dateTime;
+}
+
+function parseReservationDateTime(dateStr, timeSlot, whichPart) {
+  if (!dateStr || !timeSlot) return null;
+
+  const cleaned = String(timeSlot)
+    .replace(/\u2013|\u2014/g, "-")
+    .trim();
+
+  const slotParts = cleaned.split(/\s*-\s*/);
+  if (slotParts.length !== 2) return null;
+
+  const rawTime = whichPart === "start" ? slotParts[0] : slotParts[1];
+  return buildDateTime(dateStr, rawTime);
 }
 
 /* =====================================================
@@ -246,20 +309,20 @@ function setLiveStatusState(state, payload = {}) {
     const activeStart = document.getElementById("liveActiveStart");
     const activeEnd = document.getElementById("liveActiveEnd");
 
-    if (activeCount && payload.count) {
-      activeCount.textContent = payload.count;
+    if (activeCount) {
+      activeCount.textContent = payload.count || "0";
     }
 
-    if (activeRoom && payload.room) {
-      activeRoom.textContent = payload.room;
+    if (activeRoom) {
+      activeRoom.textContent = payload.room || "";
     }
 
-    if (activeStart && payload.start) {
-      activeStart.textContent = payload.start;
+    if (activeStart) {
+      activeStart.textContent = payload.start || "";
     }
 
-    if (activeEnd && payload.end) {
-      activeEnd.textContent = payload.end;
+    if (activeEnd) {
+      activeEnd.textContent = payload.end || "";
     }
   }
 
@@ -269,20 +332,20 @@ function setLiveStatusState(state, payload = {}) {
     const pendingStart = document.getElementById("livePendingStart");
     const pendingEnd = document.getElementById("livePendingEnd");
 
-    if (pendingCount && payload.count) {
-      pendingCount.textContent = payload.count;
+    if (pendingCount) {
+      pendingCount.textContent = payload.count || "0";
     }
 
-    if (pendingRoom && payload.room) {
-      pendingRoom.textContent = payload.room;
+    if (pendingRoom) {
+      pendingRoom.textContent = payload.room || "";
     }
 
-    if (pendingStart && payload.start) {
-      pendingStart.textContent = payload.start;
+    if (pendingStart) {
+      pendingStart.textContent = payload.start || "";
     }
 
-    if (pendingEnd && payload.end) {
-      pendingEnd.textContent = payload.end;
+    if (pendingEnd) {
+      pendingEnd.textContent = payload.end || "";
     }
   }
 }
@@ -295,26 +358,40 @@ function getReservationCardsForLiveStatus() {
 function extractLiveReservations() {
   const cards = getReservationCardsForLiveStatus();
 
-  return cards.map(card => {
-    const roomTextEl = card.querySelector(".res-room");
-    const roomText = roomTextEl ? roomTextEl.textContent.trim() : "";
+  return cards
+    .map(card => {
+      const roomTextEl = card.querySelector(".res-room");
+      const roomText = roomTextEl ? roomTextEl.textContent.trim() : "";
 
-    const dateISO = card.dataset.date || "";
-    const timeSlot = card.dataset.time || "";
-    const buildingKey = card.dataset.bldg || "";
+      const dateISO = card.dataset.date || "";
+      const timeSlot = card.dataset.time || "";
+      const buildingKey = card.dataset.bldg || "";
 
-    const start = parseReservationDateTime(dateISO, timeSlot, "start");
-    const end = parseReservationDateTime(dateISO, timeSlot, "end");
+      const start = parseReservationDateTime(dateISO, timeSlot, "start");
+      const end = parseReservationDateTime(dateISO, timeSlot, "end");
 
-    return {
-      roomText,
-      dateISO,
-      timeSlot,
-      buildingKey,
-      start,
-      end
-    };
-  }).filter(item => item.roomText && item.start && item.end);
+      return {
+        roomText,
+        dateISO,
+        timeSlot,
+        buildingKey,
+        start,
+        end
+      };
+    })
+    .filter(item => {
+      return (
+        item.roomText &&
+        item.dateISO &&
+        item.timeSlot &&
+        item.start instanceof Date &&
+        !Number.isNaN(item.start.getTime()) &&
+        item.end instanceof Date &&
+        !Number.isNaN(item.end.getTime()) &&
+        item.end > item.start
+      );
+    })
+    .sort((a, b) => a.start - b.start);
 }
 
 function initLiveStatusReal() {
@@ -340,17 +417,16 @@ function initLiveStatusReal() {
     return;
   }
 
-  const pendingReservation = reservations.find(res => {
-    const diff = res.start - now;
-    return diff > 0 && diff <= 24 * 60 * 60 * 1000;
-  });
+  const pendingReservations = reservations.filter(res => res.start > now);
 
-  if (pendingReservation) {
+  if (pendingReservations.length) {
+    const nearestPending = pendingReservations[0];
+
     setLiveStatusState("pending", {
-      count: formatPendingCountdown(pendingReservation.start - now),
-      room: pendingReservation.roomText,
-      start: `Starts at: ${formatTimeDisplay(pendingReservation.start)}`,
-      end: `Ends at: ${formatTimeDisplay(pendingReservation.end)}`
+      count: formatPendingCountdown(nearestPending.start - now),
+      room: nearestPending.roomText,
+      start: `Starts at: ${formatTimeDisplay(nearestPending.start)}`,
+      end: `Ends at: ${formatTimeDisplay(nearestPending.end)}`
     });
     return;
   }
@@ -472,8 +548,9 @@ function renderCalendar() {
    Filter Popup Logic
    ===================================================== */
 
-if (filterBtn) {
-  filterBtn.addEventListener("click", () => {
+if (filterBtn && filterPop) {
+  filterBtn.addEventListener("click", e => {
+    e.stopPropagation();
     syncChecks();
     filterPop.classList.toggle("show");
   });
@@ -486,7 +563,10 @@ if (applyFilters) {
     );
 
     renderLabsByFilter();
-    filterPop.classList.remove("show");
+
+    if (filterPop) {
+      filterPop.classList.remove("show");
+    }
   });
 }
 
@@ -494,12 +574,12 @@ if (applyFilters) {
    Global Click Handler
    ===================================================== */
 
-document.addEventListener("click", (e) => {
+document.addEventListener("click", e => {
   if (!filterPop) return;
 
-  const within = e.target.closest(".hero-actions");
+  const clickedInsideFilter = e.target.closest(".hero-actions");
 
-  if (!within) {
+  if (!clickedInsideFilter) {
     filterPop.classList.remove("show");
   }
 });
@@ -541,3 +621,9 @@ renderLabsByFilter();
 applyReservationStyles();
 renderCalendar();
 initLiveStatusReal();
+
+/* =====================================================
+   Auto Refresh Live Status
+   ===================================================== */
+
+setInterval(initLiveStatusReal, 30000);

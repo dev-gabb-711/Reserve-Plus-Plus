@@ -235,6 +235,7 @@ body{
 
 /*----------------Results Header + Filter Button------------------*/
 .result-head{
+  position:relative;
   display:flex;
   justify-content:flex-end;
   margin-bottom:12px;
@@ -248,14 +249,16 @@ body{
   display:grid;
   place-items:center;
   cursor:pointer;
+  border-radius:12px;
+  transition:background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
 }
 .filter-btn .material-symbols-rounded{
   font-size:30px;
   color:rgba(255,255,255,0.9);
 }
 .filter-btn:hover{
-  background:rgba(255,255,255,0.16);
-  box-shadow:0 0 12px rgba(255,255,255,0.35), 0 0 28px rgba(180,120,255,0.25);
+  background:rgba(255,255,255,0.10);
+  box-shadow:0 0 12px rgba(255,255,255,0.22), 0 0 24px rgba(180,120,255,0.16);
   transform:translateY(-1px);
 }
 
@@ -267,22 +270,23 @@ body{
 .filter-panel{
   position:absolute;
   top:60px;
-  right:22px;
-
-  width:min(520px, 90%);
+  right:0;
+  width:min(520px, 90vw);
   min-height:230px;
-  padding:16px 18px 52px;
+  padding:16px 18px 56px;
   border-radius:18px;
-  background:rgba(93, 71, 116, 0.92);
+  background:rgba(20,16,28,0.78);
   border:1px solid rgba(255,255,255,0.18);
-  backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);
-  box-shadow:0 20px 45px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  box-shadow:0 18px 40px rgba(0,0,0,0.35);
   display:none;
-  z-index:10;
+  z-index:20;
 }
 
-.filter-panel.open{ display:block; }
+.filter-panel.show{
+  display:block;
+}
 
 .filter-grid{
   display:grid;
@@ -293,7 +297,7 @@ body{
 .filter-field{
   display:grid;
   gap:6px;
-  color:rgba(255,255,255,0.85);
+  color:rgba(255,255,255,0.86);
   font-weight:700;
   font-size:12px;
 }
@@ -303,13 +307,21 @@ body{
   height:40px;
   border-radius:12px;
   border:1px solid rgba(255,255,255,0.14);
-  background:rgba(20,15,30,0.85);
+  background:rgba(255,255,255,0.06);
   color:rgba(255,255,255,0.95);
   padding:0 12px;
   outline:none;
+  box-shadow:none;
 }
+
 .filter-field input::placeholder{
-  color:rgba(255,255,255,0.45);
+  color:rgba(255,255,255,0.42);
+}
+
+.filter-field input:focus,
+.filter-field select:focus{
+  border-color:rgba(255,255,255,0.24);
+  background:rgba(255,255,255,0.08);
 }
 
 /*----------------Filter Actions------------------*/
@@ -318,29 +330,36 @@ body{
   bottom:14px;
   right:16px;
   display:flex;
-  gap:8px;
+  gap:10px;
 }
+
 .filter-actions button{
   border-radius:12px;
-  padding:5px 16px;
-  font-weight:500;
+  padding:8px 18px;
+  font-weight:700;
   border:none;
   cursor:pointer;
+  transition:background 0.18s ease, filter 0.18s ease, transform 0.12s ease;
 }
 
 #clearFilters{
   background:rgba(255,255,255,0.12);
   color:#fff;
 }
+
 #applyFilters{
   background:linear-gradient(135deg, #8c52ff, #ff914d);
   color:#fff;
 }
+
 #clearFilters:hover{
-  background:rgba(255,255,255,0.2);
+  background:rgba(255,255,255,0.20);
+  transform:translateY(-1px);
 }
+
 #applyFilters:hover{
-  filter:brightness(1.1);
+  filter:brightness(1.08);
+  transform:translateY(-1px);
 }
 
 
@@ -356,19 +375,21 @@ body{
   overflow-y:auto;
   padding-right:6px;
   max-height:none;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,0.22) transparent;
 }
 
 /*----------------Result Item------------------*/
 .result-item{
   border-radius:18px;
   padding:12px 14px;
-  display:grid;
-  grid-template-columns:10px 1fr auto;
-  gap:12px;
+  display:flex;
   align-items:center;
+  gap:12px;
   background:rgba(0,0,0,0.12);
   border:1px solid rgba(255,255,255,0.10);
 }
+
 .result-item:hover{
   transform:translateY(-1px);
   background:var(--panel-2);
@@ -379,13 +400,16 @@ body{
 .building-bar{
   width:10px;
   height:100%;
+  min-height:54px;
   border-radius:999px;
+  flex-shrink:0;
 }
 
 /*----------------Result Text------------------*/
 .result-main{
   display:grid;
   gap:3px;
+  min-width:0;
 }
 .result-title{
   font-weight:800;
@@ -424,7 +448,13 @@ body{
   RESPONSIVE
   ================================================ */
 @media (max-width:700px){
-  .filter-grid{ grid-template-columns:1fr; }
+  .filter-grid{
+    grid-template-columns:1fr;
+  }
+
+  .filter-panel{
+    width:min(94vw, 520px);
+  }
 }
 
 
@@ -446,23 +476,12 @@ body{
   background-clip:padding-box;
 }
 
-/*----------------Scrollbar (Firefox)------------------*/
-.result-list{
-  scrollbar-width:thin;
-  scrollbar-color:rgba(255,255,255,0.22) transparent;
-}
-
-
+/*----------------User Search Result Avatar------------------*/
 .result-avatar{
   width:46px;
   height:46px;
   border-radius:50%;
   object-fit:cover;
   margin-right:12px;
-}
-
-.result-item{
-  display:flex;
-  align-items:center;
-  gap:12px;
+  flex-shrink:0;
 }
