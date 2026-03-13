@@ -131,7 +131,7 @@
           </section>
         </div>
 
-        <!--========================= RIGHT: PROFILE + TICKETS + FAQ =========================-->
+        <!--========================= RIGHT: PROFILE + TICKETS + FAQ BUTTON =========================-->
         <aside class="right-col">
 
           <div class="glass card">
@@ -150,33 +150,42 @@
           </div>
 
           <div class="glass card">
-            <button type="button" onclick="openFaqModal()" class="btn btn-outline-light btn-outline w-100">
+            <button
+              type="button"
+              onclick="openFaqModal()"
+              class="btn btn-outline-light btn-outline w-100"
+            >
               FAQ
             </button>
-
-            <div id="faqModal" class="modal">
-              <div class="modal-content">
-                <span class="close" onclick="closeFaqModal()">&times;</span>
-
-                <h4>Frequently Asked Questions</h4>
-
-                <p><strong>Q: Can students use the computer laboratory without a class?</strong></p>
-                <p><em>A: Yes, during open hours! Please check the schedule on this dashboard to reserve a free slot in
-                    advance. Walk-ins are currently not allowed to ensure everyone gets a spot.</em></p>
-
-                <p><strong>Q: Is food and drinks allowed inside the lab?</strong></p>
-                <p><em>A: No. Food and drinks are strictly prohibited.</em></p>
-
-                <p><strong>Q: What should I do if a computer is not working?</strong></p>
-                <p><em>A: Don't worry! Please flag down a lab assistant immediately or use the "Report Issue" button on
-                    your dashboard so we can fix it right away.</em></p>
-              </div>
-            </div>
           </div>
 
         </aside>
       </section>
     </main>
+  </div>
+
+  <!--========================= FAQ MODAL =========================-->
+  <div id="faqModal" class="faq-modal">
+    <div class="faq-modal-content">
+      <button type="button" class="faq-close-btn" onclick="closeFaqModal()" aria-label="Close FAQ">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+
+      <h4 class="faq-title">Frequently Asked Questions</h4>
+
+      <div class="faq-body">
+        <p><strong>Q: Can students use the computer laboratory without a class?</strong></p>
+        <p><em>A: Yes, during open hours! Please check the schedule on this dashboard to reserve a free slot in
+            advance. Walk-ins are currently not allowed to ensure everyone gets a spot.</em></p>
+
+        <p><strong>Q: Is food and drinks allowed inside the lab?</strong></p>
+        <p><em>A: No. Food and drinks are strictly prohibited.</em></p>
+
+        <p><strong>Q: What should I do if a computer is not working?</strong></p>
+        <p><em>A: Don't worry! Please flag down a lab assistant immediately or use the "Report Issue" button on
+            your dashboard so we can fix it right away.</em></p>
+      </div>
+    </div>
   </div>
 
   <!--========================= SCRIPTS =========================-->

@@ -15,8 +15,6 @@
   --green: rgba(80, 255, 120, 0.95);
 }
 
-
-
 /*================================================
   BASE
   ================================================ */
@@ -51,8 +49,6 @@ body {
   transform: scale(1.05);
 }
 
-
-
 /*================================================
   GLOBAL LAYOUT
   ================================================ */
@@ -65,8 +61,6 @@ body {
   gap: 18px;
   padding: 0 22px 0 0;
 }
-
-
 
 /*================================================
   SIDEBAR
@@ -140,8 +134,6 @@ body {
   transform: translateX(-12px);
 }
 
-
-
 /*================================================
   MAIN
   ================================================ */
@@ -152,8 +144,6 @@ body {
   flex-direction: column;
   min-height: 0;
 }
-
-
 
 /*================================================
   HEADER
@@ -214,8 +204,6 @@ body {
   color: rgba(120, 80, 150, 0.55);
 }
 
-
-
 /*================================================
   CONTENT GRID
   ================================================ */
@@ -250,8 +238,6 @@ body {
   gap: 16px;
 }
 
-
-
 /*================================================
   GLASS + CARD UTILITIES
   ================================================ */
@@ -276,8 +262,6 @@ body {
   font-weight: 800;
   color: var(--white);
 }
-
-
 
 /*================================================
   IT ASSIST FORM
@@ -460,12 +444,10 @@ select.custom-input {
   transform: translateY(0);
 }
 
-
-
 /*================================================
   RIGHT PANEL CONTENT
   ================================================ */
-.right-col>.glass.card {
+.right-col > .glass.card {
   background: transparent;
   border: 0;
   box-shadow: none;
@@ -477,12 +459,12 @@ select.custom-input {
   min-height: 0;
 }
 
-.right-col>.glass.card:not(:last-child) {
+.right-col > .glass.card:not(:last-child) {
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.right-col>.glass.card:nth-of-type(2) {
+.right-col > .glass.card:nth-of-type(2) {
   flex: 1;
   min-height: 0;
 }
@@ -536,23 +518,40 @@ select.custom-input {
 
 /*----------------Ticket Mini Cards------------------*/
 .mini-card {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 14px;
+  display: block;
+  width: 100%;
+  padding: 16px 18px;
   border-radius: 18px;
-  background: rgba(0, 0, 0, 0.22);
+  background: rgba(0, 0, 0, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
-.mini-card .accent {
-  width: 10px;
-  height: 44px;
-  border-radius: 999px;
-  flex: 0 0 10px;
-  align-self: center;
+.mini-card .info {
+  min-width: 0;
+}
+
+.mini-card .info strong {
+  display: block;
+  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.96);
+  font-weight: 800;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.mini-card .info p {
+  margin: 6px 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 700;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.mini-card .info .mini-label {
+  color: rgba(255, 255, 255, 0.96);
+  font-weight: 800;
 }
 
 /*----------------Ticket Status Colors------------------*/
@@ -600,56 +599,6 @@ select.custom-input {
   cursor: pointer;
 }
 
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(85, 46, 95, 0.7);
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  overflow: hidden;
-
-}
-
-.modal-content {
-  position: relative;
-  background: rgb(57, 31, 61);
-  padding: 30px;
-  width: 90%;
-  max-width: 500px;
-  border-radius: 12px;
-  color: #f1f1f1;
-  max-height: 80vh;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  overflow-y: auto;
-}
-
-.close {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-  color: #c9ada7;
-  transition: 0.3s;
-}
-
-.close:hover {
-  color: #ffffff;
-}
-
-.modal h4 {
-  text-align: center;
-  margin-top: 0;
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
 .btn-outline:hover {
   filter: brightness(1.05);
 }
@@ -658,12 +607,78 @@ select.custom-input {
   transform: translateY(1px);
 }
 
+/*================================================
+  FAQ MODAL
+  ================================================ */
+.faq-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
 
+.faq-modal-content {
+  position: relative;
+  width: min(720px, 100%);
+  max-height: 80vh;
+  overflow: auto;
+  border-radius: 24px;
+  padding: 28px 26px 24px;
+  background: linear-gradient(180deg, rgba(55, 20, 75, 0.96), rgba(35, 18, 50, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  color: #fff;
+}
+
+.faq-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.faq-close-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.faq-close-btn .material-symbols-rounded {
+  font-size: 24px;
+}
+
+.faq-title {
+  margin: 0 44px 18px 0;
+  font-size: 2rem;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.faq-body {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 18px;
+}
+
+.faq-body p {
+  margin-bottom: 16px;
+  line-height: 1.55;
+}
 
 /*================================================
   RESPONSIVE
   ================================================ */
-@media (max-width:1200px) {
+@media (max-width: 1200px) {
   body {
     overflow: auto;
   }
@@ -681,7 +696,7 @@ select.custom-input {
   }
 }
 
-@media (max-width:960px) {
+@media (max-width: 960px) {
   .form-grid {
     grid-template-columns: 1fr;
   }
