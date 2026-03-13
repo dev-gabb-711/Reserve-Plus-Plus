@@ -3,6 +3,8 @@ const mongoose = require('mongoose')
 const path = require('path')
 const hbs = require('hbs')
 const session = require('express-session')
+const multer = require('multer') 
+
 
 const app = express()
 
@@ -637,59 +639,62 @@ app.post('/signup', async (req, res) => {
   }
 })
 
-app.post('/profile/:id/edit', requireLogin, async (req, res) => {
+// 1. AYUSIN ANG STORAGE PATH
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    // TANGGALIN ANG ../ DAHIL NASA ROOT ANG APP.JS
+    cb(null, path.join(__dirname, 'public/uploads')); 
+  },
+  filename: function(req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const uniqueName = `${Date.now()}-${file.fieldname}${ext}`;
+    cb(null, uniqueName);
+  }
+});
+
+const upload = multer({ storage: storage });
+
+
+app.post('/profile/:id/edit', requireLogin, upload.single('profilePic'), async (req, res) => {
   try {
-    const viewedUserId = req.params.id
-    const loggedInUserId = req.session.user.id
+    const viewedUserId = req.params.id;
+    const loggedInUserId = req.session.user.id;
 
     if (String(viewedUserId) !== String(loggedInUserId)) {
-      return res.status(403).send('Unauthorized')
-    }
-
-    const first = (req.body.firstName || '').trim()
-    const last = (req.body.lastName || '').trim()
-    const mail = (req.body.email || '').trim().toLowerCase()
-    const desc = (req.body.description || '').trim()
-    const pass = (req.body.password || '').trim()
-
-    if (!first || !last || !mail) {
-      return res
-        .status(400)
-        .send('First name, last name, and email are required.')
-    }
-
-    const existingUser = await User.findOne({
-      email: mail,
-      _id: { $ne: viewedUserId }
-    })
-
-    if (existingUser) {
-      return res
-        .status(400)
-        .send('That email is already being used by another account.')
+      return res.status(403).json({ success: false, message: 'Unauthorized' });
     }
 
     const updates = {
-      firstName: first,
-      lastName: last,
-      email: mail,
-      description: desc
+      firstName: (req.body.firstName || '').trim(),
+      lastName: (req.body.lastName || '').trim(),
+      email: (req.body.email || '').trim().toLowerCase(),
+      description: (req.body.description || '').trim()
+    };
+
+    if (req.body.password) {
+      updates.password = req.body.password.trim();
     }
 
-    if (pass) {
-      updates.password = pass
+    if (req.file) {
+      updates.profilePic = '/uploads/' + req.file.filename;
     }
 
-    await User.findByIdAndUpdate(viewedUserId, updates, { new: true })
+    await User.findByIdAndUpdate(viewedUserId, updates);
+    req.session.user.name = updates.firstName;
 
-    req.session.user.name = first
+    
+    res.json({ 
+      success: true, 
+      profilePic: updates.profilePic, 
+      userId: viewedUserId 
+    });
 
-    res.redirect(`/profile/${viewedUserId}`)
   } catch (err) {
-    console.error('Error updating profile:', err)
-    res.status(500).send('Error updating profile')
+    console.error('Error updating profile:', err);
+    res.status(500).json({ success: false, message: 'Error updating profile' });
   }
-})
+});
+
 
 app.post('/profile/:id/delete', requireLogin, async (req, res) => {
   try {

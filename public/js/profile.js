@@ -87,3 +87,37 @@ document.addEventListener('DOMContentLoaded', () => {
     )
   })
 })
+
+const editForm = document.getElementById('editProfileForm');
+
+if (editForm) {
+  editForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(editForm);
+
+    fetch(editForm.action, {
+      method: 'POST',
+      body: formData // No need for 'headers', automatic na ang multipart/form-data
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          // Update avatar preview with cache-busting
+          if (data.profilePic) {
+            avatarPreview.src = `${data.profilePic}?t=${new Date().getTime()}`;
+          }
+          alert('Profile updated successfully!');
+          
+    
+          window.location.href = `/profile/${data.userId || ''}`;
+        } else {
+          alert(data.message || 'Error updating profile');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('An error occurred. Please check your connection.');
+      });
+  });
+}
