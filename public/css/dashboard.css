@@ -694,7 +694,7 @@ body {
 
 .live-state--active .live-count {
   font-size: 6.4rem;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .live-state--pending .live-count {

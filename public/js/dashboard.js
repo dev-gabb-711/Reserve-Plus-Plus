@@ -282,8 +282,25 @@ function parseReservationDateTime(dateStr, timeSlot, whichPart) {
 
   if (slotParts.length !== 2) return null;
 
-  const rawTime = whichPart === "start" ? slotParts[0] : slotParts[1];
-  return buildDateTime(dateStr, rawTime);
+  const startTime = slotParts[0];
+  const endTime = slotParts[1];
+
+  const startDateTime = buildDateTime(dateStr, startTime);
+  const endDateTime = buildDateTime(dateStr, endTime);
+
+  if (!startDateTime || !endDateTime) return null;
+
+  if (whichPart === "start") {
+    return startDateTime;
+  }
+
+  const adjustedEnd = new Date(endDateTime);
+
+  if (adjustedEnd <= startDateTime) {
+    adjustedEnd.setDate(adjustedEnd.getDate() + 1);
+  }
+
+  return adjustedEnd;
 }
 
 /* =====================================================
