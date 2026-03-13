@@ -3,8 +3,7 @@ const mongoose = require('mongoose')
 const path = require('path')
 const hbs = require('hbs')
 const session = require('express-session')
-const multer = require('multer') 
-
+const multer = require('multer')
 
 const app = express()
 
@@ -66,18 +65,18 @@ const Notification = require('./models/Notification')
    5. HELPER FUNCTIONS
    ========================================== */
 
-function normalizeRoomCode (value) {
+function normalizeRoomCode(value) {
   return String(value || '').replace(/^[A-Za-z]+/, '')
 }
 
-function requireLogin (req, res, next) {
+function requireLogin(req, res, next) {
   if (!req.session.user) {
     return res.redirect('/login')
   }
   next()
 }
 
-function requireAdmin (req, res, next) {
+function requireAdmin(req, res, next) {
   if (!req.session.user) {
     return res.redirect('/login')
   }
@@ -89,7 +88,7 @@ function requireAdmin (req, res, next) {
   next()
 }
 
-function makeAvatar (color) {
+function makeAvatar(color) {
   return `
   data:image/svg+xml,
   <svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'>
@@ -100,7 +99,7 @@ function makeAvatar (color) {
   `
 }
 
-function getNotificationAvatar (type, senderAvatar) {
+function getNotificationAvatar(type, senderAvatar) {
   if (senderAvatar && String(senderAvatar).trim() !== '') {
     return senderAvatar
   }
@@ -110,7 +109,7 @@ function getNotificationAvatar (type, senderAvatar) {
   return makeAvatar('blue')
 }
 
-function formatNotificationForClient (notif) {
+function formatNotificationForClient(notif) {
   return {
     id: String(notif._id),
     _id: String(notif._id),
@@ -126,7 +125,7 @@ function formatNotificationForClient (notif) {
   }
 }
 
-async function createNotificationSafe (data) {
+async function createNotificationSafe(data) {
   try {
     await Notification.create(data)
   } catch (err) {
@@ -134,7 +133,7 @@ async function createNotificationSafe (data) {
   }
 }
 
-function formatDateTimeShort (value) {
+function formatDateTimeShort(value) {
   if (!value) return 'No date available'
 
   const date = new Date(value)
@@ -149,7 +148,7 @@ function formatDateTimeShort (value) {
   })
 }
 
-function buildDashboardBuildings (labs, tickets) {
+function buildDashboardBuildings(labs, tickets) {
   return labs.reduce((groups, lab) => {
     let buildingGroup = groups.find(group => group.title === lab.building)
 
@@ -183,7 +182,7 @@ function buildDashboardBuildings (labs, tickets) {
   }, [])
 }
 
-function buildDashboardTickets (tickets) {
+function buildDashboardTickets(tickets) {
   return tickets.slice(0, 6).map((ticket, index) => {
     const firstName = ticket.user?.firstName || ''
     const lastName = ticket.user?.lastName || ''
@@ -202,7 +201,7 @@ function buildDashboardTickets (tickets) {
   })
 }
 
-function buildMiniNotifications (notifications) {
+function buildMiniNotifications(notifications) {
   return notifications.map(notif => ({
     _id: notif._id,
     name: notif.senderName || notif.type || 'System',
@@ -211,7 +210,7 @@ function buildMiniNotifications (notifications) {
   }))
 }
 
-function buildSearchResults (labs) {
+function buildSearchResults(labs) {
   const searchResults = []
 
   labs.forEach(lab => {
@@ -234,7 +233,7 @@ function buildSearchResults (labs) {
   return searchResults
 }
 
-function buildStudentNotifications (notifications) {
+function buildStudentNotifications(notifications) {
   return notifications.map(notif => ({
     ...notif,
     senderName: notif.senderName || notif.type || 'System',
@@ -246,7 +245,7 @@ function buildStudentNotifications (notifications) {
  * Calculates a user-friendly time range (e.g., "09:00 AM - 10:30 AM")
  * from an array of 30-min time slots for the dashboard.
  */
-function calculateTimeRangeServer (slots) {
+function calculateTimeRangeServer(slots) {
   if (!slots || slots.length === 0) return ''
 
   try {
@@ -287,6 +286,18 @@ app.get('/', (req, res) => res.render('index'))
 app.get('/login', (req, res) => res.render('login'))
 app.get('/signup', (req, res) => res.render('signup'))
 
+app.get('/logout', requireLogin, (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Logout failed:', err)
+      return res.redirect('/dashboard')
+    }
+
+    res.clearCookie('connect.sid')
+    res.redirect('/login')
+  })
+})
+
 app.get('/dashboard', async (req, res) => {
   try {
     if (!req.session.user) return res.redirect('/login')
@@ -308,8 +319,8 @@ app.get('/dashboard', async (req, res) => {
       const buildingKey = String(building).toLowerCase().includes('andrew')
         ? 'andrew'
         : String(building).toLowerCase().includes('gokongwei')
-        ? 'gokongwei'
-        : ''
+          ? 'gokongwei'
+          : ''
 
       let calculatedTime = reservation.timeSlot
       try {
@@ -397,19 +408,17 @@ app.get('/reserve', async (req, res) => {
 })
 
 app.get('/it-assist', requireLogin, async (req, res) => {
-    try{
-        if (!req.session.user) return res.redirect('/login')
+  try {
+    if (!req.session.user) return res.redirect('/login')
 
-        const userId = req.session.user.id
-        const studentUser = await User.findById(userId).lean()
-        
-        res.render('itassist', {studentUser})
-        
-    } catch (err){
-        console.error('Error loading it-assist page:', err)
-        res.status(500).send('Error loading it-assist')
-    }    
-    
+    const userId = req.session.user.id
+    const studentUser = await User.findById(userId).lean()
+
+    res.render('itassist', { studentUser })
+  } catch (err) {
+    console.error('Error loading it-assist page:', err)
+    res.status(500).send('Error loading it-assist')
+  }
 })
 
 app.get('/it-assist-admin', requireAdmin, async (req, res) => {
@@ -639,29 +648,26 @@ app.post('/signup', async (req, res) => {
   }
 })
 
-// 1. AYUSIN ANG STORAGE PATH
 const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    // TANGGALIN ANG ../ DAHIL NASA ROOT ANG APP.JS
-    cb(null, path.join(__dirname, 'public/uploads')); 
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, 'public/uploads'))
   },
-  filename: function(req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const uniqueName = `${Date.now()}-${file.fieldname}${ext}`;
-    cb(null, uniqueName);
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname)
+    const uniqueName = `${Date.now()}-${file.fieldname}${ext}`
+    cb(null, uniqueName)
   }
-});
+})
 
-const upload = multer({ storage: storage });
-
+const upload = multer({ storage: storage })
 
 app.post('/profile/:id/edit', requireLogin, upload.single('profilePic'), async (req, res) => {
   try {
-    const viewedUserId = req.params.id;
-    const loggedInUserId = req.session.user.id;
+    const viewedUserId = req.params.id
+    const loggedInUserId = req.session.user.id
 
     if (String(viewedUserId) !== String(loggedInUserId)) {
-      return res.status(403).json({ success: false, message: 'Unauthorized' });
+      return res.status(403).json({ success: false, message: 'Unauthorized' })
     }
 
     const updates = {
@@ -669,32 +675,29 @@ app.post('/profile/:id/edit', requireLogin, upload.single('profilePic'), async (
       lastName: (req.body.lastName || '').trim(),
       email: (req.body.email || '').trim().toLowerCase(),
       description: (req.body.description || '').trim()
-    };
+    }
 
     if (req.body.password) {
-      updates.password = req.body.password.trim();
+      updates.password = req.body.password.trim()
     }
 
     if (req.file) {
-      updates.profilePic = '/uploads/' + req.file.filename;
+      updates.profilePic = '/uploads/' + req.file.filename
     }
 
-    await User.findByIdAndUpdate(viewedUserId, updates);
-    req.session.user.name = updates.firstName;
+    await User.findByIdAndUpdate(viewedUserId, updates)
+    req.session.user.name = updates.firstName
 
-    
-    res.json({ 
-      success: true, 
-      profilePic: updates.profilePic, 
-      userId: viewedUserId 
-    });
-
+    res.json({
+      success: true,
+      profilePic: updates.profilePic,
+      userId: viewedUserId
+    })
   } catch (err) {
-    console.error('Error updating profile:', err);
-    res.status(500).json({ success: false, message: 'Error updating profile' });
+    console.error('Error updating profile:', err)
+    res.status(500).json({ success: false, message: 'Error updating profile' })
   }
-});
-
+})
 
 app.post('/profile/:id/delete', requireLogin, async (req, res) => {
   try {
@@ -732,7 +735,6 @@ app.post('/profile/:id/delete', requireLogin, async (req, res) => {
    IT ASSIST ROUTES
    ========================================== */
 
-// Submit ticket
 app.post('/submit-ticket', requireLogin, async (req, res) => {
   try {
     const building = (req.body.building || '').trim()
@@ -803,7 +805,6 @@ app.post('/submit-ticket', requireLogin, async (req, res) => {
   }
 })
 
-// Resolve ticket: notify then delete
 app.post('/resolve-ticket/:id', requireAdmin, async (req, res) => {
   try {
     const ticket = await Ticket.findById(req.params.id)
@@ -834,7 +835,6 @@ app.post('/resolve-ticket/:id', requireAdmin, async (req, res) => {
   }
 })
 
-// Post announcement to all lab users
 app.post('/admin/announcements', requireAdmin, async (req, res) => {
   try {
     const message = (req.body.message || '').trim()
@@ -882,7 +882,6 @@ app.post('/admin/announcements', requireAdmin, async (req, res) => {
    API ROUTES (TICKETS)
    ========================================== */
 
-// Fetch current logged-in user's tickets
 app.get('/api/tickets/me', requireLogin, async (req, res) => {
   try {
     const tickets = await Ticket.find({ user: req.session.user.id })
@@ -901,7 +900,6 @@ app.get('/api/tickets/me', requireLogin, async (req, res) => {
    API ROUTES (NOTIFICATIONS)
    ========================================== */
 
-// Fetch current logged-in user's notifications
 app.get('/api/notifications/me', requireLogin, async (req, res) => {
   try {
     const userId = req.session.user.id
@@ -921,7 +919,6 @@ app.get('/api/notifications/me', requireLogin, async (req, res) => {
   }
 })
 
-// Delete a notification owned by the current user
 app.delete('/api/notifications/:id', requireLogin, async (req, res) => {
   try {
     const userId = req.session.user.id
@@ -942,7 +939,6 @@ app.delete('/api/notifications/:id', requireLogin, async (req, res) => {
   }
 })
 
-// Mark a notification as read
 app.patch('/api/notifications/:id/read', requireLogin, async (req, res) => {
   try {
     const userId = req.session.user.id
@@ -971,7 +967,6 @@ app.patch('/api/notifications/:id/read', requireLogin, async (req, res) => {
    API ROUTES (RESERVATIONS)
    ========================================== */
 
-// 1. Create a new reservation
 app.post('/api/reservations', async (req, res) => {
   try {
     if (!req.session.user) {
@@ -1025,7 +1020,6 @@ app.post('/api/reservations', async (req, res) => {
   }
 })
 
-// 1.5 Update an existing reservation
 app.put('/api/reservations/:id', async (req, res) => {
   try {
     if (!req.session.user) {
@@ -1082,7 +1076,6 @@ app.put('/api/reservations/:id', async (req, res) => {
   }
 })
 
-// 2. Fetch current logged-in user's active reservations
 app.get('/api/reservations/me', async (req, res) => {
   try {
     if (!req.session.user) {
@@ -1103,7 +1096,6 @@ app.get('/api/reservations/me', async (req, res) => {
   }
 })
 
-// 3. Get booked slots and the users who reserved them
 app.get('/api/reservations/booked', async (req, res) => {
   try {
     const { labId, labCode, date } = req.query
@@ -1155,7 +1147,6 @@ app.get('/api/reservations/booked', async (req, res) => {
   }
 })
 
-// 4. Cancel a reservation
 app.delete('/api/reservations/:id', async (req, res) => {
   try {
     if (!req.session.user) {
