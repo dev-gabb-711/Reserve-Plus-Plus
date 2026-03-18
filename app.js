@@ -1106,46 +1106,97 @@ app.get('/api/reservations/me', async (req, res) => {
 
 app.get('/api/reservations/booked', async (req, res) => {
   try {
-    const { labId, labCode, date } = req.query
+    const { labId, date, seats } = req.query
+    if (!labId || !date) return res.json({})
 
-    let lab
-    if (labId) {
-      lab = await Lab.findById(labId)
-    } else {
-      const cleanCode = normalizeRoomCode(labCode)
-      lab = await Lab.findOne({ labCode: cleanCode })
+    // 1. Safely parse the seats requested by the frontend into Strings
+    let selectedSeats = []
+    if (seats) {
+      try {
+        selectedSeats = JSON.parse(seats).map(String)
+      } catch (err) {
+        console.error('Seat parsing error:', err)
+      }
     }
 
-    if (!lab) return res.json({})
-
+    // 2. Fetch all active reservations for this room and date
     const bookings = await Reservation.find({
-      lab: lab._id,
+      lab: labId,
       date: date,
       status: 'Active'
-    }).populate('user', 'firstName lastName email profilePic')
+    }).populate('user')
 
-    let bookedData = {}
+    const bookedData = {}
+    const isAdmin = req.session.user && req.session.user.role === 'Admin'
+
+    // 3. Time converter for accurate 12:00 PM No-Show sorting
+    const timeToMinutes = timeStr => {
+      if (!timeStr) return 0
+      const [time, modifier] = timeStr.trim().split(' ')
+      if (!time || !modifier) return 0
+      let [hours, minutes] = time.split(':').map(Number)
+      if (hours === 12) hours = 0
+      if (modifier === 'PM') hours += 12
+      return hours * 60 + minutes
+    }
 
     bookings.forEach(booking => {
-      if (booking.timeSlot && booking.user) {
-        try {
-          const slots = JSON.parse(booking.timeSlot)
-          slots.forEach(slot => {
-            if (booking.isAnonymous) {
-              bookedData[slot] = null
-            } else {
-              bookedData[slot] = {
-                userId: booking.user._id,
-                resId: booking._id,
-                name: `${booking.user.firstName} ${booking.user.lastName}`.trim(),
-                email: booking.user.email || '',
-                avatar: booking.user.profilePic || '/img/def_avatar.jpg'
-              }
+      // 4. Standardize the database's seat format into a String Array
+      let bookingSeats = []
+      if (Array.isArray(booking.seatNumber)) {
+        bookingSeats = booking.seatNumber.map(String)
+      } else if (typeof booking.seatNumber === 'string') {
+        bookingSeats = booking.seatNumber.split(',').map(s => s.trim())
+      } else if (
+        booking.seatNumber !== undefined &&
+        booking.seatNumber !== null
+      ) {
+        bookingSeats = [String(booking.seatNumber)]
+      }
+
+      // 5. CRITICAL FIX: Check if the database seats overlap with the UI selected seats
+      let overlaps = false
+      if (selectedSeats.length === 0) {
+        overlaps = true // If no seats selected, return everything (useful for full-room map rendering)
+      } else {
+        overlaps = selectedSeats.some(s => bookingSeats.includes(s))
+      }
+
+      // 6. Only process and lock the slot IF there is an overlap!
+      if (
+        overlaps &&
+        booking.slotsArray &&
+        booking.slotsArray.length > 0 &&
+        booking.user
+      ) {
+        // Find the absolute earliest start time of the reservation block
+        const sortedSlots = [...booking.slotsArray].sort(
+          (a, b) => timeToMinutes(a) - timeToMinutes(b)
+        )
+        const actualStartTime = sortedSlots[0]
+
+        booking.slotsArray.forEach(slot => {
+          if (isAdmin || !booking.isAnonymous) {
+            bookedData[slot] = {
+              userId: booking.user._id,
+              resId: booking._id,
+              name: `${booking.user.firstName} ${booking.user.lastName}`.trim(),
+              email: booking.user.email || '',
+              avatar: booking.user.profilePic || '/img/def_avatar.jpg',
+              isAnonymous: booking.isAnonymous,
+              startTime: actualStartTime,
+              slotTime: slot
             }
-          })
-        } catch (e) {
-          // Ignore old string format errors
-        }
+          } else {
+            bookedData[slot] = {
+              name: 'Anonymous Student',
+              avatar: '/img/def_avatar.jpg',
+              isAnonymous: true,
+              startTime: actualStartTime,
+              slotTime: slot
+            }
+          }
+        })
       }
     })
 

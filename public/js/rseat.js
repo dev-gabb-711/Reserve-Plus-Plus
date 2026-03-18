@@ -113,7 +113,7 @@ async function fetchMyReservations () {
 async function fetchBookedSlots () {
   const labCode = appState.currentBld[0] + appState.currentLab
 
-  // Search the injected database array for the real MongoDB ID
+  // Locate the correct Lab ID from the injected DB list
   let labId = ''
   if (window.DB_LABS) {
     const foundLab = window.DB_LABS.find(
@@ -122,30 +122,37 @@ async function fetchBookedSlots () {
     if (foundLab) labId = foundLab._id
   }
 
+  // Format the date strictly
   const dateStr = appState.selectedDate.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
   })
 
-  // FIX 1: Instantly clear out old data to prevent cross-lab UI bleeding during network delays!
+  const selectedSeats = appState.selectedSeats || []
+  const seatsStr = encodeURIComponent(JSON.stringify(selectedSeats))
+
+  // Clear out old data to prevent ghost-locks
   appState.bookedSlots = []
   appState.bookedSlotsData = {}
 
   try {
+    // Send the seat request dynamically to the backend
     const res = await fetch(
-      `/api/reservations/booked?labId=${labId}&labCode=${labCode}&date=${dateStr}`
+      `/api/reservations/booked?labId=${labId}&labCode=${labCode}&date=${dateStr}&seats=${seatsStr}`
     )
     if (!res.ok) throw new Error('Failed to fetch slots')
 
     const data = await res.json()
 
-    // Update the global state with REAL booked slots and user info mapping
+    // Update global state with the strictly filtered slots
     appState.bookedSlotsData = data
     appState.bookedSlots = Object.keys(data)
 
-    // Redraw the time grid to black out the unavailable chips
-    renderTimeGrid()
+    // Redraw the time grid
+    if (typeof renderTimeGrid === 'function') {
+      renderTimeGrid()
+    }
   } catch (err) {
     console.error('Error loading slots:', err)
   }
@@ -203,8 +210,11 @@ document.addEventListener('DOMContentLoaded', () => {
 	   Booking Flow (Open, Review, Submit)
 	   ===================================================== */
 
-  document.getElementById('btnOpenModal').onclick = () => {
+  document.getElementById('btnOpenModal').onclick = async () => {
     appState.tempSlots = []
+
+    await fetchBookedSlots()
+
     openBookingFlow()
   }
 
@@ -236,17 +246,20 @@ document.addEventListener('DOMContentLoaded', () => {
     submitReservationForm()
   })
 
-  // Continue editing
-  document.getElementById('openEditFlow').onclick = () => {
+  // Continue editing / Edit Reservation Flow
+  document.getElementById('openEditFlow').onclick = async () => {
+    // 1. Ensure a reservation is actually selected
     if (!appState.editingTargetId) {
       alert('Please select a reservation from the list first.')
       return
     }
 
+    // 2. Find the exact reservation data from our local state
     const targetId = appState.editingTargetId
     const res = appState.reservations.find(r => r.id === targetId)
 
     if (res) {
+      // 3. Map the building strings correctly
       let targetBuilding = ''
       if (res.building && res.building.toLowerCase().includes('gokongwei')) {
         targetBuilding = 'Gokongwei Hall'
@@ -256,28 +269,38 @@ document.addEventListener('DOMContentLoaded', () => {
       ) {
         targetBuilding = 'Andrew Gonzales Hall'
       }
+
+      // Clean the lab code (e.g., removing prefix letters if necessary)
       const cleanLab = String(res.lab).replace(/^[A-Za-z]+/, '')
+
+      // 4. Set the selected seats in the global state FIRST!
+      appState.selectedSeats = res.seat
+        .toString()
+        .split(', ')
+        .map(s => parseInt(s))
+
+      appState.tempSlots = res.slots ? [...res.slots] : []
 
       if (targetBuilding && cleanLab) {
         appState.currentBld = targetBuilding
         appState.currentLab = cleanLab
 
-        // FIX: Force the calendar date to match the reservation date!
+        // 5. Force the calendar date to match the exact reservation date
         const resDate = new Date(res.date)
         if (!isNaN(resDate)) {
           appState.selectedDate = resDate
           appState.viewDate = resDate
         }
 
+        // 6. Refresh the background/layout for the correct building
         refreshUI()
-        fetchBookedSlots()
+
+        // 7. NOW we fetch the booked slots, because the state knows exactly
+        // which seat and date we are trying to edit
+        await fetchBookedSlots()
       }
 
-      appState.selectedSeats = res.seat
-        .toString()
-        .split(', ')
-        .map(s => parseInt(s))
-      appState.tempSlots = res.slots ? [...res.slots] : []
+      // 8. Open the modal with the correct seat data loaded
       openBookingFlow()
     }
   }
@@ -634,7 +657,24 @@ function renderTimeGrid () {
       const hasSlot = res.slots && res.slots.includes(s)
       const isNotBeingEdited = res.id !== appState.editingTargetId
 
-      return isSameDate && isSameLab && hasSlot && isNotBeingEdited
+      // CRITICAL FIX: Ensure we only block the slot if your existing
+      // reservation is for the EXACT seat(s) you are currently viewing!
+      let resSeats = []
+      if (Array.isArray(res.seat)) {
+        resSeats = res.seat.map(Number)
+      } else if (res.seat !== undefined && res.seat !== null) {
+        resSeats = String(res.seat)
+          .split(',')
+          .map(str => parseInt(str.trim()))
+      }
+
+      const overlapsSeat = appState.selectedSeats.some(sel =>
+        resSeats.includes(sel)
+      )
+
+      return (
+        isSameDate && isSameLab && hasSlot && isNotBeingEdited && overlapsSeat
+      )
     })
 
     const isUnavailable = isGlobalOccupied || isUserReserved
@@ -679,6 +719,14 @@ function renderTimeGrid () {
 function openBookingFlow () {
   renderCalendar()
   renderTimeGrid()
+
+  const modalSub = document.getElementById('modalSub')
+  if (modalSub) {
+    const fullLabCode = appState.currentBld[0] + appState.currentLab
+    // Set the text to be the current lab code plus the static text
+    modalSub.innerText = `${fullLabCode} • Select Date & Time`
+  }
+
   bootstrap.Modal.getOrCreateInstance(
     document.getElementById('reservationModal')
   ).show()
@@ -814,7 +862,6 @@ function showPopover (e, user) {
 
   const rect = e.currentTarget.getBoundingClientRect()
 
-  // 1. Update UI Elements
   const popAvatar = document.getElementById('popAvatar')
   const popName = document.getElementById('popName')
   const btnCancelNoShow = document.getElementById('btnCancelNoShow')
@@ -822,26 +869,27 @@ function showPopover (e, user) {
   if (popAvatar) popAvatar.src = user.avatar || '../img/default-avatar.png'
 
   if (popName) {
-    // Show 'ANON' badge to Admin if user is anonymous
     if (user.isAnonymous && localStorage.getItem('reserveRole') === 'Admin') {
-      popName.innerHTML = `${user.name} <span style="font-size:0.6rem; background:#444; color:white; padding:2px 5px; border-radius:4px; margin-left:5px;">ANON</span>`
+      popName.innerHTML = `${user.name} <span style="font-size:0.6rem; background:#ff6b4a; color:white; padding:2px 5px; border-radius:4px; margin-left:5px; vertical-align: middle;">ANONYMOUS</span>`
     } else {
       popName.innerText = user.name || 'Unknown User'
     }
     popName.href = user.userId ? `/profile/${user.userId}` : '#'
   }
 
-  // 2. No-Show Logic (Try/Catch ensures popover still shows if time parsing fails)
   if (btnCancelNoShow) {
     btnCancelNoShow.style.display = 'none'
     btnCancelNoShow.onclick = null
 
     if (localStorage.getItem('reserveRole') === 'Admin' && user.resId) {
       try {
-        const slotTimeStr = e.currentTarget.innerText.trim() // e.g. "10:00 AM"
+        // Grab the absolute start time from the backend!
+        const slotTimeStr = user.startTime || e.currentTarget.innerText.trim()
+
         const [time, modifier] = slotTimeStr.split(' ')
         let [hours, minutes] = time.split(':').map(Number)
 
+        // Convert to 24-hour military time
         if (hours === 12) hours = 0
         if (modifier === 'PM') hours += 12
 
@@ -851,9 +899,13 @@ function showPopover (e, user) {
         const now = new Date()
         const diffMins = (now - slotDate) / 1000 / 60
 
-        // SPEC: Student has 10 mins to show up. Admin has 10 mins window AFTER that.
-        // Button appears between Minute 10 and Minute 20 of the reservation.
-        if (diffMins >= 10 && diffMins <= 20) {
+        // ========================================================
+        // TEST TOGGLE: Set to 'true' to always show the button.
+        // Set to 'false' to enforce the strict 10-20 minute rule!
+        // ========================================================
+        const isTesting = true
+
+        if (isTesting || (diffMins >= 10 && diffMins <= 20)) {
           btnCancelNoShow.style.display = 'block'
           btnCancelNoShow.onclick = () => executeNoShowCancel(user.resId)
         }
@@ -863,14 +915,9 @@ function showPopover (e, user) {
     }
   }
 
-  // 3. Final Display & Position
   popover.style.display = 'flex'
-
   let topPos = rect.top - popover.offsetHeight - 10
-  if (topPos < 10) {
-    topPos = rect.bottom + 10
-  }
-
+  if (topPos < 10) topPos = rect.bottom + 10
   popover.style.top = `${topPos}px`
   popover.style.left = `${rect.left}px`
 }
