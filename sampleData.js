@@ -51,7 +51,9 @@ async function seedDatabase () {
       let displayHour = hours % 12
       if (displayHour === 0) displayHour = 12
 
-      return `${String(displayHour).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${suffix}`
+      return `${String(displayHour).padStart(2, '0')}:${String(
+        minutes
+      ).padStart(2, '0')} ${suffix}`
     }
 
     function buildSlotsArray (startHour, startMinute, numberOfSlots) {
@@ -160,7 +162,8 @@ async function seedDatabase () {
         password: '123',
         role: 'Student',
         profilePic: '/img/def_avatar.jpg',
-        description: 'Scenario account: currently inside the active reservation window.'
+        description:
+          'Scenario account: currently inside the active reservation window.'
       },
       {
         firstName: 'Nicolo',
@@ -254,6 +257,11 @@ async function seedDatabase () {
         labCode: 'A1503',
         building: 'Br. Andrew Hall',
         seats: createSeats(40)
+      },
+      {
+        labCode: 'V201',
+        building: 'Velasco Hall',
+        seats: createSeats(20)
       }
     ])
 
@@ -265,7 +273,8 @@ async function seedDatabase () {
       A1904: insertedLabs.find(l => l.labCode === 'A1904'),
       A1103: insertedLabs.find(l => l.labCode === 'A1103'),
       G305: insertedLabs.find(l => l.labCode === 'G305'),
-      A1503: insertedLabs.find(l => l.labCode === 'A1503')
+      A1503: insertedLabs.find(l => l.labCode === 'A1503'),
+      V201: insertedLabs.find(l => l.labCode === 'V201')
     }
 
     /* ==========================================
@@ -306,7 +315,11 @@ async function seedDatabase () {
       gabbyLaterTodayDate = tomorrowDate
       gabbyLaterTodaySlots = buildSlotsArray(9, 0, 1) // 30 mins tomorrow if already too late today
     } else {
-      gabbyLaterTodaySlots = buildSlotsArray(gabbyStart.getHours(), gabbyStart.getMinutes(), 1)
+      gabbyLaterTodaySlots = buildSlotsArray(
+        gabbyStart.getHours(),
+        gabbyStart.getMinutes(),
+        1
+      )
     }
 
     // 3) CURRENTLY USING THE LAB
@@ -314,7 +327,11 @@ async function seedDatabase () {
     // and lasts for 30 minutes, so the account is "currently active".
     const marionActiveStartHour = now.getHours()
     const marionActiveStartMinute = now.getMinutes() < 30 ? 0 : 30
-    const marionActiveSlots = buildSlotsArray(marionActiveStartHour, marionActiveStartMinute, 1)
+    const marionActiveSlots = buildSlotsArray(
+      marionActiveStartHour,
+      marionActiveStartMinute,
+      1
+    )
 
     /* ==========================================
        Extra sample reservations for other users
@@ -516,7 +533,9 @@ async function seedDatabase () {
         senderRole: 'Reservation System',
         senderAvatar: '/img/def_avatar.jpg',
         title: 'Reservation Reminder',
-        message: `Reminder: Your reservation is scheduled at ${buildTimeRangeFromSlots(gabbyLaterTodaySlots)}.`,
+        message: `Reminder: Your reservation is scheduled at ${buildTimeRangeFromSlots(
+          gabbyLaterTodaySlots
+        )}.`,
         type: 'Reservation'
       },
       {
@@ -525,7 +544,9 @@ async function seedDatabase () {
         senderRole: 'Reservation System',
         senderAvatar: '/img/def_avatar.jpg',
         title: 'Reservation Active',
-        message: `You are currently checked in for your reservation at ${buildTimeRangeFromSlots(marionActiveSlots)}.`,
+        message: `You are currently checked in for your reservation at ${buildTimeRangeFromSlots(
+          marionActiveSlots
+        )}.`,
         type: 'Reservation'
       },
       {
@@ -573,8 +594,16 @@ async function seedDatabase () {
     console.log(`Day after tomorrow:       ${dayAfterTomorrowDate}`)
     console.log('------------------------------------------')
     console.log(`ROSS (NONE):              no reservation today`)
-    console.log(`GABBY (LATER TODAY):      ${buildTimeRangeFromSlots(gabbyLaterTodaySlots)} | ${gabbyLaterTodayDate}`)
-    console.log(`MARION (ACTIVE NOW):      ${buildTimeRangeFromSlots(marionActiveSlots)} | ${todayDate}`)
+    console.log(
+      `GABBY (LATER TODAY):      ${buildTimeRangeFromSlots(
+        gabbyLaterTodaySlots
+      )} | ${gabbyLaterTodayDate}`
+    )
+    console.log(
+      `MARION (ACTIVE NOW):      ${buildTimeRangeFromSlots(
+        marionActiveSlots
+      )} | ${todayDate}`
+    )
     console.log('------------------------------------------')
     console.log('Test accounts:')
     console.log('ross@dlsu.edu.ph / 123')

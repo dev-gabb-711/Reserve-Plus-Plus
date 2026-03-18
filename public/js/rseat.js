@@ -1,9 +1,8 @@
 /* =====================================================
    Application State
-   - Central store for current building/lab, selections, reservations, and calendar state
    ===================================================== */
 const appState = {
-  currentBld: 'Gokongwei Hall',
+  currentBld: '',
   currentLab: '',
   selectedSeats: [],
   reservations: [],
@@ -13,57 +12,41 @@ const appState = {
   tempSlots: [],
   bookedDates: [],
   bookedSlots: [],
-  bookedSlotsData: {}, // Holds detailed user info for hovered slots
-  data: {
-    'Gokongwei Hall': {
-      labs: [],
-      bg: "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../img/gok_lab.jpg')"
-    },
-    'Andrew Gonzales Hall': {
-      labs: [],
-      bg: "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../img/ag_lab.jpg')"
-    }
-  }
+  bookedSlotsData: {},
+  data: {} // Starts empty to dynamically learn from the database
 }
 
 /* =====================================================
    Sync Labs from Database
-   - Overwrites hardcoded labs with real ones from MongoDB
    ===================================================== */
 function syncLabsFromDatabase () {
   if (!window.DB_LABS || window.DB_LABS.length === 0) return
 
-  // Clear out the hardcoded ones
-  appState.data['Gokongwei Hall'].labs = []
-  appState.data['Andrew Gonzales Hall'].labs = []
+  appState.data = {}
 
-  // Sort them naturally so "201" comes BEFORE "1102"
-  const sortedLabs = [...window.DB_LABS].sort((a, b) =>
-    a.labCode.localeCompare(b.labCode, undefined, {
-      numeric: true,
-      sensitivity: 'base'
-    })
-  )
+  const buildingStyles = {
+    'Gokongwei Hall':
+      "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../img/topbox.png')",
+    'Andrew Gonzales Hall':
+      "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../img/topbox.png')",
+    default:
+      "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('../img/topbox.png')"
+  }
 
-  sortedLabs.forEach(lab => {
-    // Remove the letter prefix (e.g., "G201" becomes "201") so the UI tabs look clean
-    const cleanCode = String(lab.labCode).replace(/^[A-Za-z]+/, '')
+  window.DB_LABS.forEach(lab => {
+    const bldName = lab.building
 
-    if (lab.building && lab.building.toLowerCase().includes('gokongwei')) {
-      if (!appState.data['Gokongwei Hall'].labs.includes(cleanCode)) {
-        appState.data['Gokongwei Hall'].labs.push(cleanCode)
-      }
-    } else if (lab.building && lab.building.toLowerCase().includes('andrew')) {
-      if (!appState.data['Andrew Gonzales Hall'].labs.includes(cleanCode)) {
-        appState.data['Andrew Gonzales Hall'].labs.push(cleanCode)
+    if (!appState.data[bldName]) {
+      appState.data[bldName] = {
+        labs: [],
+        bg: buildingStyles[bldName] || buildingStyles['default']
       }
     }
-  })
 
-  // Ensure the default selected lab actually exists in the newly synced list
-  if (appState.data[appState.currentBld].labs.length > 0) {
-    appState.currentLab = appState.data[appState.currentBld].labs[0]
-  }
+    if (!appState.data[bldName].labs.includes(lab.labCode)) {
+      appState.data[bldName].labs.push(lab.labCode)
+    }
+  })
 }
 
 /* =====================================================
@@ -163,7 +146,13 @@ async function fetchBookedSlots () {
    - Initializes the UI once the DOM is ready
    ===================================================== */
 document.addEventListener('DOMContentLoaded', () => {
-  syncLabsFromDatabase()
+  syncLabsFromDatabase() // Build dynamic data from DB
+
+  // Ensure we have a starting building if the DB loaded successfully
+  const buildings = Object.keys(appState.data)
+  if (buildings.length > 0 && !appState.currentBld) {
+    appState.currentBld = buildings[0]
+  }
 
   // 1. Fetch real data immediately when page loads
   fetchMyReservations()
@@ -171,17 +160,34 @@ document.addEventListener('DOMContentLoaded', () => {
   refreshUI()
 
   /* =====================================================
-	   Building + Lab Switching
-	   ===================================================== */
+     Building + Lab Switching
+     ===================================================== */
 
   document.getElementById('switchBuildingBtn').onclick = () => {
     clearEditMode()
 
-    appState.currentBld = appState.currentBld.includes('Gok')
-      ? 'Andrew Gonzales Hall'
-      : 'Gokongwei Hall'
+    // 1. Get all dynamically loaded buildings
+    const buildingsList = Object.keys(appState.data)
 
-    appState.currentLab = appState.data[appState.currentBld].labs[0]
+    // 2. Cycle to the next building in the array
+    if (buildingsList.length > 0) {
+      const currentIndex = buildingsList.indexOf(appState.currentBld)
+      const nextIndex = (currentIndex + 1) % buildingsList.length
+
+      appState.currentBld = buildingsList[nextIndex]
+
+      // Update the title in the DOM immediately
+      const titleEl = document.getElementById('currentBuildingName')
+      if (titleEl) titleEl.innerText = appState.currentBld
+
+      // Set the lab to the first lab in the new building
+      if (appState.data[appState.currentBld].labs.length > 0) {
+        appState.currentLab = appState.data[appState.currentBld].labs[0]
+      } else {
+        appState.currentLab = ''
+      }
+    }
+
     appState.selectedSeats = []
 
     refreshUI()
@@ -440,12 +446,25 @@ async function submitReservationForm () {
    ===================================================== */
 function renderSeats () {
   const grid = document.getElementById('seatContainer')
-  grid.innerHTML = ''
+  if (grid) grid.innerHTML = '' // Added safety check
 
-  document.getElementById('btnOpenModal').disabled = true
+  const btnOpenModal = document.getElementById('btnOpenModal')
+  if (btnOpenModal) btnOpenModal.disabled = true
 
-  const fullLabCode = appState.currentBld[0] + appState.currentLab
-  document.getElementById('displayLabCode').innerText = fullLabCode
+  // Ensure building and lab actually exist before trying to read properties like [0]
+  if (
+    !appState.currentBld ||
+    !appState.currentLab ||
+    !appState.data[appState.currentBld]
+  ) {
+    return
+  }
+  // ----------------------
+
+  const fullLabCode = appState.currentLab
+
+  const displayLabCode = document.getElementById('displayLabCode')
+  if (displayLabCode) displayLabCode.innerText = fullLabCode
 
   let totalSeats = 40 // Fallback just in case
   if (window.DB_LABS) {
@@ -473,11 +492,13 @@ function renderSeats () {
         appState.selectedSeats.push(i)
         el.classList.add('selected')
       }
-      document.getElementById('btnOpenModal').disabled =
-        appState.selectedSeats.length === 0
+      const updateBtn = document.getElementById('btnOpenModal')
+      if (updateBtn) {
+        updateBtn.disabled = appState.selectedSeats.length === 0
+      }
     }
 
-    grid.appendChild(el)
+    if (grid) grid.appendChild(el)
   }
 }
 
@@ -722,7 +743,7 @@ function openBookingFlow () {
 
   const modalSub = document.getElementById('modalSub')
   if (modalSub) {
-    const fullLabCode = appState.currentBld[0] + appState.currentLab
+    const fullLabCode = appState.currentLab
     // Set the text to be the current lab code plus the static text
     modalSub.innerText = `${fullLabCode} • Select Date & Time`
   }
@@ -736,20 +757,29 @@ function openBookingFlow () {
    UI Refresh
    ===================================================== */
 function refreshUI () {
-  document.getElementById('currentBuildingName').innerText = appState.currentBld
-  document.getElementById('heroBg').style.backgroundImage =
-    appState.data[appState.currentBld].bg
+  const bldData = appState.data[appState.currentBld]
+  if (!bldData) return // Stop here if no data exists yet
 
+  // Safely update Title and Background
+  const titleEl = document.getElementById('currentBuildingName')
+  if (titleEl) titleEl.innerText = appState.currentBld
+
+  const bgEl = document.getElementById('heroBg')
+  if (bgEl && bldData.bg) bgEl.style.backgroundImage = bldData.bg
+
+  // Safely update Lab Buttons
   const nav = document.getElementById('labNavBar')
-  nav.innerHTML = appState.data[appState.currentBld].labs
-    .map(
-      l => `
-        <button class="btn-lab-round ${
-          appState.currentLab === l ? 'active' : ''
-        }" onclick="setLab('${l}')">${l}</button>
-    `
-    )
-    .join('')
+  if (nav && bldData.labs) {
+    nav.innerHTML = bldData.labs
+      .map(
+        l => `
+          <button class="btn-lab-round ${
+            appState.currentLab === l ? 'active' : ''
+          }" onclick="setLab('${l}')">${l}</button>
+      `
+      )
+      .join('')
+  }
 
   renderSeats()
 }
@@ -982,3 +1012,5 @@ setInterval(() => {
     fetchBookedSlots()
   }
 }, 30000)
+
+syncLabsFromDatabase()
