@@ -265,19 +265,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const res = appState.reservations.find(r => r.id === targetId)
 
     if (res) {
-      // 3. Map the building strings correctly
-      let targetBuilding = ''
-      if (res.building && res.building.toLowerCase().includes('gokongwei')) {
-        targetBuilding = 'Gokongwei Hall'
-      } else if (
-        res.building &&
-        res.building.toLowerCase().includes('andrew')
-      ) {
-        targetBuilding = 'Andrew Gonzales Hall'
-      }
+      // 3. Dynamically set the building straight from the reservation data!
+      const targetBuilding = res.building || ''
 
-      // Clean the lab code (e.g., removing prefix letters if necessary)
-      const cleanLab = String(res.lab).replace(/^[A-Za-z]+/, '')
+      // Use the exact lab string from the reservation
+      const cleanLab = String(res.lab)
 
       // 4. Set the selected seats in the global state FIRST!
       appState.selectedSeats = res.seat
@@ -301,8 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 6. Refresh the background/layout for the correct building
         refreshUI()
 
-        // 7. NOW we fetch the booked slots, because the state knows exactly
-        // which seat and date we are trying to edit
+        // 7. Fetch the booked slots, because the state knows exactly which seat and date we are trying to edit
         await fetchBookedSlots()
       }
 

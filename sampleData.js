@@ -262,6 +262,31 @@ async function seedDatabase () {
         labCode: 'V201',
         building: 'Velasco Hall',
         seats: createSeats(20)
+      },
+      {
+        labCode: 'V308',
+        building: 'Velasco Hall',
+        seats: createSeats(35)
+      },
+      {
+        labCode: 'V404',
+        building: 'Velasco Hall',
+        seats: createSeats(40)
+      },
+      {
+        labCode: 'LS212A',
+        building: 'St. La Salle Hall',
+        seats: createSeats(20)
+      },
+      {
+        labCode: 'LS330',
+        building: 'St. La Salle Hall',
+        seats: createSeats(30)
+      },
+      {
+        labCode: 'LS220B',
+        building: 'St. La Salle Hall',
+        seats: createSeats(30)
       }
     ])
 
@@ -274,7 +299,12 @@ async function seedDatabase () {
       A1103: insertedLabs.find(l => l.labCode === 'A1103'),
       G305: insertedLabs.find(l => l.labCode === 'G305'),
       A1503: insertedLabs.find(l => l.labCode === 'A1503'),
-      V201: insertedLabs.find(l => l.labCode === 'V201')
+      V201: insertedLabs.find(l => l.labCode === 'V201'),
+      V308: insertedLabs.find(l => l.labCode === 'V308'),
+      V404: insertedLabs.find(l => l.labCode === 'V404'),
+      LS212A: insertedLabs.find(l => l.labCode === 'LS212A'),
+      LS330: insertedLabs.find(l => l.labCode === 'LS330'),
+      LS220B: insertedLabs.find(l => l.labCode === 'LS220B')
     }
 
     /* ==========================================

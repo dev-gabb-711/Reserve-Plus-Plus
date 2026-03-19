@@ -753,17 +753,9 @@ app.post('/submit-ticket', requireLogin, async (req, res) => {
     const concern = (req.body.concern || '').trim()
     const message = (req.body.message || '').trim()
 
-    const allowedBuildings = ['Br. Andrew Hall', 'Gokongwei Hall']
-
     if (!building || !room || !seat) {
       return res.status(400).json({
         error: 'Building, room, and seat are required.'
-      })
-    }
-
-    if (!allowedBuildings.includes(building)) {
-      return res.status(400).json({
-        error: 'Invalid building value.'
       })
     }
 
