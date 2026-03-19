@@ -34,12 +34,12 @@ let current = [...DATA]
    URL QUERY HELPERS
    ===================================================== */
 
-function getUrlQuery() {
+function getUrlQuery () {
   const params = new URLSearchParams(window.location.search)
   return (params.get('q') || '').trim()
 }
 
-function syncSearchInputWithUrl() {
+function syncSearchInputWithUrl () {
   if (!searchInput) return
   searchInput.value = getUrlQuery()
 }
@@ -48,11 +48,11 @@ function syncSearchInputWithUrl() {
    SEARCH HELPERS
    ===================================================== */
 
-function getSearchQuery() {
+function getSearchQuery () {
   return (searchInput?.value || '').trim().toLowerCase()
 }
 
-function matchesSearch(item, q) {
+function matchesSearch (item, q) {
   if (!q) return true
 
   if (item.type === 'user') {
@@ -78,22 +78,22 @@ function matchesSearch(item, q) {
    FILTER HELPERS
    ===================================================== */
 
-function matchesBuilding(item, building) {
+function matchesBuilding (item, building) {
   if (!building || item.type === 'user') return true
   return item.buildingCode === building
 }
 
-function matchesRoom(item, room) {
+function matchesRoom (item, room) {
   if (!room || item.type === 'user') return true
   return String(item.room).includes(room)
 }
 
-function matchesDate(item, date) {
+function matchesDate (item, date) {
   if (!date || item.type === 'user') return true
   return item.date === date
 }
 
-function sortResults(items, sortValue) {
+function sortResults (items, sortValue) {
   const sorted = [...items]
 
   if (sortValue === 'room') {
@@ -110,7 +110,7 @@ function sortResults(items, sortValue) {
    APPLY FILTERS
    ===================================================== */
 
-function applyAllFilters() {
+function applyAllFilters () {
   const q = getSearchQuery()
 
   const building = buildingFilter?.value || ''
@@ -136,17 +136,17 @@ function applyAllFilters() {
    FILTER PANEL TOGGLE
    ===================================================== */
 
-function openFilterPanel() {
+function openFilterPanel () {
   filterPanel.classList.add('show')
   filterPanel.setAttribute('aria-hidden', 'false')
 }
 
-function closeFilterPanel() {
+function closeFilterPanel () {
   filterPanel.classList.remove('show')
   filterPanel.setAttribute('aria-hidden', 'true')
 }
 
-function toggleFilterPanel() {
+function toggleFilterPanel () {
   if (filterPanel.classList.contains('show')) {
     closeFilterPanel()
   } else {
@@ -200,8 +200,7 @@ if (applyFiltersBtn) {
 /* =====================================================
    RENDERING RESULTS
    ===================================================== */
-
-function render() {
+function render () {
   resultList.innerHTML = ''
 
   if (!current.length) {
@@ -230,7 +229,11 @@ function render() {
         window.location.href = `/profile/${item.userId}`
       })
     } else {
-      const barClass = item.buildingCode === 'G' ? 'bld-g' : 'bld-a'
+      const safeCode = item.buildingCode
+        ? item.buildingCode.toLowerCase()
+        : 'default'
+      const barClass = `bld-${safeCode}`
+
       const title = `Room ${item.room} • Seat ${item.seat}`
 
       const meta =
@@ -269,11 +272,41 @@ if (searchInput) {
         return
       }
 
-      window.location.href =
-        '/search-results?q=' + encodeURIComponent(q)
+      window.location.href = '/search-results?q=' + encodeURIComponent(q)
     }
   })
 }
+
+/* =====================================================
+   FILTER POPULATION (Search Results)
+   ===================================================== */
+function populateSearchFilters () {
+  const bldFilter = document.getElementById('buildingFilter')
+  if (!bldFilter) return
+
+  const uniqueBuildings = {}
+
+  // 1. Scan all search results to find unique buildings
+  if (typeof DATA !== 'undefined') {
+    DATA.forEach(item => {
+      // Only check items that have building data (ignoring user profiles)
+      if (item.buildingCode && item.building) {
+        uniqueBuildings[item.buildingCode] = item.building
+      }
+    })
+  }
+
+  // 2. Inject the dynamically found buildings into the dropdown
+  Object.keys(uniqueBuildings).forEach(code => {
+    const opt = document.createElement('option')
+    opt.value = code
+    opt.textContent = `${uniqueBuildings[code]} (${code})`
+    bldFilter.appendChild(opt)
+  })
+}
+
+// Run the function immediately
+populateSearchFilters()
 
 /* =====================================================
    INITIAL LOAD

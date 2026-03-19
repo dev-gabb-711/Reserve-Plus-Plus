@@ -2,264 +2,278 @@
    DOM References
    ===================================================== */
 
-const filterBtn = document.getElementById("filterBtn");
-const filterPop = document.getElementById("filterPop");
-const applyFilters = document.getElementById("applyFilters");
+const filterBtn = document.getElementById('filterBtn')
+const filterPop = document.getElementById('filterPop')
+const applyFilters = document.getElementById('applyFilters')
 
 const filterChecks = filterPop
   ? Array.from(filterPop.querySelectorAll("input[type='checkbox']"))
-  : [];
+  : []
 
-const labGrid = document.getElementById("lab-room-grid");
-const reservationList = document.getElementById("reservationList");
+const labGrid = document.getElementById('lab-room-grid')
+const reservationList = document.getElementById('reservationList')
 
-const calGrid = document.getElementById("calendar-days-grid");
-const prevBtn = document.getElementById("prev-month");
-const nextBtn = document.getElementById("next-month");
-const calMonthLabel = document.getElementById("calMonthLabel");
+const calGrid = document.getElementById('calendar-days-grid')
+const prevBtn = document.getElementById('prev-month')
+const nextBtn = document.getElementById('next-month')
+const calMonthLabel = document.getElementById('calMonthLabel')
 
-const liveStatusBox = document.getElementById("liveStatusBox");
+const liveStatusBox = document.getElementById('liveStatusBox')
 
 /* =====================================================
    State
    ===================================================== */
 
-let activeBuildingFilters = new Set(["andrew", "gokongwei"]);
-let viewDate = new Date();
-let liveStatusInterval = null;
+let activeBuildingFilters = new Set(['andrew', 'gokongwei'])
+let viewDate = new Date()
+let liveStatusInterval = null
 
 /* =====================================================
    Date Utilities
    ===================================================== */
 
-function pad2(n) {
-  return String(n).padStart(2, "0");
+function pad2 (n) {
+  return String(n).padStart(2, '0')
 }
 
-function toISODateKey(d) {
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+function toISODateKey (d) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
 }
 
-function mondayIndex(jsDay) {
-  return (jsDay + 6) % 7;
+function mondayIndex (jsDay) {
+  return (jsDay + 6) % 7
 }
 
-function parseDateFromReservation(value) {
-  if (!value) return null;
+function parseDateFromReservation (value) {
+  if (!value) return null
 
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
-    return value;
+    return value
   }
 
-  const raw = String(value).trim();
-  if (!raw) return null;
+  const raw = String(value).trim()
+  if (!raw) return null
 
-  const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
   if (isoMatch) {
-    const year = Number(isoMatch[1]);
-    const month = Number(isoMatch[2]) - 1;
-    const day = Number(isoMatch[3]);
-    const d = new Date(year, month, day);
-    return Number.isNaN(d.getTime()) ? null : d;
+    const year = Number(isoMatch[1])
+    const month = Number(isoMatch[2]) - 1
+    const day = Number(isoMatch[3])
+    const d = new Date(year, month, day)
+    return Number.isNaN(d.getTime()) ? null : d
   }
 
-  const prettyMatch = raw.match(/^([A-Za-z]{3,9})\s+(\d{1,2}),\s*(\d{4})$/);
+  const prettyMatch = raw.match(/^([A-Za-z]{3,9})\s+(\d{1,2}),\s*(\d{4})$/)
   if (prettyMatch) {
     const months = {
-      jan: 0, january: 0,
-      feb: 1, february: 1,
-      mar: 2, march: 2,
-      apr: 3, april: 3,
+      jan: 0,
+      january: 0,
+      feb: 1,
+      february: 1,
+      mar: 2,
+      march: 2,
+      apr: 3,
+      april: 3,
       may: 4,
-      jun: 5, june: 5,
-      jul: 6, july: 6,
-      aug: 7, august: 7,
-      sep: 8, sept: 8, september: 8,
-      oct: 9, october: 9,
-      nov: 10, november: 10,
-      dec: 11, december: 11
-    };
+      jun: 5,
+      june: 5,
+      jul: 6,
+      july: 6,
+      aug: 7,
+      august: 7,
+      sep: 8,
+      sept: 8,
+      september: 8,
+      oct: 9,
+      october: 9,
+      nov: 10,
+      november: 10,
+      dec: 11,
+      december: 11
+    }
 
-    const monthName = prettyMatch[1].toLowerCase();
-    const monthIndex = months[monthName];
-    const day = Number(prettyMatch[2]);
-    const year = Number(prettyMatch[3]);
+    const monthName = prettyMatch[1].toLowerCase()
+    const monthIndex = months[monthName]
+    const day = Number(prettyMatch[2])
+    const year = Number(prettyMatch[3])
 
     if (monthIndex !== undefined) {
-      const d = new Date(year, monthIndex, day);
-      return Number.isNaN(d.getTime()) ? null : d;
+      const d = new Date(year, monthIndex, day)
+      return Number.isNaN(d.getTime()) ? null : d
     }
   }
 
-  const parsed = new Date(raw);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  const parsed = new Date(raw)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
 }
 
-function normalizeReservationDateToISO(value) {
-  const parsed = parseDateFromReservation(value);
-  if (!parsed) return "";
-  return toISODateKey(parsed);
+function normalizeReservationDateToISO (value) {
+  const parsed = parseDateFromReservation(value)
+  if (!parsed) return ''
+  return toISODateKey(parsed)
 }
 
-function formatTimeDisplay(dateObj) {
+function formatTimeDisplay (dateObj) {
   if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) {
-    return "";
+    return ''
   }
 
-  return dateObj.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
+  return dateObj.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
     hour12: true
-  });
+  })
 }
 
-function formatMinutesRemaining(msDiff) {
-  const totalMinutes = Math.max(0, Math.ceil(msDiff / 60000));
-  return String(totalMinutes);
+function formatMinutesRemaining (msDiff) {
+  const totalMinutes = Math.max(0, Math.ceil(msDiff / 60000))
+  return String(totalMinutes)
 }
 
-function formatPendingCountdown(msDiff) {
-  const totalSeconds = Math.max(0, Math.floor(msDiff / 1000));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+function formatPendingCountdown (msDiff) {
+  const totalSeconds = Math.max(0, Math.floor(msDiff / 1000))
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
 
   if (hours > 0) {
-    return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(
+      seconds
+    ).padStart(2, '0')}`
   }
 
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`
 }
 
 /* =====================================================
    Time Parsing Helpers
    ===================================================== */
 
-function normalizeTimeToken(value) {
-  return String(value || "")
-    .replace(/\u2013|\u2014/g, "-")
-    .replace(/\s+/g, " ")
-    .trim();
+function normalizeTimeToken (value) {
+  return String(value || '')
+    .replace(/\u2013|\u2014/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
-function convert12HourTo24Hour(timeStr) {
-  const value = normalizeTimeToken(timeStr);
-  const match = value.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+function convert12HourTo24Hour (timeStr) {
+  const value = normalizeTimeToken(timeStr)
+  const match = value.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
 
-  if (!match) return null;
+  if (!match) return null
 
-  let hours = Number(match[1]);
-  const minutes = Number(match[2]);
-  const meridiem = match[3].toUpperCase();
+  let hours = Number(match[1])
+  const minutes = Number(match[2])
+  const meridiem = match[3].toUpperCase()
 
   if (hours < 1 || hours > 12 || minutes < 0 || minutes > 59) {
-    return null;
+    return null
   }
 
-  if (meridiem === "AM") {
-    if (hours === 12) hours = 0;
+  if (meridiem === 'AM') {
+    if (hours === 12) hours = 0
   } else {
-    if (hours !== 12) hours += 12;
+    if (hours !== 12) hours += 12
   }
 
-  return `${pad2(hours)}:${pad2(minutes)}`;
+  return `${pad2(hours)}:${pad2(minutes)}`
 }
 
-function convert24HourTo12Hour(hours, minutes) {
-  const suffix = hours >= 12 ? "PM" : "AM";
-  let displayHour = hours % 12;
-  if (displayHour === 0) displayHour = 12;
-  return `${displayHour}:${String(minutes).padStart(2, "0")} ${suffix}`;
+function convert24HourTo12Hour (hours, minutes) {
+  const suffix = hours >= 12 ? 'PM' : 'AM'
+  let displayHour = hours % 12
+  if (displayHour === 0) displayHour = 12
+  return `${displayHour}:${String(minutes).padStart(2, '0')} ${suffix}`
 }
 
-function normalizeSingleTimeTo24(timeStr) {
-  const value = normalizeTimeToken(timeStr);
+function normalizeSingleTimeTo24 (timeStr) {
+  const value = normalizeTimeToken(timeStr)
 
-  if (!value) return null;
+  if (!value) return null
 
-  const already24 = value.match(/^(\d{1,2}):(\d{2})$/);
+  const already24 = value.match(/^(\d{1,2}):(\d{2})$/)
   if (already24) {
-    const hours = Number(already24[1]);
-    const minutes = Number(already24[2]);
+    const hours = Number(already24[1])
+    const minutes = Number(already24[2])
 
     if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
-      return `${pad2(hours)}:${pad2(minutes)}`;
+      return `${pad2(hours)}:${pad2(minutes)}`
     }
   }
 
-  return convert12HourTo24Hour(value);
+  return convert12HourTo24Hour(value)
 }
 
-function addThirtyMinutesToTimeLabel(timeLabel) {
-  const normalized = normalizeSingleTimeTo24(timeLabel);
-  if (!normalized) return null;
+function addThirtyMinutesToTimeLabel (timeLabel) {
+  const normalized = normalizeSingleTimeTo24(timeLabel)
+  if (!normalized) return null
 
-  let [hours, minutes] = normalized.split(":").map(Number);
+  let [hours, minutes] = normalized.split(':').map(Number)
 
-  minutes += 30;
+  minutes += 30
   if (minutes >= 60) {
-    hours += 1;
-    minutes -= 60;
+    hours += 1
+    minutes -= 60
   }
   if (hours >= 24) {
-    hours %= 24;
+    hours %= 24
   }
 
-  return convert24HourTo12Hour(hours, minutes);
+  return convert24HourTo12Hour(hours, minutes)
 }
 
-function normalizeTimeRange(rawTime) {
-  const value = normalizeTimeToken(rawTime);
-  if (!value) return "";
+function normalizeTimeRange (rawTime) {
+  const value = normalizeTimeToken(rawTime)
+  if (!value) return ''
 
-  if (value.includes("-")) {
-    const parts = value.split(/\s*-\s*/);
+  if (value.includes('-')) {
+    const parts = value.split(/\s*-\s*/)
     if (parts.length === 2) {
-      const start = normalizeTimeToken(parts[0]);
-      const end = normalizeTimeToken(parts[1]);
+      const start = normalizeTimeToken(parts[0])
+      const end = normalizeTimeToken(parts[1])
 
       if (normalizeSingleTimeTo24(start) && normalizeSingleTimeTo24(end)) {
-        return `${start} - ${end}`;
+        return `${start} - ${end}`
       }
     }
   }
 
   try {
-    const parsed = JSON.parse(value);
+    const parsed = JSON.parse(value)
 
     if (Array.isArray(parsed) && parsed.length) {
-      const start = normalizeTimeToken(parsed[0]);
-      const last = normalizeTimeToken(parsed[parsed.length - 1]);
+      const start = normalizeTimeToken(parsed[0])
+      const last = normalizeTimeToken(parsed[parsed.length - 1])
 
-      const end = addThirtyMinutesToTimeLabel(last);
+      const end = addThirtyMinutesToTimeLabel(last)
 
       if (start && end) {
-        return `${start} - ${end}`;
+        return `${start} - ${end}`
       }
     }
   } catch (err) {
     // Not JSON; continue below
   }
 
-  const maybeSingle = normalizeSingleTimeTo24(value);
+  const maybeSingle = normalizeSingleTimeTo24(value)
   if (maybeSingle) {
-    const end = addThirtyMinutesToTimeLabel(value);
+    const end = addThirtyMinutesToTimeLabel(value)
     if (end) {
-      return `${normalizeTimeToken(value)} - ${end}`;
+      return `${normalizeTimeToken(value)} - ${end}`
     }
   }
 
-  return value;
+  return value
 }
 
-function buildDateTime(dateStr, timeStr) {
-  const normalizedTime = normalizeSingleTimeTo24(timeStr);
-  if (!dateStr || !normalizedTime) return null;
+function buildDateTime (dateStr, timeStr) {
+  const normalizedTime = normalizeSingleTimeTo24(timeStr)
+  if (!dateStr || !normalizedTime) return null
 
-  const baseDate = parseDateFromReservation(dateStr);
-  if (!baseDate) return null;
+  const baseDate = parseDateFromReservation(dateStr)
+  if (!baseDate) return null
 
-  const [hours, minutes] = normalizedTime.split(":").map(Number);
+  const [hours, minutes] = normalizedTime.split(':').map(Number)
 
   const dateTime = new Date(
     baseDate.getFullYear(),
@@ -269,231 +283,233 @@ function buildDateTime(dateStr, timeStr) {
     minutes,
     0,
     0
-  );
+  )
 
-  return Number.isNaN(dateTime.getTime()) ? null : dateTime;
+  return Number.isNaN(dateTime.getTime()) ? null : dateTime
 }
 
-function parseReservationDateTime(dateStr, timeSlot, whichPart) {
-  if (!dateStr || !timeSlot) return null;
+function parseReservationDateTime (dateStr, timeSlot, whichPart) {
+  if (!dateStr || !timeSlot) return null
 
-  const cleaned = normalizeTimeRange(timeSlot);
-  const slotParts = cleaned.split(/\s*-\s*/);
+  const cleaned = normalizeTimeRange(timeSlot)
+  const slotParts = cleaned.split(/\s*-\s*/)
 
-  if (slotParts.length !== 2) return null;
+  if (slotParts.length !== 2) return null
 
-  const startTime = slotParts[0];
-  const endTime = slotParts[1];
+  const startTime = slotParts[0]
+  const endTime = slotParts[1]
 
-  const startDateTime = buildDateTime(dateStr, startTime);
-  const endDateTime = buildDateTime(dateStr, endTime);
+  const startDateTime = buildDateTime(dateStr, startTime)
+  const endDateTime = buildDateTime(dateStr, endTime)
 
-  if (!startDateTime || !endDateTime) return null;
+  if (!startDateTime || !endDateTime) return null
 
-  if (whichPart === "start") {
-    return startDateTime;
+  if (whichPart === 'start') {
+    return startDateTime
   }
 
-  const adjustedEnd = new Date(endDateTime);
+  const adjustedEnd = new Date(endDateTime)
 
   if (adjustedEnd <= startDateTime) {
-    adjustedEnd.setDate(adjustedEnd.getDate() + 1);
+    adjustedEnd.setDate(adjustedEnd.getDate() + 1)
   }
 
-  return adjustedEnd;
+  return adjustedEnd
 }
 
 /* =====================================================
    Building Helpers
    ===================================================== */
 
-function inferBuildingKey(text) {
-  const value = String(text || "").trim().toLowerCase();
+function inferBuildingKey (text) {
+  const value = String(text || '')
+    .trim()
+    .toLowerCase()
 
-  if (!value) return "";
+  if (!value) return ''
 
   if (
-    value.includes("andrew") ||
+    value.includes('andrew') ||
     /^a\d+/i.test(value) ||
-    value.includes("room a")
+    value.includes('room a')
   ) {
-    return "andrew";
+    return 'andrew'
   }
 
   if (
-    value.includes("gokongwei") ||
+    value.includes('gokongwei') ||
     /^g\d+/i.test(value) ||
     /^gk\d+/i.test(value) ||
-    value.includes("room g")
+    value.includes('room g')
   ) {
-    return "gokongwei";
+    return 'gokongwei'
   }
 
-  return "";
+  return ''
 }
 
-function applyLabBuildingStyles() {
-  if (!labGrid) return;
+function applyLabBuildingStyles () {
+  if (!labGrid) return
 
-  const labCards = Array.from(labGrid.querySelectorAll(".lab-room"));
+  const labCards = Array.from(labGrid.querySelectorAll('.lab-room'))
 
   labCards.forEach(card => {
-    const sub = card.querySelector(".lab-sub");
-    const pill = card.querySelector(".lab-pill");
+    const sub = card.querySelector('.lab-sub')
+    const pill = card.querySelector('.lab-pill')
 
-    const buildingText = sub ? sub.textContent : "";
-    const buildingKey = inferBuildingKey(buildingText);
+    const buildingText = sub ? sub.textContent : ''
+    const buildingKey = inferBuildingKey(buildingText)
 
-    card.dataset.bldg = buildingKey;
+    card.dataset.bldg = buildingKey
 
-    if (!pill) return;
+    if (!pill) return
 
-    pill.style.background = "";
-    pill.style.boxShadow = "";
+    pill.style.background = ''
+    pill.style.boxShadow = ''
 
-    if (buildingKey === "andrew") {
-      pill.style.background = "#ffffff";
-      pill.style.boxShadow = "0 10px 24px rgba(255,255,255,0.18)";
-    } else if (buildingKey === "gokongwei") {
-      pill.style.background = "#ff7a45";
-      pill.style.boxShadow = "0 10px 24px rgba(255,122,69,0.18)";
+    if (buildingKey === 'andrew') {
+      pill.style.background = '#ffffff'
+      pill.style.boxShadow = '0 10px 24px rgba(255,255,255,0.18)'
+    } else if (buildingKey === 'gokongwei') {
+      pill.style.background = '#ff7a45'
+      pill.style.boxShadow = '0 10px 24px rgba(255,122,69,0.18)'
     }
-  });
+  })
 }
 
-function renderLabsByFilter() {
-  if (!labGrid) return;
+function renderLabsByFilter () {
+  if (!labGrid) return
 
-  const labCards = Array.from(labGrid.querySelectorAll(".lab-room"));
+  const labCards = Array.from(labGrid.querySelectorAll('.lab-room'))
 
   labCards.forEach(card => {
-    const key = card.dataset.bldg || "";
+    const key = card.dataset.bldg || ''
 
     if (!key) {
-      card.style.display = "";
-      return;
+      card.style.display = ''
+      return
     }
 
-    card.style.display = activeBuildingFilters.has(key) ? "" : "none";
-  });
+    card.style.display = activeBuildingFilters.has(key) ? '' : 'none'
+  })
 }
 
-function syncChecks() {
+function syncChecks () {
   filterChecks.forEach(check => {
-    check.checked = activeBuildingFilters.has(check.value);
-  });
+    check.checked = activeBuildingFilters.has(check.value)
+  })
 }
 
 /* =====================================================
    Reservations Styling + Mapping
    ===================================================== */
 
-function applyReservationStyles() {
-  if (!reservationList) return;
+function applyReservationStyles () {
+  if (!reservationList) return
 
-  const cards = Array.from(reservationList.querySelectorAll(".res-card"));
+  const cards = Array.from(reservationList.querySelectorAll('.res-card'))
 
   cards.forEach(card => {
-    const bar = card.querySelector(".res-accent-bar");
-    const buildingKey = card.dataset.bldg || "";
+    const bar = card.querySelector('.res-accent-bar')
+    const buildingKey = card.dataset.bldg || ''
 
-    if (!bar) return;
+    if (!bar) return
 
-    bar.style.background = "";
-    bar.style.boxShadow = "";
+    bar.style.background = ''
+    bar.style.boxShadow = ''
 
-    if (buildingKey === "andrew") {
-      bar.style.background = "#ffffff";
-      bar.style.boxShadow = "0 10px 24px rgba(255,255,255,0.18)";
-    } else if (buildingKey === "gokongwei") {
-      bar.style.background = "#ff7a45";
-      bar.style.boxShadow = "0 10px 24px rgba(255,122,69,0.18)";
+    if (buildingKey === 'andrew') {
+      bar.style.background = '#ffffff'
+      bar.style.boxShadow = '0 10px 24px rgba(255,255,255,0.18)'
+    } else if (buildingKey === 'gokongwei') {
+      bar.style.background = '#ff7a45'
+      bar.style.boxShadow = '0 10px 24px rgba(255,122,69,0.18)'
     }
-  });
+  })
 }
 
-function buildReservationMap() {
-  const map = new Map();
+function buildReservationMap () {
+  const map = new Map()
 
-  if (!reservationList) return map;
+  if (!reservationList) return map
 
-  const cards = Array.from(reservationList.querySelectorAll(".res-card"));
+  const cards = Array.from(reservationList.querySelectorAll('.res-card'))
 
   cards.forEach(card => {
-    const rawDate = card.dataset.date || "";
-    const dateISO = normalizeReservationDateToISO(rawDate);
-    const buildingKey = card.dataset.bldg || "";
+    const rawDate = card.dataset.date || ''
+    const dateISO = normalizeReservationDateToISO(rawDate)
+    const buildingKey = card.dataset.bldg || ''
 
-    if (!dateISO || !buildingKey) return;
+    if (!dateISO || !buildingKey) return
 
     if (!map.has(dateISO)) {
-      map.set(dateISO, new Set());
+      map.set(dateISO, new Set())
     }
 
-    map.get(dateISO).add(buildingKey);
-  });
+    map.get(dateISO).add(buildingKey)
+  })
 
-  return map;
+  return map
 }
 
 /* =====================================================
    Live Reservation Status
    ===================================================== */
 
-function setLiveStatusState(state, payload = {}) {
-  if (!liveStatusBox) return;
+function setLiveStatusState (state, payload = {}) {
+  if (!liveStatusBox) return
 
-  liveStatusBox.dataset.state = state;
+  liveStatusBox.dataset.state = state
 
-  if (state === "active") {
-    const activeCount = document.getElementById("liveActiveCount");
-    const activeRoom = document.getElementById("liveActiveRoom");
-    const activeStart = document.getElementById("liveActiveStart");
-    const activeEnd = document.getElementById("liveActiveEnd");
+  if (state === 'active') {
+    const activeCount = document.getElementById('liveActiveCount')
+    const activeRoom = document.getElementById('liveActiveRoom')
+    const activeStart = document.getElementById('liveActiveStart')
+    const activeEnd = document.getElementById('liveActiveEnd')
 
-    if (activeCount) activeCount.textContent = payload.count || "0";
-    if (activeRoom) activeRoom.textContent = payload.room || "";
-    if (activeStart) activeStart.textContent = payload.start || "";
-    if (activeEnd) activeEnd.textContent = payload.end || "";
-    return;
+    if (activeCount) activeCount.textContent = payload.count || '0'
+    if (activeRoom) activeRoom.textContent = payload.room || ''
+    if (activeStart) activeStart.textContent = payload.start || ''
+    if (activeEnd) activeEnd.textContent = payload.end || ''
+    return
   }
 
-  if (state === "pending") {
-    const pendingCount = document.getElementById("livePendingCount");
-    const pendingRoom = document.getElementById("livePendingRoom");
-    const pendingStart = document.getElementById("livePendingStart");
-    const pendingEnd = document.getElementById("livePendingEnd");
+  if (state === 'pending') {
+    const pendingCount = document.getElementById('livePendingCount')
+    const pendingRoom = document.getElementById('livePendingRoom')
+    const pendingStart = document.getElementById('livePendingStart')
+    const pendingEnd = document.getElementById('livePendingEnd')
 
-    if (pendingCount) pendingCount.textContent = payload.count || "0";
-    if (pendingRoom) pendingRoom.textContent = payload.room || "";
-    if (pendingStart) pendingStart.textContent = payload.start || "";
-    if (pendingEnd) pendingEnd.textContent = payload.end || "";
-    return;
+    if (pendingCount) pendingCount.textContent = payload.count || '0'
+    if (pendingRoom) pendingRoom.textContent = payload.room || ''
+    if (pendingStart) pendingStart.textContent = payload.start || ''
+    if (pendingEnd) pendingEnd.textContent = payload.end || ''
+    return
   }
 }
 
-function getReservationCardsForLiveStatus() {
-  if (!reservationList) return [];
-  return Array.from(reservationList.querySelectorAll(".res-card"));
+function getReservationCardsForLiveStatus () {
+  if (!reservationList) return []
+  return Array.from(reservationList.querySelectorAll('.res-card'))
 }
 
-function extractLiveReservations() {
-  const cards = getReservationCardsForLiveStatus();
+function extractLiveReservations () {
+  const cards = getReservationCardsForLiveStatus()
 
   return cards
     .map(card => {
-      const roomTextEl = card.querySelector(".res-room");
-      const roomText = roomTextEl ? roomTextEl.textContent.trim() : "";
+      const roomTextEl = card.querySelector('.res-room')
+      const roomText = roomTextEl ? roomTextEl.textContent.trim() : ''
 
-      const rawDate = card.dataset.date || "";
-      const rawTime = card.dataset.time || "";
-      const buildingKey = card.dataset.bldg || "";
+      const rawDate = card.dataset.date || ''
+      const rawTime = card.dataset.time || ''
+      const buildingKey = card.dataset.bldg || ''
 
-      const normalizedDate = normalizeReservationDateToISO(rawDate);
-      const normalizedTime = normalizeTimeRange(rawTime);
+      const normalizedDate = normalizeReservationDateToISO(rawDate)
+      const normalizedTime = normalizeTimeRange(rawTime)
 
-      const start = parseReservationDateTime(rawDate, normalizedTime, "start");
-      const end = parseReservationDateTime(rawDate, normalizedTime, "end");
+      const start = parseReservationDateTime(rawDate, normalizedTime, 'start')
+      const end = parseReservationDateTime(rawDate, normalizedTime, 'end')
 
       return {
         roomText,
@@ -502,7 +518,7 @@ function extractLiveReservations() {
         buildingKey,
         start,
         end
-      };
+      }
     })
     .filter(item => {
       return (
@@ -514,163 +530,170 @@ function extractLiveReservations() {
         item.end instanceof Date &&
         !Number.isNaN(item.end.getTime()) &&
         item.end > item.start
-      );
+      )
     })
-    .sort((a, b) => a.start - b.start);
+    .sort((a, b) => a.start - b.start)
 }
 
-function updateLiveStatus() {
-  if (!liveStatusBox) return;
+function updateLiveStatus () {
+  if (!liveStatusBox) return
 
-  const now = new Date();
-  const reservations = extractLiveReservations();
+  const now = new Date()
+  const reservations = extractLiveReservations()
 
   if (!reservations.length) {
-    setLiveStatusState("none");
-    return;
+    setLiveStatusState('none')
+    return
   }
 
   const activeReservations = reservations.filter(
     res => now >= res.start && now < res.end
-  );
+  )
 
   if (activeReservations.length) {
-    const currentReservation = activeReservations.sort((a, b) => a.end - b.end)[0];
+    const currentReservation = activeReservations.sort(
+      (a, b) => a.end - b.end
+    )[0]
 
-    setLiveStatusState("active", {
+    setLiveStatusState('active', {
       count: formatMinutesRemaining(currentReservation.end - now),
       room: currentReservation.roomText,
       start: `Started: ${formatTimeDisplay(currentReservation.start)}`,
       end: `Ends: ${formatTimeDisplay(currentReservation.end)}`
-    });
-    return;
+    })
+    return
   }
 
   const pendingReservations = reservations
     .filter(res => res.start > now)
-    .sort((a, b) => a.start - b.start);
+    .sort((a, b) => a.start - b.start)
 
   if (pendingReservations.length) {
-    const nearestPending = pendingReservations[0];
+    const nearestPending = pendingReservations[0]
 
-    setLiveStatusState("pending", {
+    setLiveStatusState('pending', {
       count: formatPendingCountdown(nearestPending.start - now),
       room: nearestPending.roomText,
       start: `Starts at: ${formatTimeDisplay(nearestPending.start)}`,
       end: `Ends at: ${formatTimeDisplay(nearestPending.end)}`
-    });
-    return;
+    })
+    return
   }
 
-  setLiveStatusState("none");
+  setLiveStatusState('none')
 }
 
-function startLiveStatusTimer() {
-  if (!liveStatusBox) return;
+function startLiveStatusTimer () {
+  if (!liveStatusBox) return
 
   if (liveStatusInterval) {
-    clearInterval(liveStatusInterval);
+    clearInterval(liveStatusInterval)
   }
 
-  updateLiveStatus();
-  liveStatusInterval = setInterval(updateLiveStatus, 1000);
+  updateLiveStatus()
+  liveStatusInterval = setInterval(updateLiveStatus, 1000)
 }
 
 /* =====================================================
    Calendar Rendering
    ===================================================== */
 
-function renderCalendar() {
-  if (!calGrid) return;
+function renderCalendar () {
+  if (!calGrid) return
 
-  const resMap = buildReservationMap();
-  const todayKey = toISODateKey(new Date());
+  const resMap = buildReservationMap()
+  const todayKey = toISODateKey(new Date())
 
-  const year = viewDate.getFullYear();
-  const month = viewDate.getMonth();
+  const year = viewDate.getFullYear()
+  const month = viewDate.getMonth()
 
   if (calMonthLabel) {
     calMonthLabel.textContent = viewDate.toLocaleString(undefined, {
-      month: "long",
-      year: "numeric"
-    });
+      month: 'long',
+      year: 'numeric'
+    })
   }
 
-  const first = new Date(year, month, 1);
-  const last = new Date(year, month + 1, 0);
+  const first = new Date(year, month, 1)
+  const last = new Date(year, month + 1, 0)
 
-  const startPad = mondayIndex(first.getDay());
-  const daysInMonth = last.getDate();
+  const startPad = mondayIndex(first.getDay())
+  const daysInMonth = last.getDate()
 
-  const cells = [];
+  const cells = []
 
   for (let i = 0; i < startPad; i++) {
-    cells.push({ empty: true });
+    cells.push({ empty: true })
   }
 
   for (let d = 1; d <= daysInMonth; d++) {
-    const dateObj = new Date(year, month, d);
-    const key = toISODateKey(dateObj);
+    const dateObj = new Date(year, month, d)
+    const key = toISODateKey(dateObj)
 
     cells.push({
       empty: false,
       day: d,
       key
-    });
+    })
   }
 
   while (cells.length % 7 !== 0) {
-    cells.push({ empty: true });
+    cells.push({ empty: true })
   }
 
   calGrid.innerHTML = cells
     .map(cell => {
       if (cell.empty) {
-        return `<span class="empty"></span>`;
+        return `<span class="empty"></span>`
       }
 
-      const classes = [];
+      const classes = []
 
       if (cell.key === todayKey) {
-        classes.push("today");
+        classes.push('today')
       }
 
-      return `<span class="${classes.join(" ")}" data-date="${cell.key}">${cell.day}</span>`;
+      return `<span class="${classes.join(' ')}" data-date="${cell.key}">${
+        cell.day
+      }</span>`
     })
-    .join("");
+    .join('')
 
-  const daySpans = Array.from(calGrid.querySelectorAll("span[data-date]"));
+  const daySpans = Array.from(calGrid.querySelectorAll('span[data-date]'))
 
   daySpans.forEach(dayEl => {
-    const dateKey = dayEl.dataset.date;
-    const buildingSet = resMap.get(dateKey);
+    const dateKey = dayEl.dataset.date
+    const buildingSet = resMap.get(dateKey)
 
-    if (!buildingSet || !buildingSet.size) return;
+    if (!buildingSet || !buildingSet.size) return
 
-    dayEl.classList.add("has-res");
+    dayEl.classList.add('has-res')
 
     if (buildingSet.size > 1) {
-      dayEl.style.setProperty("--calendar-bg", "linear-gradient(135deg, #ffffff, #ff7a45)");
-    } else if (buildingSet.has("andrew")) {
-      dayEl.style.setProperty("--calendar-bg", "#ffffff");
-    } else if (buildingSet.has("gokongwei")) {
-      dayEl.style.setProperty("--calendar-bg", "#ff7a45");
+      dayEl.style.setProperty(
+        '--calendar-bg',
+        'linear-gradient(135deg, #ffffff, #ff7a45)'
+      )
+    } else if (buildingSet.has('andrew')) {
+      dayEl.style.setProperty('--calendar-bg', '#ffffff')
+    } else if (buildingSet.has('gokongwei')) {
+      dayEl.style.setProperty('--calendar-bg', '#ff7a45')
     }
 
-    dayEl.style.position = "relative";
-    dayEl.style.setProperty("background", "transparent");
-    dayEl.style.setProperty("z-index", "0");
-    dayEl.style.setProperty("--calendar-shadow", "none");
-    dayEl.setAttribute("data-hasres", "true");
-  });
+    dayEl.style.position = 'relative'
+    dayEl.style.setProperty('background', 'transparent')
+    dayEl.style.setProperty('z-index', '0')
+    dayEl.style.setProperty('--calendar-shadow', 'none')
+    dayEl.setAttribute('data-hasres', 'true')
+  })
 
-  const styleId = "dashboard-calendar-inline-style";
-  let styleTag = document.getElementById(styleId);
+  const styleId = 'dashboard-calendar-inline-style'
+  let styleTag = document.getElementById(styleId)
 
   if (!styleTag) {
-    styleTag = document.createElement("style");
-    styleTag.id = styleId;
-    document.head.appendChild(styleTag);
+    styleTag = document.createElement('style')
+    styleTag.id = styleId
+    document.head.appendChild(styleTag)
   }
 
   styleTag.textContent = `
@@ -685,7 +708,7 @@ function renderCalendar() {
       background:var(--calendar-bg, #ff7a45);
       box-shadow:var(--calendar-shadow, none);
     }
-  `;
+  `
 }
 
 /* =====================================================
@@ -693,65 +716,65 @@ function renderCalendar() {
    ===================================================== */
 
 if (filterBtn && filterPop) {
-  filterBtn.addEventListener("click", e => {
-    e.stopPropagation();
-    syncChecks();
-    filterPop.classList.toggle("show");
-  });
+  filterBtn.addEventListener('click', e => {
+    e.stopPropagation()
+    syncChecks()
+    filterPop.classList.toggle('show')
+  })
 }
 
 if (applyFilters) {
-  applyFilters.addEventListener("click", () => {
+  applyFilters.addEventListener('click', () => {
     activeBuildingFilters = new Set(
       filterChecks.filter(check => check.checked).map(check => check.value)
-    );
+    )
 
-    renderLabsByFilter();
+    renderLabsByFilter()
 
     if (filterPop) {
-      filterPop.classList.remove("show");
+      filterPop.classList.remove('show')
     }
-  });
+  })
 }
 
 /* =====================================================
    Global Click Handler
    ===================================================== */
 
-document.addEventListener("click", e => {
-  if (!filterPop) return;
+document.addEventListener('click', e => {
+  if (!filterPop) return
 
-  const clickedInsideFilter = e.target.closest(".hero-actions");
+  const clickedInsideFilter = e.target.closest('.hero-actions')
 
   if (!clickedInsideFilter) {
-    filterPop.classList.remove("show");
+    filterPop.classList.remove('show')
   }
-});
+})
 
 /* =====================================================
    Calendar Navigation
    ===================================================== */
 
 if (prevBtn) {
-  prevBtn.addEventListener("click", () => {
-    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
-    renderCalendar();
-  });
+  prevBtn.addEventListener('click', () => {
+    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1)
+    renderCalendar()
+  })
 }
 
 if (nextBtn) {
-  nextBtn.addEventListener("click", () => {
-    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
-    renderCalendar();
-  });
+  nextBtn.addEventListener('click', () => {
+    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1)
+    renderCalendar()
+  })
 }
 
 /* =====================================================
    Initial Render
    ===================================================== */
 
-applyLabBuildingStyles();
-renderLabsByFilter();
-applyReservationStyles();
-renderCalendar();
-startLiveStatusTimer();
+applyLabBuildingStyles()
+renderLabsByFilter()
+applyReservationStyles()
+renderCalendar()
+startLiveStatusTimer()

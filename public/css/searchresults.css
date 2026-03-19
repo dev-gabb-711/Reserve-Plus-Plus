@@ -485,3 +485,19 @@ body{
   margin-right:12px;
   flex-shrink:0;
 }
+
+/* Fix for the white filter backdrop */
+.filter-panel::backdrop,
+dialog::backdrop,
+.backdrop,
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5) !important; /* Makes it a nice dark, transparent overlay */
+    /* Use background-color: transparent !important; if you prefer it completely invisible */
+}
+
+/* If the white background is happening inside the select dropdowns themselves: */
+.filter-panel select,
+.filter-panel select option {
+    background-color: var(--bg-surface, #1e1e1e); /* Use your theme's dark color */
+    color: var(--text-main, #ffffff);
+}
