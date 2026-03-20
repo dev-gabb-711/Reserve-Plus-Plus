@@ -127,7 +127,7 @@ async function seedDatabase () {
     /* ==========================================
        2. SAMPLE USERS
        ========================================== */
-    const insertedUsers = await User.insertMany([
+    const insertedUsers = await User.create([
       {
         firstName: 'Ross',
         lastName: 'Manalang',
