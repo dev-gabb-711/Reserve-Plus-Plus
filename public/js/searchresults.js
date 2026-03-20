@@ -6,6 +6,103 @@ const rawSearchResults = document.getElementById('searchResultsData')
 const DATA = rawSearchResults ? JSON.parse(rawSearchResults.textContent) : []
 
 /* =====================================================
+   BUILDING HELPERS
+   ===================================================== */
+
+function normalizeBuildingKey(value) {
+  const text = String(value || '')
+    .trim()
+    .toLowerCase()
+
+  if (
+    text.includes('gokongwei') ||
+    text === 'g' ||
+    text === 'gk' ||
+    text.startsWith('g2') ||
+    text.startsWith('g3') ||
+    text.startsWith('g')
+  ) {
+    return 'gokongwei'
+  }
+
+  if (
+    text.includes('andrew') ||
+    text.includes('br. andrew') ||
+    text.includes('br andrew') ||
+    text === 'a' ||
+    text.startsWith('a1') ||
+    text.startsWith('a')
+  ) {
+    return 'andrew'
+  }
+
+  if (
+    text.includes('velasco') ||
+    text === 'v' ||
+    text.startsWith('v2') ||
+    text.startsWith('v3') ||
+    text.startsWith('v4') ||
+    text.startsWith('v')
+  ) {
+    return 'velasco'
+  }
+
+  if (
+    text.includes('st. la salle') ||
+    text.includes('st la salle') ||
+    text.includes('lasalle') ||
+    text.includes('la salle') ||
+    text === 'ls' ||
+    text.startsWith('ls')
+  ) {
+    return 'lasalle'
+  }
+
+  return 'default'
+}
+
+function getBuildingBarClass(item) {
+  const buildingKey = normalizeBuildingKey(item.building || item.buildingCode || item.room)
+  return `bld-${buildingKey}`
+}
+
+/* =====================================================
+   BUILDING THEME HELPER
+   ===================================================== */
+
+function applyBuildingTheme(building) {
+  const root = document.documentElement
+  const key = normalizeBuildingKey(building)
+
+  let color = '#2ecc71'
+  let strong = '#27c468'
+  let soft = 'rgba(46, 204, 113, 0.22)'
+  let shadow = 'rgba(46, 204, 113, 0.22)'
+
+  if (key === 'gokongwei') {
+    color = '#ff9b54'
+    strong = '#ff7a45'
+    soft = 'rgba(255, 155, 84, 0.22)'
+    shadow = 'rgba(255, 155, 84, 0.22)'
+  } else if (key === 'velasco') {
+    color = '#5aa9ff'
+    strong = '#3f8cff'
+    soft = 'rgba(90, 169, 255, 0.22)'
+    shadow = 'rgba(90, 169, 255, 0.22)'
+  } else if (key === 'lasalle') {
+    color = '#b07cff'
+    strong = '#9a60ff'
+    soft = 'rgba(176, 124, 255, 0.22)'
+    shadow = 'rgba(176, 124, 255, 0.22)'
+  }
+
+  root.style.setProperty('--active-building', color)
+  root.style.setProperty('--active-building-strong', strong)
+  root.style.setProperty('--active-building-soft', soft)
+  root.style.setProperty('--active-building-shadow', shadow)
+}
+
+/* =====================================================
    DOM REFERENCES
    ===================================================== */
 
@@ -34,12 +131,12 @@ let current = [...DATA]
    URL QUERY HELPERS
    ===================================================== */
 
-function getUrlQuery () {
+function getUrlQuery() {
   const params = new URLSearchParams(window.location.search)
   return (params.get('q') || '').trim()
 }
 
-function syncSearchInputWithUrl () {
+function syncSearchInputWithUrl() {
   if (!searchInput) return
   searchInput.value = getUrlQuery()
 }
@@ -48,11 +145,11 @@ function syncSearchInputWithUrl () {
    SEARCH HELPERS
    ===================================================== */
 
-function getSearchQuery () {
+function getSearchQuery() {
   return (searchInput?.value || '').trim().toLowerCase()
 }
 
-function matchesSearch (item, q) {
+function matchesSearch(item, q) {
   if (!q) return true
 
   if (item.type === 'user') {
@@ -78,28 +175,36 @@ function matchesSearch (item, q) {
    FILTER HELPERS
    ===================================================== */
 
-function matchesBuilding (item, building) {
+function matchesBuilding(item, building) {
   if (!building || item.type === 'user') return true
-  return item.buildingCode === building
+
+  const itemKey = normalizeBuildingKey(item.buildingCode || item.building || item.room)
+  const filterKey = normalizeBuildingKey(building)
+
+  return itemKey === filterKey
 }
 
-function matchesRoom (item, room) {
+function matchesRoom(item, room) {
   if (!room || item.type === 'user') return true
-  return String(item.room).includes(room)
+  return String(item.room).toLowerCase().includes(room.toLowerCase())
 }
 
-function matchesDate (item, date) {
+function matchesDate(item, date) {
   if (!date || item.type === 'user') return true
   return item.date === date
 }
 
-function sortResults (items, sortValue) {
+function sortResults(items, sortValue) {
   const sorted = [...items]
 
   if (sortValue === 'room') {
     sorted.sort((a, b) => {
       if (a.type === 'user' || b.type === 'user') return 0
-      return Number(a.room) - Number(b.room)
+
+      const roomA = String(a.room || '').replace(/[^\d]/g, '')
+      const roomB = String(b.room || '').replace(/[^\d]/g, '')
+
+      return Number(roomA) - Number(roomB)
     })
   }
 
@@ -110,7 +215,7 @@ function sortResults (items, sortValue) {
    APPLY FILTERS
    ===================================================== */
 
-function applyAllFilters () {
+function applyAllFilters() {
   const q = getSearchQuery()
 
   const building = buildingFilter?.value || ''
@@ -136,17 +241,21 @@ function applyAllFilters () {
    FILTER PANEL TOGGLE
    ===================================================== */
 
-function openFilterPanel () {
+function openFilterPanel() {
+  if (!filterPanel) return
   filterPanel.classList.add('show')
   filterPanel.setAttribute('aria-hidden', 'false')
 }
 
-function closeFilterPanel () {
+function closeFilterPanel() {
+  if (!filterPanel) return
   filterPanel.classList.remove('show')
   filterPanel.setAttribute('aria-hidden', 'true')
 }
 
-function toggleFilterPanel () {
+function toggleFilterPanel() {
+  if (!filterPanel) return
+
   if (filterPanel.classList.contains('show')) {
     closeFilterPanel()
   } else {
@@ -181,10 +290,10 @@ if (filterBtn && filterPanel) {
 
 if (clearFilters) {
   clearFilters.addEventListener('click', () => {
-    buildingFilter.value = ''
-    roomFilter.value = ''
-    dateFilter.value = ''
-    sortFilter.value = 'soonest'
+    if (buildingFilter) buildingFilter.value = ''
+    if (roomFilter) roomFilter.value = ''
+    if (dateFilter) dateFilter.value = ''
+    if (sortFilter) sortFilter.value = 'soonest'
 
     applyAllFilters()
   })
@@ -200,7 +309,10 @@ if (applyFiltersBtn) {
 /* =====================================================
    RENDERING RESULTS
    ===================================================== */
-function render () {
+
+function render() {
+  if (!resultList || !emptyState) return
+
   resultList.innerHTML = ''
 
   if (!current.length) {
@@ -229,10 +341,7 @@ function render () {
         window.location.href = `/profile/${item.userId}`
       })
     } else {
-      const safeCode = item.buildingCode
-        ? item.buildingCode.toLowerCase()
-        : 'default'
-      const barClass = `bld-${safeCode}`
+      const barClass = getBuildingBarClass(item)
 
       const title = `Room ${item.room} • Seat ${item.seat}`
 
@@ -248,6 +357,16 @@ function render () {
           <div class="result-meta">${meta}</div>
         </div>
       `
+
+      const buildingName = item.building || item.buildingCode || item.room
+
+      card.addEventListener('mouseenter', () => {
+        applyBuildingTheme(buildingName)
+      })
+
+      card.addEventListener('click', () => {
+        applyBuildingTheme(buildingName)
+      })
     }
 
     resultList.appendChild(card)
@@ -278,34 +397,42 @@ if (searchInput) {
 }
 
 /* =====================================================
-   FILTER POPULATION (Search Results)
+   FILTER POPULATION
    ===================================================== */
-function populateSearchFilters () {
+
+function populateSearchFilters() {
   const bldFilter = document.getElementById('buildingFilter')
   if (!bldFilter) return
 
-  const uniqueBuildings = {}
+  const uniqueBuildings = new Map()
 
-  // 1. Scan all search results to find unique buildings
-  if (typeof DATA !== 'undefined') {
-    DATA.forEach(item => {
-      // Only check items that have building data (ignoring user profiles)
-      if (item.buildingCode && item.building) {
-        uniqueBuildings[item.buildingCode] = item.building
-      }
-    })
-  }
+  DATA.forEach(item => {
+    if (item.type === 'user') return
 
-  // 2. Inject the dynamically found buildings into the dropdown
-  Object.keys(uniqueBuildings).forEach(code => {
+    const key = normalizeBuildingKey(item.buildingCode || item.building || item.room)
+    if (key === 'default') return
+
+    let label = 'Br. Andrew Hall'
+
+    if (key === 'gokongwei') {
+      label = 'Gokongwei Hall'
+    } else if (key === 'velasco') {
+      label = 'Velasco Hall'
+    } else if (key === 'lasalle') {
+      label = 'St. La Salle Hall'
+    }
+
+    uniqueBuildings.set(key, label)
+  })
+
+  uniqueBuildings.forEach((label, key) => {
     const opt = document.createElement('option')
-    opt.value = code
-    opt.textContent = `${uniqueBuildings[code]} (${code})`
+    opt.value = key
+    opt.textContent = label
     bldFilter.appendChild(opt)
   })
 }
 
-// Run the function immediately
 populateSearchFilters()
 
 /* =====================================================
@@ -313,4 +440,5 @@ populateSearchFilters()
    ===================================================== */
 
 syncSearchInputWithUrl()
+applyBuildingTheme('andrew')
 applyAllFilters()

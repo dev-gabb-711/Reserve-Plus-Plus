@@ -11,6 +11,21 @@
   --muted2:rgba(255,255,255,0.55);
   --stroke:rgba(255,255,255,0.18);
   --shadow:0 18px 40px rgba(0,0,0,0.35);
+
+  --green:#2ecc71;
+  --orange:#ff9b54;
+  --blue:#5aa9ff;
+  --purple:#b07cff;
+
+  --green-shadow:rgba(46,204,113,0.18);
+  --orange-shadow:rgba(255,155,84,0.22);
+  --blue-shadow:rgba(90,169,255,0.20);
+  --purple-shadow:rgba(176,124,255,0.22);
+
+  --active-building:var(--green);
+  --active-building-strong:#27c468;
+  --active-building-soft:rgba(46,204,113,0.22);
+  --active-building-shadow:rgba(46,204,113,0.22);
 }
 
 
@@ -370,7 +385,7 @@ body{
 .result-list{
   display:flex;
   flex-direction:column;
-  gap:3px;
+  gap:10px;
   flex:1;
   overflow-y:auto;
   padding-right:6px;
@@ -388,6 +403,7 @@ body{
   gap:12px;
   background:rgba(0,0,0,0.12);
   border:1px solid rgba(255,255,255,0.10);
+  transition:transform 0.12s ease, background 0.18s ease, border-color 0.18s ease;
 }
 
 .result-item:hover{
@@ -403,6 +419,36 @@ body{
   min-height:54px;
   border-radius:999px;
   flex-shrink:0;
+  background:var(--green);
+  box-shadow:0 10px 24px var(--green-shadow);
+}
+
+/*----------------Building Color Classes------------------*/
+.building-bar.bld-default,
+.building-bar.bld-andrew,
+.building-bar.bld-a{
+  background:var(--green);
+  box-shadow:0 10px 24px var(--green-shadow);
+}
+
+.building-bar.bld-gokongwei,
+.building-bar.bld-g,
+.building-bar.bld-gk{
+  background:var(--orange);
+  box-shadow:0 10px 24px var(--orange-shadow);
+}
+
+.building-bar.bld-velasco,
+.building-bar.bld-v{
+  background:var(--blue);
+  box-shadow:0 10px 24px var(--blue-shadow);
+}
+
+.building-bar.bld-lasalle,
+.building-bar.bld-ls,
+.building-bar.bld-stlasalle{
+  background:var(--purple);
+  box-shadow:0 10px 24px var(--purple-shadow);
 }
 
 /*----------------Result Text------------------*/
@@ -432,14 +478,20 @@ body{
   font-size:12px;
 }
 
-/*----------------Building Colors------------------*/
-.bld-g{ background:rgba(255,70,70,0.95); }
-.bld-a{ background:rgba(80,220,140,0.95); }
-
 .result-empty{
   margin:14px 0 0;
   color:rgba(255,255,255,0.72);
   font-weight:650;
+}
+
+/*----------------User Search Result Avatar------------------*/
+.result-avatar{
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  object-fit:cover;
+  margin-right:12px;
+  flex-shrink:0;
 }
 
 
@@ -460,9 +512,8 @@ body{
 
 
 /*================================================
-  SCROLLBAR STYLES (GAB'S EXPERIMENT)
+  SCROLLBAR STYLES
   ================================================ */
-/*----------------Scrollbar (Chrome/Edge/Safari)------------------*/
 .result-list::-webkit-scrollbar{ width:10px; }
 .result-list::-webkit-scrollbar-track{ background:transparent; }
 .result-list::-webkit-scrollbar-thumb{
@@ -476,28 +527,17 @@ body{
   background-clip:padding-box;
 }
 
-/*----------------User Search Result Avatar------------------*/
-.result-avatar{
-  width:46px;
-  height:46px;
-  border-radius:50%;
-  object-fit:cover;
-  margin-right:12px;
-  flex-shrink:0;
-}
-
 /* Fix for the white filter backdrop */
 .filter-panel::backdrop,
 dialog::backdrop,
 .backdrop,
 .modal-backdrop {
-    background-color: rgba(0, 0, 0, 0.5) !important; /* Makes it a nice dark, transparent overlay */
-    /* Use background-color: transparent !important; if you prefer it completely invisible */
+  background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
-/* If the white background is happening inside the select dropdowns themselves: */
+/* If the white background is happening inside the select dropdowns themselves */
 .filter-panel select,
 .filter-panel select option {
-    background-color: var(--bg-surface, #1e1e1e); /* Use your theme's dark color */
-    color: var(--text-main, #ffffff);
+  background-color: #1e1e1e;
+  color: #ffffff;
 }
