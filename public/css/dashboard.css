@@ -9,8 +9,16 @@
   --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
   --panel: rgba(255, 255, 255, 0.06);
   --panel2: rgba(255, 255, 255, 0.08);
-  --red: #ff3b3b;
+
   --green: rgba(80, 255, 120, 0.95);
+  --orange: rgba(255, 155, 84, 0.95);
+  --blue: rgba(90, 169, 255, 0.95);
+  --purple: rgba(176, 124, 255, 0.95);
+
+  --green-shadow: rgba(80, 255, 120, 0.18);
+  --orange-shadow: rgba(255, 155, 84, 0.22);
+  --blue-shadow: rgba(90, 169, 255, 0.20);
+  --purple-shadow: rgba(176, 124, 255, 0.22);
 }
 
 
@@ -439,12 +447,22 @@ body {
 
 .lab-pill.bldg-andrew {
   background: var(--green);
-  box-shadow: 0 10px 24px rgba(80, 255, 120, 0.18);
+  box-shadow: 0 10px 24px var(--green-shadow);
 }
 
 .lab-pill.bldg-gokongwei {
-  background: rgba(255, 60, 60, 0.95);
-  box-shadow: 0 10px 24px rgba(255, 60, 60, 0.18);
+  background: var(--orange);
+  box-shadow: 0 10px 24px var(--orange-shadow);
+}
+
+.lab-pill.bldg-velasco {
+  background: var(--blue);
+  box-shadow: 0 10px 24px var(--blue-shadow);
+}
+
+.lab-pill.bldg-lasalle {
+  background: var(--purple);
+  box-shadow: 0 10px 24px var(--purple-shadow);
 }
 
 /*----------------Room Text------------------*/
@@ -1012,14 +1030,28 @@ body {
   flex: 0 0 auto;
 }
 
-.green-accent .res-accent-bar {
-  background: rgba(80, 255, 120, 0.95);
-  box-shadow: 0 10px 24px rgba(80, 255, 120, 0.18);
+.green-accent .res-accent-bar,
+.res-accent-bar.bldg-andrew {
+  background: var(--green);
+  box-shadow: 0 10px 24px var(--green-shadow);
 }
 
-.red-accent .res-accent-bar {
-  background: rgba(255, 60, 60, 0.95);
-  box-shadow: 0 10px 24px rgba(255, 60, 60, 0.18);
+.orange-accent .res-accent-bar,
+.res-accent-bar.bldg-gokongwei {
+  background: var(--orange);
+  box-shadow: 0 10px 24px var(--orange-shadow);
+}
+
+.blue-accent .res-accent-bar,
+.res-accent-bar.bldg-velasco {
+  background: var(--blue);
+  box-shadow: 0 10px 24px var(--blue-shadow);
+}
+
+.purple-accent .res-accent-bar,
+.res-accent-bar.bldg-lasalle {
+  background: var(--purple);
+  box-shadow: 0 10px 24px var(--purple-shadow);
 }
 
 /*----------------Reservation Text------------------*/
@@ -1164,11 +1196,43 @@ body {
 }
 
 .cal-days span.has-res.bldg-gokongwei::after {
-  background: rgba(255, 60, 60, 0.95);
+  background: var(--orange);
 }
 
-.cal-days span.has-res.multi::after {
-  background: linear-gradient(135deg, rgba(80, 255, 120, 0.95), rgba(255, 60, 60, 0.95));
+.cal-days span.has-res.bldg-velasco::after {
+  background: var(--blue);
+}
+
+.cal-days span.has-res.bldg-lasalle::after {
+  background: var(--purple);
+}
+
+.cal-days span.has-res.multi-ag::after {
+  background: linear-gradient(135deg, var(--green), var(--orange));
+}
+
+.cal-days span.has-res.multi-av::after {
+  background: linear-gradient(135deg, var(--green), var(--blue));
+}
+
+.cal-days span.has-res.multi-al::after {
+  background: linear-gradient(135deg, var(--green), var(--purple));
+}
+
+.cal-days span.has-res.multi-gv::after {
+  background: linear-gradient(135deg, var(--orange), var(--blue));
+}
+
+.cal-days span.has-res.multi-gl::after {
+  background: linear-gradient(135deg, var(--orange), var(--purple));
+}
+
+.cal-days span.has-res.multi-vl::after {
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+}
+
+.cal-days span.has-res.multi-all::after {
+  background: linear-gradient(135deg, var(--green), var(--orange), var(--blue), var(--purple));
 }
 
 

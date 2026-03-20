@@ -24,7 +24,13 @@ const liveStatusBox = document.getElementById('liveStatusBox')
    State
    ===================================================== */
 
-let activeBuildingFilters = new Set(['andrew', 'gokongwei'])
+let activeBuildingFilters = new Set([
+  'andrew',
+  'gokongwei',
+  'velasco',
+  'lasalle'
+])
+
 let viewDate = new Date()
 let liveStatusInterval = null
 
@@ -330,6 +336,8 @@ function inferBuildingKey (text) {
 
   if (
     value.includes('andrew') ||
+    value.includes('br. andrew') ||
+    value.includes('br andrew') ||
     /^a\d+/i.test(value) ||
     value.includes('room a')
   ) {
@@ -345,7 +353,54 @@ function inferBuildingKey (text) {
     return 'gokongwei'
   }
 
+  if (
+    value.includes('velasco') ||
+    /^v\d+/i.test(value) ||
+    value.includes('room v')
+  ) {
+    return 'velasco'
+  }
+
+  if (
+    value.includes('st. la salle') ||
+    value.includes('st la salle') ||
+    value.includes('la salle hall') ||
+    /^ls\d+/i.test(value)
+  ) {
+    return 'lasalle'
+  }
+
   return ''
+}
+
+function getBuildingColor (buildingKey) {
+  switch (buildingKey) {
+    case 'andrew':
+      return {
+        bg: '#50ff78',
+        shadow: 'rgba(80, 255, 120, 0.18)'
+      }
+    case 'gokongwei':
+      return {
+        bg: '#ff9b54',
+        shadow: 'rgba(255, 155, 84, 0.22)'
+      }
+    case 'velasco':
+      return {
+        bg: '#5aa9ff',
+        shadow: 'rgba(90, 169, 255, 0.20)'
+      }
+    case 'lasalle':
+      return {
+        bg: '#b07cff',
+        shadow: 'rgba(176, 124, 255, 0.22)'
+      }
+    default:
+      return {
+        bg: '#50ff78',
+        shadow: 'rgba(80, 255, 120, 0.18)'
+      }
+  }
 }
 
 function applyLabBuildingStyles () {
@@ -364,16 +419,10 @@ function applyLabBuildingStyles () {
 
     if (!pill) return
 
-    pill.style.background = ''
-    pill.style.boxShadow = ''
+    const colors = getBuildingColor(buildingKey)
 
-    if (buildingKey === 'andrew') {
-      pill.style.background = '#ffffff'
-      pill.style.boxShadow = '0 10px 24px rgba(255,255,255,0.18)'
-    } else if (buildingKey === 'gokongwei') {
-      pill.style.background = '#ff7a45'
-      pill.style.boxShadow = '0 10px 24px rgba(255,122,69,0.18)'
-    }
+    pill.style.background = colors.bg
+    pill.style.boxShadow = `0 10px 24px ${colors.shadow}`
   })
 }
 
@@ -415,16 +464,10 @@ function applyReservationStyles () {
 
     if (!bar) return
 
-    bar.style.background = ''
-    bar.style.boxShadow = ''
+    const colors = getBuildingColor(buildingKey)
 
-    if (buildingKey === 'andrew') {
-      bar.style.background = '#ffffff'
-      bar.style.boxShadow = '0 10px 24px rgba(255,255,255,0.18)'
-    } else if (buildingKey === 'gokongwei') {
-      bar.style.background = '#ff7a45'
-      bar.style.boxShadow = '0 10px 24px rgba(255,122,69,0.18)'
-    }
+    bar.style.background = colors.bg
+    bar.style.boxShadow = `0 10px 24px ${colors.shadow}`
   })
 }
 
@@ -598,6 +641,31 @@ function startLiveStatusTimer () {
    Calendar Rendering
    ===================================================== */
 
+function getCalendarGradientForBuildings (buildingSet) {
+  const orderedKeys = ['andrew', 'gokongwei', 'velasco', 'lasalle'].filter(key =>
+    buildingSet.has(key)
+  )
+
+  const colorMap = {
+    andrew: '#50ff78',
+    gokongwei: '#ff9b54',
+    velasco: '#5aa9ff',
+    lasalle: '#b07cff'
+  }
+
+  const colors = orderedKeys.map(key => colorMap[key]).filter(Boolean)
+
+  if (!colors.length) {
+    return '#50ff78'
+  }
+
+  if (colors.length === 1) {
+    return colors[0]
+  }
+
+  return `linear-gradient(135deg, ${colors.join(', ')})`
+}
+
 function renderCalendar () {
   if (!calGrid) return
 
@@ -653,9 +721,7 @@ function renderCalendar () {
         classes.push('today')
       }
 
-      return `<span class="${classes.join(' ')}" data-date="${cell.key}">${
-        cell.day
-      }</span>`
+      return `<span class="${classes.join(' ')}" data-date="${cell.key}">${cell.day}</span>`
     })
     .join('')
 
@@ -668,17 +734,10 @@ function renderCalendar () {
     if (!buildingSet || !buildingSet.size) return
 
     dayEl.classList.add('has-res')
-
-    if (buildingSet.size > 1) {
-      dayEl.style.setProperty(
-        '--calendar-bg',
-        'linear-gradient(135deg, #ffffff, #ff7a45)'
-      )
-    } else if (buildingSet.has('andrew')) {
-      dayEl.style.setProperty('--calendar-bg', '#ffffff')
-    } else if (buildingSet.has('gokongwei')) {
-      dayEl.style.setProperty('--calendar-bg', '#ff7a45')
-    }
+    dayEl.style.setProperty(
+      '--calendar-bg',
+      getCalendarGradientForBuildings(buildingSet)
+    )
 
     dayEl.style.position = 'relative'
     dayEl.style.setProperty('background', 'transparent')
@@ -705,7 +764,7 @@ function renderCalendar () {
       border-radius:50%;
       z-index:-2;
       opacity:0.95;
-      background:var(--calendar-bg, #ff7a45);
+      background:var(--calendar-bg, #50ff78);
       box-shadow:var(--calendar-shadow, none);
     }
   `
