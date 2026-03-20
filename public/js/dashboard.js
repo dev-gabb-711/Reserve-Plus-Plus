@@ -364,8 +364,9 @@ function inferBuildingKey (text) {
   if (
     value.includes('st. la salle') ||
     value.includes('st la salle') ||
-    value.includes('la salle hall') ||
-    /^ls\d+/i.test(value)
+    value.includes('la salle') ||
+    /^ls\d+/i.test(value) ||
+    value.includes('room ls')
   ) {
     return 'lasalle'
   }
@@ -401,6 +402,30 @@ function getBuildingColor (buildingKey) {
         shadow: 'rgba(80, 255, 120, 0.18)'
       }
   }
+}
+
+function assignReservationBuildingKeys () {
+  if (!reservationList) return
+
+  const cards = Array.from(reservationList.querySelectorAll('.res-card'))
+
+  cards.forEach(card => {
+    const roomEl = card.querySelector('.res-room')
+    const timeEl = card.querySelector('.res-time')
+
+    const roomText = roomEl ? roomEl.textContent : ''
+    const timeText = timeEl ? timeEl.textContent : ''
+    const combinedText = `${roomText} ${timeText}`
+
+    const buildingKey = inferBuildingKey(
+      card.dataset.bldg ||
+        card.dataset.building ||
+        card.dataset.lab ||
+        combinedText
+    )
+
+    card.dataset.bldg = buildingKey
+  })
 }
 
 function applyLabBuildingStyles () {
@@ -456,6 +481,8 @@ function syncChecks () {
 function applyReservationStyles () {
   if (!reservationList) return
 
+  assignReservationBuildingKeys()
+
   const cards = Array.from(reservationList.querySelectorAll('.res-card'))
 
   cards.forEach(card => {
@@ -475,6 +502,8 @@ function buildReservationMap () {
   const map = new Map()
 
   if (!reservationList) return map
+
+  assignReservationBuildingKeys()
 
   const cards = Array.from(reservationList.querySelectorAll('.res-card'))
 
@@ -537,6 +566,8 @@ function getReservationCardsForLiveStatus () {
 }
 
 function extractLiveReservations () {
+  assignReservationBuildingKeys()
+
   const cards = getReservationCardsForLiveStatus()
 
   return cards

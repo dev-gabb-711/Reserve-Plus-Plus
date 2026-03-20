@@ -153,7 +153,8 @@ async function seedDatabase () {
         password: '123',
         role: 'Student',
         profilePic: '/img/def_avatar.jpg',
-        description: 'Scenario account: has a reservation later today.'
+        description:
+          'Scenario account: has one reservation in each building for color-coding tests.'
       },
       {
         firstName: 'Marion',
@@ -325,32 +326,18 @@ async function seedDatabase () {
 
     /* ==========================================
        4A. SCENARIO CONTROL BLOCK
-       Edit these values whenever you want to
-       test different live reservation states.
        ========================================== */
 
     // 1) NO RESERVATION TODAY
     // Ross will intentionally have no reservation for today.
 
-    // 2) RESERVATION LATER TODAY
-    // Gabby gets a future reservation later than the current time.
-    let gabbyLaterTodayDate = todayDate
-    let gabbyLaterTodaySlots = []
-
-    const gabbyStart = new Date(now)
-    gabbyStart.setMinutes(0, 0, 0)
-    gabbyStart.setHours(gabbyStart.getHours() + 2)
-
-    if (gabbyStart.getDate() !== today.getDate()) {
-      gabbyLaterTodayDate = tomorrowDate
-      gabbyLaterTodaySlots = buildSlotsArray(9, 0, 1) // 30 mins tomorrow if already too late today
-    } else {
-      gabbyLaterTodaySlots = buildSlotsArray(
-        gabbyStart.getHours(),
-        gabbyStart.getMinutes(),
-        1
-      )
-    }
+    // 2) GABBY COLOR-CODING TEST DAY
+    // Gabby gets one reservation in each building on the same day.
+    const gabbyTestDate = tomorrowDate
+    const gabbyAndrewSlots = buildSlotsArray(8, 0, 2)   // 8:00 - 9:00 AM
+    const gabbyGokongweiSlots = buildSlotsArray(10, 0, 2) // 10:00 - 11:00 AM
+    const gabbyVelascoSlots = buildSlotsArray(13, 0, 2) // 1:00 - 2:00 PM
+    const gabbyLaSalleSlots = buildSlotsArray(15, 0, 2) // 3:00 - 4:00 PM
 
     // 3) CURRENTLY USING THE LAB
     // Marion gets a reservation that started at the current half-hour block
@@ -459,15 +446,46 @@ async function seedDatabase () {
       }),
 
       /* ------------------------------------------
-         GABBY - reservation later today
+         GABBY - ONE RESERVATION PER BUILDING
+         (for color-coding + calendar testing)
          ------------------------------------------ */
       makeReservationPayload({
         userId: userMap.gabby._id,
         labId: labMap.A1904._id,
         labCode: labMap.A1904.labCode,
         seatNumbers: [6],
-        date: gabbyLaterTodayDate,
-        slotsArray: gabbyLaterTodaySlots,
+        date: gabbyTestDate,
+        slotsArray: gabbyAndrewSlots,
+        status: 'Active'
+      }),
+
+      makeReservationPayload({
+        userId: userMap.gabby._id,
+        labId: labMap.G201._id,
+        labCode: labMap.G201.labCode,
+        seatNumbers: [7],
+        date: gabbyTestDate,
+        slotsArray: gabbyGokongweiSlots,
+        status: 'Active'
+      }),
+
+      makeReservationPayload({
+        userId: userMap.gabby._id,
+        labId: labMap.V201._id,
+        labCode: labMap.V201.labCode,
+        seatNumbers: [3],
+        date: gabbyTestDate,
+        slotsArray: gabbyVelascoSlots,
+        status: 'Active'
+      }),
+
+      makeReservationPayload({
+        userId: userMap.gabby._id,
+        labId: labMap.LS212A._id,
+        labCode: labMap.LS212A.labCode,
+        seatNumbers: [5],
+        date: gabbyTestDate,
+        slotsArray: gabbyLaSalleSlots,
         status: 'Active'
       }),
 
@@ -562,10 +580,8 @@ async function seedDatabase () {
         senderName: 'Reserve++ Team',
         senderRole: 'Reservation System',
         senderAvatar: '/img/def_avatar.jpg',
-        title: 'Reservation Reminder',
-        message: `Reminder: Your reservation is scheduled at ${buildTimeRangeFromSlots(
-          gabbyLaterTodaySlots
-        )}.`,
+        title: 'Multi-Building Test Reservations Ready',
+        message: `You have active reservations on ${gabbyTestDate} in Andrew, Gokongwei, Velasco, and St. La Salle.`,
         type: 'Reservation'
       },
       {
@@ -624,10 +640,26 @@ async function seedDatabase () {
     console.log(`Day after tomorrow:       ${dayAfterTomorrowDate}`)
     console.log('------------------------------------------')
     console.log(`ROSS (NONE):              no reservation today`)
+    console.log(`GABBY (COLOR TEST DATE):  ${gabbyTestDate}`)
     console.log(
-      `GABBY (LATER TODAY):      ${buildTimeRangeFromSlots(
-        gabbyLaterTodaySlots
-      )} | ${gabbyLaterTodayDate}`
+      `  Andrew:                 ${labMap.A1904.labCode} | ${buildTimeRangeFromSlots(
+        gabbyAndrewSlots
+      )}`
+    )
+    console.log(
+      `  Gokongwei:              ${labMap.G201.labCode} | ${buildTimeRangeFromSlots(
+        gabbyGokongweiSlots
+      )}`
+    )
+    console.log(
+      `  Velasco:                ${labMap.V201.labCode} | ${buildTimeRangeFromSlots(
+        gabbyVelascoSlots
+      )}`
+    )
+    console.log(
+      `  St. La Salle:           ${labMap.LS212A.labCode} | ${buildTimeRangeFromSlots(
+        gabbyLaSalleSlots
+      )}`
     )
     console.log(
       `MARION (ACTIVE NOW):      ${buildTimeRangeFromSlots(
