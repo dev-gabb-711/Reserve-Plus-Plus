@@ -25,7 +25,7 @@
     <!--========================= SIDEBAR NAV =========================-->
     <aside class="side-nav">
       <div class="side-icons">
-            <button class="side-btn" type="button" onclick="navToHome()">
+        <button class="side-btn" type="button" onclick="navToHome()">
           <span class="material-symbols-rounded">home</span>
         </button>
 
@@ -119,15 +119,15 @@
         <aside class="right-col">
 
           <!--========================= MY RESERVATIONS =========================-->
-          <div class="glass card">
+          <section class="glass card">
             <h3 class="card-title">My Reservations</h3>
             <div id="activeResContainer" class="res-list"></div>
-          </div>
+          </section>
 
           <!--========================= EDIT RESERVATIONS =========================-->
-          <div class="glass card">
+          <section class="glass card">
             <h3 class="card-title">Edit Reservations</h3>
-            <p class="edit-desc">Select a reservation to edit</p>
+            <p class="edit-desc">Select a reservation to edit.</p>
 
             <button class="btn-outline" id="openEditFlow" type="button">
               <span class="material-symbols-rounded">event_repeat</span>
@@ -138,7 +138,7 @@
               <button class="btn-ghost" id="btnConfirmEdit" type="button">Confirm</button>
               <button class="btn-ghost" id="btnCancelEdit" type="button">Cancel</button>
             </div>
-          </div>
+          </section>
         </aside>
       </section>
     </main>
@@ -147,13 +147,13 @@
   <!--========================= MODALS =========================-->
 
   <!--========================= RESERVATION PICKER MODAL =========================-->
-  <div class="modal fade" id="reservationModal" tabindex="-1">
+  <div class="modal fade" id="reservationModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content glass-modal">
         <div class="modal-header border-0">
           <div>
             <h4 class="fw-bold mb-0" id="modalTitle">Gokongwei Hall</h4>
-            <p class="text-white-50 small mb-0" id="modalSub">GK201 • Select Date &amp; Time</p>
+            <p class="text-white-50 small mb-0" id="modalSub">G201 • Select Date &amp; Time</p>
           </div>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
@@ -182,7 +182,7 @@
   </div>
 
   <!--========================= CONFIRM CANCEL MODAL =========================-->
-  <div class="modal fade" id="confirmCancelModal" tabindex="-1">
+  <div class="modal fade" id="confirmCancelModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
       <div class="modal-content glass-modal text-center p-4">
         <h5 class="fw-bold text-white mb-3">Cancel Reservation?</h5>
@@ -190,7 +190,12 @@
 
         <div class="d-flex gap-2">
           <button type="button" class="btn-ghost w-100" data-bs-dismiss="modal">Keep It</button>
-          <button type="button" class="btn-ghost w-100" id="executeDelete" style="background:#ff4a4a!important;">
+          <button
+            type="button"
+            class="btn-ghost w-100"
+            id="executeDelete"
+            style="background:#ff4a4a!important;"
+          >
             Yes, Cancel
           </button>
         </div>
@@ -199,7 +204,7 @@
   </div>
 
   <!--========================= SUMMARY MODAL WITH FORM =========================-->
-  <div class="modal fade" id="summaryModal" tabindex="-1">
+  <div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content glass-modal p-3">
         <div class="modal-header border-0">
@@ -210,9 +215,11 @@
         <!--========================= RESERVATION FORM =========================-->
         <form id="reservation-form" method="POST">
           <div class="modal-body">
-            <div class="p-3 rounded mb-3" style="background:rgba(255,255,255,0.05);border-left:4px solid #ff6b4a;">
-              
-              <!-- Form Inputs (Hidden) -->
+            <div
+              class="p-3 rounded mb-3"
+              style="background:rgba(255,255,255,0.05); border-left:4px solid #ff6b4a;"
+            >
+              <!--========================= FORM INPUTS (HIDDEN) =========================-->
               <input type="hidden" id="building" name="building" required>
               <input type="hidden" id="lab" name="lab" required>
               <input type="hidden" id="labId" name="labId" required>
@@ -222,20 +229,38 @@
               <input type="hidden" id="slots" name="slots" required>
               <input type="hidden" id="reservationId" name="reservation_id">
 
-              <!-- Summary Display -->
-              <p class="mb-2"><span class="text-white-50">Location:</span> <span id="sumBld" class="fw-bold"></span></p>
-              <p class="mb-2"><span class="text-white-50">Lab &amp; Seat:</span> <span id="sumLabSeat" class="fw-bold"></span></p>
-              <p class="mb-2"><span class="text-white-50">Date:</span> <span id="sumDate" class="fw-bold"></span></p>
-              <p class="mb-0"><span class="text-white-50">Time:</span> <span id="sumTime" class="fw-bold"></span></p>
+              <!--========================= SUMMARY DISPLAY =========================-->
+              <p class="mb-2">
+                <span class="text-white-50">Location:</span>
+                <span id="sumBld" class="fw-bold"></span>
+              </p>
+              <p class="mb-2">
+                <span class="text-white-50">Lab &amp; Seat:</span>
+                <span id="sumLabSeat" class="fw-bold"></span>
+              </p>
+              <p class="mb-2">
+                <span class="text-white-50">Date:</span>
+                <span id="sumDate" class="fw-bold"></span>
+              </p>
+              <p class="mb-0">
+                <span class="text-white-50">Time:</span>
+                <span id="sumTime" class="fw-bold"></span>
+              </p>
             </div>
 
             <hr style="border-color: rgba(255,255,255,0.1);">
+
             <div class="form-check form-switch mt-3 d-flex align-items-center gap-2">
               <input class="form-check-input mt-0" type="checkbox" id="isAnonymous" name="isAnonymous">
-              <label class="form-check-label text-white-50 small" for="isAnonymous" style="cursor: pointer;">
+              <label
+                class="form-check-label text-white-50 small"
+                for="isAnonymous"
+                style="cursor: pointer;"
+              >
                 Book Anonymously (Hide my name and avatar from others)
               </label>
             </div>
+
             <p class="small text-white-50 text-center mb-0">
               Please ensure all details are correct before proceeding.
             </p>
@@ -253,17 +278,30 @@
   </div>
 
   <!--========================= SUCCESS MODAL =========================-->
-  <div class="modal fade" id="successModal" tabindex="-1">
+  <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
-      <div class="modal-content glass-modal text-center p-4" style="border:1px solid rgba(46,204,113,0.3);">
+      <div
+        class="modal-content glass-modal text-center p-4"
+        style="border:1px solid rgba(46,204,113,0.3);"
+      >
         <div class="mb-3">
-          <span class="material-symbols-rounded" style="font-size:80px;color:#2ecc71;display:block;">check_circle</span>
+          <span
+            class="material-symbols-rounded"
+            style="font-size:80px; color:#2ecc71; display:block;"
+          >
+            check_circle
+          </span>
         </div>
 
         <h4 class="fw-bold text-white">Confirmed!</h4>
         <p class="text-white-50 small mb-4">Your seat has been successfully reserved.</p>
 
-        <button type="button" class="btn-ghost w-100" data-bs-dismiss="modal" style="background:#2ecc71!important;">
+        <button
+          type="button"
+          class="btn-ghost w-100"
+          data-bs-dismiss="modal"
+          style="background:#2ecc71!important;"
+        >
           Great!
         </button>
       </div>
@@ -271,11 +309,19 @@
   </div>
 
   <!--========================= CANCEL SUCCESS MODAL =========================-->
-  <div class="modal fade" id="cancelSuccessModal" tabindex="-1">
+  <div class="modal fade" id="cancelSuccessModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
-      <div class="modal-content glass-modal text-center p-4" style="border:1px solid rgba(255,107,74,0.3);">
+      <div
+        class="modal-content glass-modal text-center p-4"
+        style="border:1px solid rgba(255,107,74,0.3);"
+      >
         <div class="mb-3">
-          <span class="material-symbols-rounded" style="font-size:80px;color:#ff6b4a;display:block;">delete_forever</span>
+          <span
+            class="material-symbols-rounded"
+            style="font-size:80px; color:#ff6b4a; display:block;"
+          >
+            delete_forever
+          </span>
         </div>
 
         <h4 class="fw-bold text-white">Canceled</h4>
@@ -287,33 +333,75 @@
   </div>
 
   <!--========================= USER POP UP MODAL =========================-->
-  <div id="userPopover" class="user-popover" style="display: none; position: fixed; z-index: 9999; background: rgba(20,20,20,0.95); border: 1px solid rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); pointer-events: auto; backdrop-filter: blur(10px); flex-direction: row; align-items: center; justify-content: space-between; gap: 20px;">
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <img id="popAvatar" src="" alt="User" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-      <div style="display: flex; flex-direction: column;">
-        <div style="font-size: 0.75rem; color: #aaa; margin-bottom: 2px;">Reserved by</div>
-        <a id="popName" href="#" style="color: #ff6b4a; font-weight: 600; text-decoration: none; font-size: 0.9rem;">Name</a>
+  <div
+    id="userPopover"
+    class="user-popover"
+    style="
+      display:none;
+      position:fixed;
+      z-index:9999;
+      background:rgba(20,20,20,0.95);
+      border:1px solid rgba(255,255,255,0.2);
+      padding:15px;
+      border-radius:8px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.5);
+      pointer-events:auto;
+      backdrop-filter:blur(10px);
+      flex-direction:row;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    "
+  >
+    <div style="display:flex; align-items:center; gap:10px;">
+      <img
+        id="popAvatar"
+        src=""
+        alt="User"
+        style="width:40px; height:40px; border-radius:50%; object-fit:cover;"
+      >
+      <div style="display:flex; flex-direction:column;">
+        <div style="font-size:0.75rem; color:#aaa; margin-bottom:2px;">Reserved by</div>
+        <a
+          id="popName"
+          href="#"
+          style="color:#ff6b4a; font-weight:600; text-decoration:none; font-size:0.9rem;"
+        >
+          Name
+        </a>
       </div>
     </div>
-    <button id="btnCancelNoShow" class="btn btn-sm" style="display: none; background: #ff3b3b; color: white; font-weight: 600; border: none; border-radius: 4px; padding: 6px 12px; white-space: nowrap;">
+
+    <button
+      id="btnCancelNoShow"
+      class="btn btn-sm"
+      style="
+        display:none;
+        background:#ff3b3b;
+        color:white;
+        font-weight:600;
+        border:none;
+        border-radius:4px;
+        padding:6px 12px;
+        white-space:nowrap;
+      "
+    >
       Cancel (No-Show)
     </button>
-    
   </div>
 
   <!--========================= SCRIPTS =========================-->
   <script>
     window.DB_LABS = {{{json labs}}};
-    // Script for the switching of tabs
-    // 1. Detect the current URL to automatically save the user's role
+
     const path = window.location.pathname;
+
     if (path === '/admin-dashboard' || path === '/it-assist-admin') {
       localStorage.setItem('reserveRole', 'Admin');
     } else if (path === '/dashboard' || path === '/it-assist') {
       localStorage.setItem('reserveRole', 'Student');
     }
 
-    // 2. Dynamic Navigation Functions
     function navToHome() {
       const role = localStorage.getItem('reserveRole');
       window.location.href = role === 'Admin' ? '/admin-dashboard' : '/dashboard';

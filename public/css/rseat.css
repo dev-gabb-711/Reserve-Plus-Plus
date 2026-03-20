@@ -11,10 +11,16 @@
   --glass: rgba(255, 255, 255, 0.08);
   --glass2: rgba(255, 255, 255, 0.06);
   --radius: 22px;
-  --orange: #ff7a45;
-  --red: #ff5a4a;
-  --purple: #a855f7;
+
+  --orange: #ff9b54;
   --green: #2ecc71;
+  --blue: #5aa9ff;
+  --purple: #b07cff;
+
+  --green-shadow: rgba(46, 204, 113, 0.18);
+  --orange-shadow: rgba(255, 155, 84, 0.22);
+  --blue-shadow: rgba(90, 169, 255, 0.20);
+  --purple-shadow: rgba(176, 124, 255, 0.22);
 }
 
 
@@ -153,7 +159,6 @@ body {
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -561,6 +566,28 @@ body {
   width: 10px;
   border-radius: 999px;
   flex: 0 0 10px;
+  background: var(--green);
+  box-shadow: 0 10px 24px var(--green-shadow);
+}
+
+.mini-card.green .accent {
+  background: var(--green) !important;
+  box-shadow: 0 10px 24px var(--green-shadow);
+}
+
+.mini-card.orange .accent {
+  background: var(--orange) !important;
+  box-shadow: 0 10px 24px var(--orange-shadow);
+}
+
+.mini-card.blue .accent {
+  background: var(--blue) !important;
+  box-shadow: 0 10px 24px var(--blue-shadow);
+}
+
+.mini-card.purple .accent {
+  background: var(--purple) !important;
+  box-shadow: 0 10px 24px var(--purple-shadow);
 }
 
 .mini-card .info {
@@ -580,14 +607,6 @@ body {
   color: rgba(255, 255, 255, 0.65);
   font-weight: 800;
   font-size: 12.5px;
-}
-
-.mini-card.red .accent {
-  background: var(--red) !important;
-}
-
-.mini-card.green .accent {
-  background: var(--green) !important;
 }
 
 .mini-card:hover {
