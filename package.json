@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/dev-gabb-711/CCAPDEV-MCOs#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "express": "^5.2.1",
     "express-handlebars": "^8.0.6",
     "express-session": "^1.19.0",
