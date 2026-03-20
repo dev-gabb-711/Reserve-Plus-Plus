@@ -102,6 +102,42 @@ function parseSeatArray(seatValue) {
     .filter(n => !Number.isNaN(n))
 }
 
+function applyCurrentBuildingTheme(buildingName) {
+  const root = document.documentElement
+  const building = String(buildingName || '').toLowerCase()
+
+  let color = '#2ecc71'
+  let strong = '#27c468'
+  let soft = 'rgba(46, 204, 113, 0.22)'
+  let shadow = 'rgba(46, 204, 113, 0.22)'
+
+  if (building.includes('gokongwei')) {
+    color = '#ff9b54'
+    strong = '#f08d47'
+    soft = 'rgba(255, 155, 84, 0.22)'
+    shadow = 'rgba(255, 155, 84, 0.22)'
+  } else if (building.includes('velasco')) {
+    color = '#5aa9ff'
+    strong = '#4698f5'
+    soft = 'rgba(90, 169, 255, 0.22)'
+    shadow = 'rgba(90, 169, 255, 0.22)'
+  } else if (
+    building.includes('st. la salle') ||
+    building.includes('st la salle') ||
+    building.includes('la salle')
+  ) {
+    color = '#b07cff'
+    strong = '#9d68f2'
+    soft = 'rgba(176, 124, 255, 0.22)'
+    shadow = 'rgba(176, 124, 255, 0.22)'
+  }
+
+  root.style.setProperty('--active-building', color)
+  root.style.setProperty('--active-building-strong', strong)
+  root.style.setProperty('--active-building-soft', soft)
+  root.style.setProperty('--active-building-shadow', shadow)
+}
+
 /* =====================================================
    Sync Labs from Database
    ===================================================== */
@@ -801,6 +837,8 @@ function openBookingFlow() {
 function refreshUI() {
   const bldData = appState.data[appState.currentBld]
   if (!bldData) return
+
+  applyCurrentBuildingTheme(appState.currentBld)
 
   const titleEl = document.getElementById('currentBuildingName')
   if (titleEl) titleEl.innerText = appState.currentBld

@@ -21,6 +21,12 @@
   --orange-shadow: rgba(255, 155, 84, 0.22);
   --blue-shadow: rgba(90, 169, 255, 0.20);
   --purple-shadow: rgba(176, 124, 255, 0.22);
+
+  /* active building theme */
+  --active-building: var(--green);
+  --active-building-strong: #27c468;
+  --active-building-soft: rgba(46, 204, 113, 0.22);
+  --active-building-shadow: rgba(46, 204, 113, 0.22);
 }
 
 
@@ -332,8 +338,9 @@ body {
 }
 
 .btn-lab-round.active {
-  background: linear-gradient(180deg, rgba(255, 122, 69, 0.95), rgba(255, 90, 74, 0.85));
+  background: linear-gradient(180deg, var(--active-building), var(--active-building-strong));
   border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 10px 24px var(--active-building-shadow);
 }
 
 /*----------------Static Hero Image------------------*/
@@ -402,7 +409,7 @@ body {
 }
 
 .dot.selected {
-  background: var(--orange);
+  background: var(--active-building);
 }
 
 .dot.reserved {
@@ -461,9 +468,9 @@ body {
 }
 
 .seat-unit.selected {
-  background: rgba(255, 122, 69, 0.22);
-  border-color: rgba(255, 122, 69, 0.55);
-  box-shadow: 0 10px 24px rgba(255, 122, 69, 0.12);
+  background: var(--active-building-soft);
+  border-color: var(--active-building);
+  box-shadow: 0 10px 24px var(--active-building-shadow);
 }
 
 /*----------------Seat Footer + Proceed Button------------------*/
@@ -488,8 +495,8 @@ body {
   font-weight: 900;
   letter-spacing: 0.2px;
   color: #fff;
-  background: linear-gradient(180deg, rgba(255, 122, 69, 0.95), rgba(255, 90, 74, 0.85));
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(180deg, var(--active-building), var(--active-building-strong));
+  box-shadow: 0 16px 36px var(--active-building-shadow);
 }
 
 .btn-proceed:disabled {
@@ -720,8 +727,9 @@ body {
 }
 
 .cal-day.selected {
-  background: rgba(255, 122, 69, 0.20);
-  border-color: rgba(255, 122, 69, 0.55);
+  background: var(--active-building-soft);
+  border-color: var(--active-building);
+  box-shadow: 0 10px 24px var(--active-building-shadow);
 }
 
 .cal-day.unavailable {
@@ -771,8 +779,9 @@ body {
 }
 
 .chip-time.active {
-  background: rgba(255, 122, 69, 0.20);
-  border-color: rgba(255, 122, 69, 0.55);
+  background: var(--active-building-soft);
+  border-color: var(--active-building);
+  box-shadow: 0 10px 24px var(--active-building-shadow);
 }
 
 .chip-time.unavailable {
