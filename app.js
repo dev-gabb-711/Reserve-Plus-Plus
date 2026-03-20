@@ -585,7 +585,7 @@ app.post('/login', async (req, res) => {
   const { email, password } = req.body
 
   try {
-    const user = await User.findOne({ email }).lean()
+    const user = await User.findOne({ email })
 
     if (!user) {
       return res.render('login', {
@@ -594,8 +594,9 @@ app.post('/login', async (req, res) => {
       })
     }
 
-    if (user.password !== password) {
-      return res.render('login', { errorMessage: 'Incorrect password.', email })
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+    return res.render('login', { errorMessage: 'Incorrect password.', email });
     }
 
     // IMPORTANT: I-set ang session para hindi ka ma-kickout ng requireLogin
@@ -612,6 +613,7 @@ app.post('/login', async (req, res) => {
       res.redirect('/dashboard') // Dito pumupunta ang students
     }
   } catch (err) {
+    console.error(err);
     res.status(500).render('login', { errorMessage: 'Server error.' })
   }
 })
