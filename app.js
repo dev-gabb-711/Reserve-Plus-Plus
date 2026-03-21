@@ -320,7 +320,6 @@ app.get('/logout', requireLogin, (req, res) => {
 
 app.get('/dashboard', requireLogin, async (req, res) => {
   try {
-
     const userId = req.session.user.id
     const studentUser = await User.findById(userId).lean()
     const labs = await Lab.find().lean()
@@ -536,7 +535,8 @@ app.get('/profile/:id', requireLogin, async (req, res) => {
       },
       reservations,
       isOwner,
-      isEditMode
+      isEditMode,
+      loggedInRole: req.session.user.role
     })
   } catch (err) {
     console.error('Error loading profile:', err)
@@ -613,30 +613,30 @@ app.post('/login', async (req, res) => {
       })
     }
 
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await user.comparePassword(password)
     if (!isMatch) {
-    return res.render('login', { errorMessage: 'Incorrect password.', email });
+      return res.render('login', { errorMessage: 'Incorrect password.', email })
     }
 
     // IMPORTANT: I-set ang session para hindi ka ma-kickout ng requireLogin
     // generates session id PER user, (ung previous implementation regardless of sino nag login iisa lang ung session ID,)
     req.session.regenerate(err => {
-        if (err) return res.status(500).send('Error')
+      if (err) return res.status(500).send('Error')
 
-        req.session.user = {
-            id: user._id,
-            name: user.firstName,
-            role: user.role
-        }
+      req.session.user = {
+        id: user._id,
+        name: user.firstName,
+        role: user.role
+      }
 
-        if (user.role === 'Admin') {
-            res.redirect('/admin-dashboard')
-        } else {
-            res.redirect('/dashboard')
-        }
+      if (user.role === 'Admin') {
+        res.redirect('/admin-dashboard')
+      } else {
+        res.redirect('/dashboard')
+      }
     })
   } catch (err) {
-    console.error(err);
+    console.error(err)
     res.status(500).render('login', { errorMessage: 'Server error.' })
   }
 })

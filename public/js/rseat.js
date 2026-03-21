@@ -19,11 +19,11 @@ const appState = {
 /* =====================================================
    Helpers
    ===================================================== */
-function getFullLabCode() {
+function getFullLabCode () {
   return String(appState.currentLab || '').trim()
 }
 
-function getReservationColorClass(buildingName) {
+function getReservationColorClass (buildingName) {
   const building = String(buildingName || '')
     .toLowerCase()
     .trim()
@@ -55,7 +55,7 @@ function getReservationColorClass(buildingName) {
   return 'green'
 }
 
-function normalizeBuildingName(buildingName) {
+function normalizeBuildingName (buildingName) {
   const building = String(buildingName || '')
     .toLowerCase()
     .trim()
@@ -87,7 +87,7 @@ function normalizeBuildingName(buildingName) {
   return String(buildingName || '').trim()
 }
 
-function parseSeatArray(seatValue) {
+function parseSeatArray (seatValue) {
   if (Array.isArray(seatValue)) {
     return seatValue.map(Number).filter(n => !Number.isNaN(n))
   }
@@ -102,7 +102,7 @@ function parseSeatArray(seatValue) {
     .filter(n => !Number.isNaN(n))
 }
 
-function applyCurrentBuildingTheme(buildingName) {
+function applyCurrentBuildingTheme (buildingName) {
   const root = document.documentElement
   const building = String(buildingName || '').toLowerCase()
 
@@ -141,8 +141,15 @@ function applyCurrentBuildingTheme(buildingName) {
 /* =====================================================
    Sync Labs from Database
    ===================================================== */
-function syncLabsFromDatabase() {
+function syncLabsFromDatabase () {
   if (!window.DB_LABS || window.DB_LABS.length === 0) return
+
+  window.DB_LABS.sort((a, b) =>
+    String(a.labCode).localeCompare(String(b.labCode), undefined, {
+      numeric: true,
+      sensitivity: 'base'
+    })
+  )
 
   appState.data = {}
 
@@ -176,7 +183,7 @@ function syncLabsFromDatabase() {
 /* =====================================================
    Database Fetching Logic
    ===================================================== */
-async function fetchMyReservations() {
+async function fetchMyReservations () {
   try {
     const res = await fetch('/api/reservations/me')
     if (!res.ok) throw new Error('Failed to load reservations')
@@ -194,7 +201,9 @@ async function fetchMyReservations() {
 
       return {
         id: dbRes._id,
-        building: dbRes.lab ? normalizeBuildingName(dbRes.lab.building) : 'Unknown Building',
+        building: dbRes.lab
+          ? normalizeBuildingName(dbRes.lab.building)
+          : 'Unknown Building',
         lab: dbRes.lab ? dbRes.lab.labCode : 'Unknown Lab',
         seat: dbRes.seatNumber,
         date: dbRes.date,
@@ -212,7 +221,7 @@ async function fetchMyReservations() {
   }
 }
 
-async function fetchBookedSlots() {
+async function fetchBookedSlots () {
   const labCode = getFullLabCode()
   if (!labCode) return
 
@@ -443,7 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /* =====================================================
    Populate Reservation Form
    ===================================================== */
-function populateReservationForm(dateStr, timeRange) {
+function populateReservationForm (dateStr, timeRange) {
   const labCode = getFullLabCode()
 
   let labId = ''
@@ -455,11 +464,14 @@ function populateReservationForm(dateStr, timeRange) {
   document.getElementById('building').value = appState.currentBld
   document.getElementById('lab').value = labCode
   document.getElementById('labId').value = labId
-  document.getElementById('seats').value = JSON.stringify(appState.selectedSeats)
+  document.getElementById('seats').value = JSON.stringify(
+    appState.selectedSeats
+  )
   document.getElementById('date').value = dateStr
   document.getElementById('time').value = timeRange
   document.getElementById('slots').value = JSON.stringify(appState.tempSlots)
-  document.getElementById('reservationId').value = appState.editingTargetId || ''
+  document.getElementById('reservationId').value =
+    appState.editingTargetId || ''
 
   document.getElementById('sumBld').innerText = appState.currentBld
   document.getElementById(
@@ -473,7 +485,7 @@ function populateReservationForm(dateStr, timeRange) {
 /* =====================================================
    Form Submission Handler
    ===================================================== */
-async function submitReservationForm() {
+async function submitReservationForm () {
   const form = document.getElementById('reservation-form')
   const formData = new FormData(form)
 
@@ -536,7 +548,7 @@ async function submitReservationForm() {
 /* =====================================================
    Seat Grid Rendering
    ===================================================== */
-function renderSeats() {
+function renderSeats () {
   const grid = document.getElementById('seatContainer')
   if (grid) grid.innerHTML = ''
 
@@ -567,7 +579,9 @@ function renderSeats() {
 
   for (let i = 1; i <= totalSeats; i++) {
     const el = document.createElement('div')
-    el.className = `seat-unit ${appState.selectedSeats.includes(i) ? 'selected' : ''}`
+    el.className = `seat-unit ${
+      appState.selectedSeats.includes(i) ? 'selected' : ''
+    }`
     el.innerHTML = `<span class="material-symbols-rounded">desktop_windows</span> Seat ${i}`
 
     el.onclick = () => {
@@ -592,7 +606,7 @@ function renderSeats() {
 /* =====================================================
    Time Range Helper
    ===================================================== */
-function calculateTimeRange(slots) {
+function calculateTimeRange (slots) {
   if (slots.length === 0) return ''
 
   const sorted = [...slots].sort(
@@ -624,7 +638,7 @@ function calculateTimeRange(slots) {
 /* =====================================================
    Calendar Rendering
    ===================================================== */
-function renderCalendar() {
+function renderCalendar () {
   const calGrid = document.getElementById('calendarEl')
   if (!calGrid) return
 
@@ -682,7 +696,8 @@ function renderCalendar() {
       d === appState.selectedDate.getDate() &&
       month === appState.selectedDate.getMonth()
     ) {
-      totalBookedCount = new Set([...userSlotsForDay, ...appState.bookedSlots]).size
+      totalBookedCount = new Set([...userSlotsForDay, ...appState.bookedSlots])
+        .size
     }
 
     const isDayFullyBooked = totalBookedCount >= 18
@@ -726,7 +741,7 @@ window.changeMonth = dir => {
 /* =====================================================
    Time Slot Grid Rendering
    ===================================================== */
-function renderTimeGrid() {
+function renderTimeGrid () {
   const grid = document.getElementById('timeSlotGrid')
   if (!grid) return
 
@@ -780,7 +795,9 @@ function renderTimeGrid() {
     const isUnavailable = isGlobalOccupied || isUserReserved
 
     const chip = document.createElement('div')
-    chip.className = `chip-time ${appState.tempSlots.includes(s) ? 'active' : ''} ${isUnavailable ? 'unavailable' : ''}`
+    chip.className = `chip-time ${
+      appState.tempSlots.includes(s) ? 'active' : ''
+    } ${isUnavailable ? 'unavailable' : ''}`
     chip.innerText = s
 
     if (!isUnavailable) {
@@ -816,7 +833,7 @@ function renderTimeGrid() {
 /* =====================================================
    Booking Flow Launcher
    ===================================================== */
-function openBookingFlow() {
+function openBookingFlow () {
   renderCalendar()
   renderTimeGrid()
 
@@ -834,7 +851,7 @@ function openBookingFlow() {
 /* =====================================================
    UI Refresh
    ===================================================== */
-function refreshUI() {
+function refreshUI () {
   const bldData = appState.data[appState.currentBld]
   if (!bldData) return
 
@@ -876,7 +893,7 @@ window.setLab = l => {
 /* =====================================================
    Reservations List Rendering
    ===================================================== */
-function renderReservations() {
+function renderReservations () {
   const container = document.getElementById('activeResContainer')
   if (!container) return
 
@@ -890,8 +907,8 @@ function renderReservations() {
           <div class="accent"></div>
           <div class="info">
             <strong>${res.lab} • Seat(s) ${
-              Array.isArray(res.seat) ? res.seat.join(', ') : res.seat
-            }</strong>
+        Array.isArray(res.seat) ? res.seat.join(', ') : res.seat
+      }</strong>
             <p>${res.date} | ${res.time}</p>
           </div>
         </div>
@@ -939,7 +956,7 @@ window.selectForEdit = (e, id) => {
 /* =====================================================
    Helper: Clear Edit Mode
    ===================================================== */
-function clearEditMode() {
+function clearEditMode () {
   appState.editingTargetId = null
   const desc = document.querySelector('.edit-desc')
   if (desc) desc.innerText = 'Select a reservation to edit.'
@@ -956,7 +973,7 @@ function clearEditMode() {
 const popover = document.getElementById('userPopover')
 let popoverTimer
 
-function showPopover(e, user) {
+function showPopover (e, user) {
   if (!popover) return
   clearTimeout(popoverTimer)
 
@@ -1016,7 +1033,7 @@ function showPopover(e, user) {
   popover.style.left = `${rect.left}px`
 }
 
-async function executeNoShowCancel(reservationId) {
+async function executeNoShowCancel (reservationId) {
   const isConfirmed = confirm('Mark student as No-Show and cancel reservation?')
   if (!isConfirmed) return
 
@@ -1045,7 +1062,7 @@ async function executeNoShowCancel(reservationId) {
   }
 }
 
-function hidePopover() {
+function hidePopover () {
   if (!popover) return
 
   popoverTimer = setTimeout(() => {

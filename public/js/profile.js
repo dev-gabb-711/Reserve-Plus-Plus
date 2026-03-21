@@ -38,7 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
   closeButtons.forEach(btn => {
     btn.addEventListener('click', event => {
       event.preventDefault()
-      window.location.href = '/dashboard'
+      const role = localStorage.getItem('reserveRole')
+      window.location.href =
+        role === 'Admin' ? '/admin-dashboard' : '/dashboard'
     })
   })
 
@@ -57,13 +59,13 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 })
 
-const editForm = document.getElementById('editProfileForm');
+const editForm = document.getElementById('editProfileForm')
 
 if (editForm) {
-  editForm.addEventListener('submit', function(e) {
-    e.preventDefault();
+  editForm.addEventListener('submit', function (e) {
+    e.preventDefault()
 
-    const formData = new FormData(editForm);
+    const formData = new FormData(editForm)
 
     fetch(editForm.action, {
       method: 'POST',
@@ -74,19 +76,18 @@ if (editForm) {
         if (data.success) {
           // Update avatar preview with cache-busting
           if (data.profilePic) {
-            avatarPreview.src = `${data.profilePic}?t=${new Date().getTime()}`;
+            avatarPreview.src = `${data.profilePic}?t=${new Date().getTime()}`
           }
-          alert('Profile updated successfully!');
-          
-    
-          window.location.href = `/profile/${data.userId || ''}`;
+          alert('Profile updated successfully!')
+
+          window.location.href = `/profile/${data.userId || ''}`
         } else {
-          alert(data.message || 'Error updating profile');
+          alert(data.message || 'Error updating profile')
         }
       })
       .catch(err => {
-        console.error(err);
-        alert('An error occurred. Please check your connection.');
-      });
-  });
+        console.error(err)
+        alert('An error occurred. Please check your connection.')
+      })
+  })
 }
