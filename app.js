@@ -17,10 +17,19 @@ app.use(
     saveUninitialized: true,
     cookie: {
       maxAge: 60 * 60 * 1000,
-      secure: false
+      secure: false,
+      httpOnly: true
     }
   })
 )
+
+app.use((req, res, next) => {
+  console.log('===== SESSION DEBUG =====')
+  console.log('Session ID:', req.sessionID) // Express's internal session ID
+  console.log('Session data:', req.session) // Your stored user info
+  console.log('-------------------------\n')
+  next()
+})
 
 /* ==========================================
    1. DATABASE CONNECTION
@@ -283,7 +292,17 @@ function calculateTimeRangeServer (slots) {
    ========================================== */
 
 app.get('/', (req, res) => res.render('index'))
+
+// Pag eto yung ginamit, chinecheck ung session, when u close the tab and open it again, same account dapat lalabas. (naka remember me)
+// app.get('/login', (req, res) => {
+//     if (req.session.user) {
+//         return res.redirect('/dashboard');
+//     }
+//     res.render('login');
+// })
+
 app.get('/login', (req, res) => res.render('login'))
+
 app.get('/signup', (req, res) => res.render('signup'))
 
 app.get('/logout', requireLogin, (req, res) => {
@@ -294,13 +313,13 @@ app.get('/logout', requireLogin, (req, res) => {
     }
 
     res.clearCookie('connect.sid')
+    req.session = null
     res.redirect('/login')
   })
 })
 
-app.get('/dashboard', async (req, res) => {
+app.get('/dashboard', requireLogin, async (req, res) => {
   try {
-    if (!req.session.user) return res.redirect('/login')
 
     const userId = req.session.user.id
     const studentUser = await User.findById(userId).lean()
@@ -600,18 +619,22 @@ app.post('/login', async (req, res) => {
     }
 
     // IMPORTANT: I-set ang session para hindi ka ma-kickout ng requireLogin
-    req.session.user = {
-      id: user._id,
-      name: user.firstName,
-      role: user.role
-    }
+    // generates session id PER user, (ung previous implementation regardless of sino nag login iisa lang ung session ID,)
+    req.session.regenerate(err => {
+        if (err) return res.status(500).send('Error')
 
-    // Redirect base sa role
-    if (user.role === 'Admin') {
-      res.redirect('/admin-dashboard')
-    } else {
-      res.redirect('/dashboard') // Dito pumupunta ang students
-    }
+        req.session.user = {
+            id: user._id,
+            name: user.firstName,
+            role: user.role
+        }
+
+        if (user.role === 'Admin') {
+            res.redirect('/admin-dashboard')
+        } else {
+            res.redirect('/dashboard')
+        }
+    })
   } catch (err) {
     console.error(err);
     res.status(500).render('login', { errorMessage: 'Server error.' })
