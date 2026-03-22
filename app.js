@@ -607,7 +607,7 @@ app.get('/api/labs', async (req, res) => {
    ========================================== */
 
 app.post('/login', async (req, res) => {
-  const { email, password } = req.body
+  const { email, password, rememberMe } = req.body
 
   try {
     const user = await User.findOne({ email })
@@ -633,6 +633,12 @@ app.post('/login', async (req, res) => {
         id: user._id,
         name: user.firstName,
         role: user.role
+      }
+
+      if (rememberMe) {
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000 // 30 days
+      } else {
+        req.session.cookie.maxAge = 60 * 60 * 1000 // 1 hour
       }
 
       if (user.role === 'Admin') {
