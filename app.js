@@ -16,22 +16,22 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-        path: '/', 
-        maxAge: 60 * 60 * 1000,
-        secure: false,
-        httpOnly: true
+      path: '/',
+      maxAge: 60 * 60 * 1000,
+      secure: false,
+      httpOnly: true
     }
   })
 )
 
 app.use((req, res, next) => {
-    console.log('===== SESSION DEBUG =====')
-    console.log('Session ID:', req.sessionID) // Express's internal session ID
-    console.log('Session data:', req.session) // Your stored user info
-    console.log('Incoming request:', req.method, req.url)  
-    console.log('-------------------------\n')
-    
-    next()
+  console.log('===== SESSION DEBUG =====')
+  console.log('Session ID:', req.sessionID) // Express's internal session ID
+  console.log('Session data:', req.session) // Your stored user info
+  console.log('Incoming request:', req.method, req.url)
+  console.log('-------------------------\n')
+
+  next()
 })
 
 /* ==========================================
@@ -85,6 +85,11 @@ function requireLogin (req, res, next) {
   if (!req.session.user) {
     return res.redirect('/login')
   }
+
+  res.set(
+    'Cache-Control',
+    'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0'
+  )
   next()
 }
 
@@ -97,6 +102,10 @@ function requireAdmin (req, res, next) {
     return res.status(403).send('Unauthorized')
   }
 
+  res.set(
+    'Cache-Control',
+    'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0'
+  )
   next()
 }
 
@@ -297,31 +306,30 @@ function calculateTimeRangeServer (slots) {
 app.get('/', (req, res) => res.render('index'))
 
 app.get('/login', (req, res) => {
-    if (req.session.user) {
-        return res.redirect('/dashboard');
-    }
-    res.render('login');
+  if (req.session.user) {
+    return res.redirect('/dashboard')
+  }
+  res.render('login')
 })
 
 app.get('/signup', (req, res) => res.render('signup'))
 
-app.get('/logout', (req, res) =>{
+app.get('/logout', (req, res) => {
+  // pwede na idelete yung debug comments sa clean up, pero for u guys' verification/info nalang din ill leave the debug prints here
+  console.log('BEFORE DESTROY:', req.session)
 
-    // pwede na idelete yung debug comments sa clean up, pero for u guys' verification/info nalang din ill leave the debug prints here
-    console.log('BEFORE DESTROY:', req.session)
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Destroy error:', err)
+      return res.redirect('/dashboard')
+    }
 
-    req.session.destroy(err => {
-        if (err) {
-            console.error('Destroy error:', err)
-            return res.redirect('/dashboard')
-        }
+    console.log('AFTER DESTROY (should be gone)')
 
-        console.log('AFTER DESTROY (should be gone)')
+    res.clearCookie('connect.sid', { path: '/' })
 
-        res.clearCookie('connect.sid', { path: '/' })
-
-        res.redirect('/login')
-    })
+    res.redirect('/login')
+  })
 })
 
 app.get('/dashboard', requireLogin, async (req, res) => {
@@ -624,8 +632,6 @@ app.post('/login', async (req, res) => {
       return res.render('login', { errorMessage: 'Incorrect password.', email })
     }
 
-    // IMPORTANT: I-set ang session para hindi ka ma-kickout ng requireLogin
-    // generates session id PER user, (ung previous implementation regardless of sino nag login iisa lang ung session ID,)
     req.session.regenerate(err => {
       if (err) return res.status(500).send('Error')
 
