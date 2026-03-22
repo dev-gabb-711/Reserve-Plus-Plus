@@ -35,15 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   }
 
-  closeButtons.forEach(btn => {
-    btn.addEventListener('click', event => {
-      event.preventDefault()
-      const role = localStorage.getItem('reserveRole')
-      window.location.href =
-        role === 'Admin' ? '/admin-dashboard' : '/dashboard'
-    })
-  })
-
   scrollRows.forEach(row => {
     row.addEventListener(
       'wheel',

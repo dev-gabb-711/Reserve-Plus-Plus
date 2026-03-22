@@ -28,22 +28,21 @@
     <!--========================= SIDEBAR NAV =========================-->
     <aside class="side-nav">
       <div class="side-icons">
-
-        <button class="side-btn" type="button" onclick="navToHome()">
+        <a href="/home" class="side-btn text-decoration-none">
           <span class="material-symbols-rounded">home</span>
-        </button>
+        </a>
 
-        <button class="side-btn" type="button" onclick="location.href='/reserve'">
+        <a href="/reserve" class="side-btn text-decoration-none">
           <span class="material-symbols-rounded">computer</span>
-        </button>
+        </a>
 
-        <button class="side-btn" type="button" onclick="navToITAssist()">
+        <a href="/support" class="side-btn text-decoration-none">
           <span class="material-symbols-rounded">report</span>
-        </button>
+        </a>
 
-        <button class="side-btn" type="button" onclick="location.href='/notifications'">
+        <a href="/notifications" class="side-btn text-decoration-none">
           <span class="material-symbols-rounded">notifications</span>
-        </button>
+        </a>
       </div>
 
       <div class="side-brand">
@@ -138,27 +137,6 @@
   <script id="searchResultsData" type="application/json">{{{json searchResults}}}</script>
 
   <!--========================= SCRIPTS =========================-->
-  {{!-- Script for the switching of tabs --}}
-  <script>
-        // 1. Detect the current URL to automatically save the user's role
-        const path = window.location.pathname;
-        if (path === '/admin-dashboard' || path === '/it-assist-admin') {
-          localStorage.setItem('reserveRole', 'Admin');
-        } else if (path === '/dashboard' || path === '/it-assist') {
-          localStorage.setItem('reserveRole', 'Student');
-        }
-
-        // 2. Dynamic Navigation Functions
-        function navToHome() {
-          const role = localStorage.getItem('reserveRole');
-          window.location.href = role === 'Admin' ? '/admin-dashboard' : '/dashboard';
-        }
-
-        function navToITAssist() {
-          const role = localStorage.getItem('reserveRole');
-          window.location.href = role === 'Admin' ? '/it-assist-admin' : '/it-assist';
-        }
-  </script>
   <script src="/js/searchresults.js"></script>
 </body>
 </html>

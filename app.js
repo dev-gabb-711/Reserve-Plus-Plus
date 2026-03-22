@@ -332,6 +332,22 @@ app.get('/logout', (req, res) => {
   })
 })
 
+app.get('/home', requireLogin, (req, res) => {
+  if (req.session.user.role === 'Admin') {
+    res.redirect('/admin-dashboard')
+  } else {
+    res.redirect('/dashboard')
+  }
+})
+
+app.get('/support', requireLogin, (req, res) => {
+  if (req.session.user.role === 'Admin') {
+    res.redirect('/it-assist-admin')
+  } else {
+    res.redirect('/it-assist')
+  }
+})
+
 app.get('/dashboard', requireLogin, async (req, res) => {
   try {
     const userId = req.session.user.id
@@ -429,7 +445,7 @@ app.get('/admin-dashboard', requireAdmin, async (req, res) => {
   }
 })
 
-app.get('/reserve', async (req, res) => {
+app.get('/reserve', requireLogin, async (req, res) => {
   try {
     const labs = await Lab.find().lean()
     res.render('rseat', { labs })
@@ -558,7 +574,7 @@ app.get('/profile/:id', requireLogin, async (req, res) => {
   }
 })
 
-app.get('/search-results', async (req, res) => {
+app.get('/search-results', requireLogin, async (req, res) => {
   try {
     const q = (req.query.q || '').trim()
 
