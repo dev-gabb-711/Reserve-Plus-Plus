@@ -14,21 +14,24 @@ app.use(
   session({
     secret: 'sikretLangDaw',
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
-      maxAge: 60 * 60 * 1000,
-      secure: false,
-      httpOnly: true
+        path: '/', 
+        maxAge: 60 * 60 * 1000,
+        secure: false,
+        httpOnly: true
     }
   })
 )
 
 app.use((req, res, next) => {
-  console.log('===== SESSION DEBUG =====')
-  console.log('Session ID:', req.sessionID) // Express's internal session ID
-  console.log('Session data:', req.session) // Your stored user info
-  console.log('-------------------------\n')
-  next()
+    console.log('===== SESSION DEBUG =====')
+    console.log('Session ID:', req.sessionID) // Express's internal session ID
+    console.log('Session data:', req.session) // Your stored user info
+    console.log('Incoming request:', req.method, req.url)  
+    console.log('-------------------------\n')
+    
+    next()
 })
 
 /* ==========================================
@@ -293,29 +296,32 @@ function calculateTimeRangeServer (slots) {
 
 app.get('/', (req, res) => res.render('index'))
 
-// Pag eto yung ginamit, chinecheck ung session, when u close the tab and open it again, same account dapat lalabas. (naka remember me)
-// app.get('/login', (req, res) => {
-//     if (req.session.user) {
-//         return res.redirect('/dashboard');
-//     }
-//     res.render('login');
-// })
-
-app.get('/login', (req, res) => res.render('login'))
+app.get('/login', (req, res) => {
+    if (req.session.user) {
+        return res.redirect('/dashboard');
+    }
+    res.render('login');
+})
 
 app.get('/signup', (req, res) => res.render('signup'))
 
-app.get('/logout', requireLogin, (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      console.error('Logout failed:', err)
-      return res.redirect('/dashboard')
-    }
+app.get('/logout', (req, res) =>{
 
-    res.clearCookie('connect.sid')
-    req.session = null
-    res.redirect('/login')
-  })
+    // pwede na idelete yung debug comments sa clean up, pero for u guys' verification/info nalang din ill leave the debug prints here
+    console.log('BEFORE DESTROY:', req.session)
+
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Destroy error:', err)
+            return res.redirect('/dashboard')
+        }
+
+        console.log('AFTER DESTROY (should be gone)')
+
+        res.clearCookie('connect.sid', { path: '/' })
+
+        res.redirect('/login')
+    })
 })
 
 app.get('/dashboard', requireLogin, async (req, res) => {
