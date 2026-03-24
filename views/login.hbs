@@ -23,43 +23,54 @@
 
   <!--========================= AUTH WRAPPER =========================-->
   <main class="auth-wrap">
-
     <section class="auth-card">
 
       <!--========================= LEFT: LOGIN FORM =========================-->
       <div class="auth-left">
         <h1 class="auth-title">Log In</h1>
+
         <form class="auth-form" id="loginForm" action="/login" method="post">
-          <span class="sr-only">Email</span>
-          <span class="sr-only">Email</span>
           {{#if errorMessage}}
           <div id="error-alert" class="invalid-message">
             {{errorMessage}}
           </div>
           {{/if}}
+
           <!------------------ Email ------------------>
-          <label class="field">
-            <input type="email" id="email" name="email" placeholder="Email" required>
+          <label class="field" for="email">
+            <span class="sr-only">Email</span>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Email"
+              required
+            >
           </label>
-
-
 
           <!------------------ Password ------------------>
-          <label class="field">
+          <label class="field" for="password">
             <span class="sr-only">Password</span>
-            <input type="password" id="password" name="password" placeholder="Password" required>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Password"
+              required
+            >
           </label>
 
-          <!------------------ Forgot Password ------------------>
-          <a class="auth-link" href="#">
-            Forgot Password
-          </a>
+          <!------------------ Form Options ------------------>
+          <div class="auth-options">
+            <label class="remember-row" for="rememberMe">
+              <input type="checkbox" name="rememberMe" id="rememberMe">
+              <span>Remember Me</span>
+            </label>
 
-          <!--================== Remember Me ==================-->
-          <label class="field">
-            <input type="checkbox" name="rememberMe" id="rememberMe">
-            <span>Remember Me</span>
-          </label>
+            <a class="auth-link forgot-link" href="#">
+              Forgot Password
+            </a>
+          </div>
 
           <!------------------ Submit Button ------------------>
           <button class="btn-grad" type="submit">
@@ -70,9 +81,6 @@
           <a class="auth-link bottom" href="/signup">
             Not yet a member? Sign up now
           </a>
-
-
-
         </form>
       </div>
 
@@ -83,18 +91,17 @@
 
     </section>
   </main>
-  <script>
 
+  <script>
     const errorAlert = document.getElementById('error-alert');
 
     if (errorAlert) {
-
       setTimeout(() => {
-        errorAlert.style.transition = "opacity 0.5s ease";
-        errorAlert.style.opacity = "0";
+        errorAlert.style.transition = 'opacity 0.5s ease';
+        errorAlert.style.opacity = '0';
 
         setTimeout(() => {
-          errorAlert.style.display = "none";
+          errorAlert.style.display = 'none';
         }, 500);
       }, 3000);
     }
