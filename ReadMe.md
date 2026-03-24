@@ -3,7 +3,7 @@
 ## Overview
 Reserve++ is an application that allows students to reserve seats at available computer laboratories at De La Salle University. This implements role-based access, allowing students to view seat availability and reserve a workstation in different computer laboratories in various buildings in campus. While administrator access supports features such as monitoring reservations, reviewing submitted tickets, and publishing global announcements. 
 
-Currently, the application supports reservations in the Br. Andrew Gonzales Hall and Gokongwei Hall.
+Currently, the application supports reservations in the Br. Andrew Gonzales Hall, Gokongwei Hall, Velasco Hall, and St. La Salle Hall.
 
 Reserve++ is built using Node.js, Express.js, MongoDB, Mongoose, and Handlebars, following an MVC-style architecture to separate application logic, database interaction, and user interface components.
 
