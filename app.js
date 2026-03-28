@@ -729,7 +729,7 @@ app.post('/signup', async (req, res) => {
 // Fix error with multer not finding storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/img/')
+    cb(null, 'public/uploads/')
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
@@ -753,27 +753,31 @@ app.post(
         return res.status(403).json({ success: false, message: 'Unauthorized' })
       }
 
-      const updates = {
-        firstName: (req.body.firstName || '').trim(),
-        lastName: (req.body.lastName || '').trim(),
-        email: (req.body.email || '').trim().toLowerCase(),
-        description: (req.body.description || '').trim()
-      }
+      // Find the user first so we can use .save() later
+      const user = await User.findById(viewedUserId)
 
-      if (req.body.password) {
-        updates.password = req.body.password.trim()
+      // Update the text fields
+      user.firstName = (req.body.firstName || '').trim()
+      user.lastName = (req.body.lastName || '').trim()
+      user.email = (req.body.email || '').trim().toLowerCase()
+      user.description = (req.body.description || '').trim()
+
+      // Only update password if they typed a new one
+      if (req.body.password && req.body.password.trim() !== '') {
+        user.password = req.body.password.trim()
       }
 
       if (req.file) {
-        updates.profilePic = '/uploads/' + req.file.filename
+        user.profilePic = '/uploads/' + req.file.filename
       }
 
-      await User.findByIdAndUpdate(viewedUserId, updates)
-      req.session.user.name = updates.firstName
+      await user.save()
+
+      req.session.user.name = user.firstName
 
       res.json({
         success: true,
-        profilePic: updates.profilePic,
+        profilePic: user.profilePic,
         userId: viewedUserId
       })
     } catch (err) {
