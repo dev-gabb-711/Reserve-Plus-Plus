@@ -683,13 +683,22 @@ app.post('/signup', async (req, res) => {
     const pass = (req.body.password || '').trim()
 
     if (!first || !last || !mail || !pass) {
-      return res.status(400).send('Please fill in all required fields.')
+      return res.render('signup', {
+        errorMessage: 'Please fill in all required fields.'
+      })
+    }
+
+    if (!mail.endsWith('@dlsu.edu.ph')) {
+      return res.render('signup', {
+        errorMessage: 'Only DLSU email addresses are allowed.'
+      })
     }
 
     const existingUser = await User.findOne({ email: mail })
-
     if (existingUser) {
-      return res.status(400).send('An account with that email already exists.')
+      return res.render('signup', {
+        errorMessage: 'An account with that email already exists.'
+      })
     }
 
     const newUser = new User({
@@ -706,18 +715,19 @@ app.post('/signup', async (req, res) => {
     res.redirect('/login')
   } catch (err) {
     console.error('Signup failed:', err)
-    res.status(500).send('Signup failed: ' + err.message)
+    res.render('signup', { errorMessage: 'Signup failed: ' + err.message })
   }
 })
 
+// Fix error with multer not finding storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, 'public/uploads'))
+    cb(null, 'public/img/')
   },
   filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname)
-    const uniqueName = `${Date.now()}-${file.fieldname}${ext}`
-    cb(null, uniqueName)
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
+    // Example: avatar-168432901.jpg
+    cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname))
   }
 })
 

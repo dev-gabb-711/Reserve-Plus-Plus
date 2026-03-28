@@ -30,6 +30,12 @@
 
         <form class="auth-form" action="/signup" method="post">
 
+          {{#if errorMessage}}
+            <div id="error-alert" class="invalid-message" style="margin-bottom: 1rem;">
+              {{errorMessage}}
+            </div>
+          {{/if}}
+
           <!-- Email -->
           <label class="field">
             <span class="sr-only">Email</span>
