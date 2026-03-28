@@ -21,11 +21,14 @@
   "homepage": "https://github.com/dev-gabb-711/CCAPDEV-MCOs#readme",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-handlebars": "^8.0.6",
     "express-session": "^1.19.0",
-    "hbs": "^4.2.0",
     "mongoose": "^9.2.3",
     "multer": "^2.1.1"
+  },
+  "overrides": {
+    "handlebars": "^4.7.8"
   }
 }

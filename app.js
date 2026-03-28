@@ -1,7 +1,9 @@
+require('dotenv').config()
+
 const express = require('express')
 const mongoose = require('mongoose')
 const path = require('path')
-const hbs = require('hbs')
+const { engine } = require('express-handlebars')
 const session = require('express-session')
 const multer = require('multer')
 
@@ -12,7 +14,7 @@ const app = express()
  ============================================ */
 app.use(
   session({
-    secret: 'sikretLangDaw',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -38,13 +40,29 @@ app.use((req, res, next) => {
    1. DATABASE CONNECTION
    ========================================== */
 mongoose
-  .connect('mongodb://127.0.0.1:27017/ReserveDB')
+  .connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB! Slay Architect.'))
   .catch(err => console.error('Database connection error:', err))
 
 /* ==========================================
    2. SETTINGS & MIDDLEWARE
    ========================================== */
+app.engine(
+  'hbs',
+  engine({
+    extname: '.hbs',
+    defaultLayout: false,
+    partialsDir: path.join(__dirname, 'views', 'partials'),
+    helpers: {
+      eq: (a, b) => a === b,
+      firstChar: value => {
+        if (!value) return ''
+        return String(value).charAt(0).toUpperCase()
+      },
+      json: context => JSON.stringify(context)
+    }
+  })
+)
 app.set('view engine', 'hbs')
 app.set('views', path.join(__dirname, 'views'))
 
@@ -52,20 +70,8 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-hbs.registerPartials(path.join(__dirname, 'views', 'partials'))
-
 /* ==========================================
-   3. HANDLEBARS HELPERS
-   ========================================== */
-hbs.registerHelper('eq', (a, b) => a === b)
-hbs.registerHelper('firstChar', value => {
-  if (!value) return ''
-  return String(value).charAt(0).toUpperCase()
-})
-hbs.registerHelper('json', context => JSON.stringify(context))
-
-/* ==========================================
-   4. IMPORT MODELS
+   3. IMPORT MODELS
    ========================================== */
 const User = require('./models/User')
 const Lab = require('./models/Lab')
@@ -74,7 +80,7 @@ const Reservation = require('./models/Reservation')
 const Notification = require('./models/Notification')
 
 /* ==========================================
-   5. HELPER FUNCTIONS
+   4. HELPER FUNCTIONS
    ========================================== */
 
 function normalizeRoomCode (value) {
@@ -300,7 +306,7 @@ function calculateTimeRangeServer (slots) {
 }
 
 /* ==========================================
-   6. GET ROUTES
+   5. GET ROUTES
    ========================================== */
 
 app.get('/', (req, res) => res.render('index'))
@@ -627,7 +633,7 @@ app.get('/api/labs', async (req, res) => {
 })
 
 /* ==========================================
-   7. POST ROUTES
+   6. POST ROUTES
    ========================================== */
 
 app.post('/login', async (req, res) => {
@@ -1285,7 +1291,6 @@ app.delete('/api/reservations/:id', async (req, res) => {
       return res.status(404).json({ error: 'Reservation not found' })
     }
 
-    // NEW: Check if this was triggered by the Admin No-Show button
     const isNoShow = req.query.reason === 'noshow'
 
     const notifTitle = isNoShow
@@ -1304,7 +1309,7 @@ app.delete('/api/reservations/:id', async (req, res) => {
         } has been successfully cancelled.`
 
     await createNotificationSafe({
-      recipient: cancelledReservation.user, // <--- FIX: This now accurately targets the student!
+      recipient: cancelledReservation.user,
       senderName: 'Reserve++ Team',
       senderRole: 'Reservation System',
       title: notifTitle,
@@ -1320,9 +1325,9 @@ app.delete('/api/reservations/:id', async (req, res) => {
 })
 
 /* ==========================================
-   8. SERVER START
+   7. SERVER START
    ========================================== */
-const PORT = 3000
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Running at http://localhost:${PORT}`)
 })

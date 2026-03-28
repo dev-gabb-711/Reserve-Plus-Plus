@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const mongoose = require('mongoose')
 const User = require('./models/User')
 const Lab = require('./models/Lab')
@@ -9,7 +11,7 @@ const Notification = require('./models/Notification')
    DATABASE CONNECTION
    ========================================== */
 mongoose
-  .connect('mongodb://127.0.0.1:27017/ReserveDB')
+  .connect(process.env.MONGODB_URI)
   .then(() => seedDatabase())
   .catch(err => console.error(err))
 
@@ -334,7 +336,7 @@ async function seedDatabase () {
     // 2) GABBY COLOR-CODING TEST DAY
     // Gabby gets one reservation in each building on the same day.
     const gabbyTestDate = tomorrowDate
-    const gabbyAndrewSlots = buildSlotsArray(8, 0, 2)   // 8:00 - 9:00 AM
+    const gabbyAndrewSlots = buildSlotsArray(8, 0, 2) // 8:00 - 9:00 AM
     const gabbyGokongweiSlots = buildSlotsArray(10, 0, 2) // 10:00 - 11:00 AM
     const gabbyVelascoSlots = buildSlotsArray(13, 0, 2) // 1:00 - 2:00 PM
     const gabbyLaSalleSlots = buildSlotsArray(15, 0, 2) // 3:00 - 4:00 PM
@@ -642,24 +644,24 @@ async function seedDatabase () {
     console.log(`ROSS (NONE):              no reservation today`)
     console.log(`GABBY (COLOR TEST DATE):  ${gabbyTestDate}`)
     console.log(
-      `  Andrew:                 ${labMap.A1904.labCode} | ${buildTimeRangeFromSlots(
-        gabbyAndrewSlots
-      )}`
+      `  Andrew:                 ${
+        labMap.A1904.labCode
+      } | ${buildTimeRangeFromSlots(gabbyAndrewSlots)}`
     )
     console.log(
-      `  Gokongwei:              ${labMap.G201.labCode} | ${buildTimeRangeFromSlots(
-        gabbyGokongweiSlots
-      )}`
+      `  Gokongwei:              ${
+        labMap.G201.labCode
+      } | ${buildTimeRangeFromSlots(gabbyGokongweiSlots)}`
     )
     console.log(
-      `  Velasco:                ${labMap.V201.labCode} | ${buildTimeRangeFromSlots(
-        gabbyVelascoSlots
-      )}`
+      `  Velasco:                ${
+        labMap.V201.labCode
+      } | ${buildTimeRangeFromSlots(gabbyVelascoSlots)}`
     )
     console.log(
-      `  St. La Salle:           ${labMap.LS212A.labCode} | ${buildTimeRangeFromSlots(
-        gabbyLaSalleSlots
-      )}`
+      `  St. La Salle:           ${
+        labMap.LS212A.labCode
+      } | ${buildTimeRangeFromSlots(gabbyLaSalleSlots)}`
     )
     console.log(
       `MARION (ACTIVE NOW):      ${buildTimeRangeFromSlots(
