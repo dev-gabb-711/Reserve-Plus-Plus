@@ -1,5 +1,10 @@
 require('dotenv').config()
 
+if (process.env.USE_CUSTOM_DNS === 'true') {
+  const dns = require('node:dns')
+  dns.setServers(['8.8.8.8', '8.8.4.4'])
+}
+
 const express = require('express')
 const mongoose = require('mongoose')
 const path = require('path')
