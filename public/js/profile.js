@@ -80,7 +80,9 @@ function showToast ({
       class="toast-header text-white border-0"
       style="background:transparent; position:relative; padding-right:2.5rem;"
     >
-      <span class="material-symbols-rounded me-2 mt-1 ${tone.iconClass}">${tone.icon}</span>
+      <span class="material-symbols-rounded me-2 mt-1 ${tone.iconClass}">${
+    tone.icon
+  }</span>
       <strong class="me-auto mt-1">${escapeHtml(title)}</strong>
       <button
         type="button"
@@ -126,12 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const file = event.target.files?.[0]
       if (!file) return
 
-      const allowedTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/jpg',
-        'image/gif'
-      ]
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif']
 
       if (!allowedTypes.includes(file.type)) {
         event.target.value = ''
@@ -192,6 +189,18 @@ document.addEventListener('DOMContentLoaded', () => {
         body: formData
       })
         .then(async res => {
+          if (res.status === 401) {
+            showToast({
+              title: 'Session Expired',
+              message: 'You have been logged out. Redirecting to login...',
+              variant: 'danger'
+            })
+            setTimeout(() => {
+              location.assign('/login')
+            }, 2500)
+            return
+          }
+
           let data = {}
 
           try {
@@ -216,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
 
             setTimeout(() => {
-              window.location.href = `/profile/${data.userId || ''}`
+              location.assign(`/profile/${data.userId || ''}`)
             }, 900)
           } else {
             showToast({

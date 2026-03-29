@@ -93,7 +93,9 @@ function showToast ({
       class="toast-header text-white border-0"
       style="background:transparent; position:relative; padding-right:2.5rem;"
     >
-      <span class="material-symbols-rounded me-2 mt-1 ${tone.iconClass}">${tone.icon}</span>
+      <span class="material-symbols-rounded me-2 mt-1 ${tone.iconClass}">${
+    tone.icon
+  }</span>
       <strong class="me-auto mt-1">${escapeHtml(title)}</strong>
       <button
         type="button"
@@ -185,8 +187,12 @@ function showConfirmToast ({
     <div class="toast-body">
       <div class="mb-3">${escapeHtml(message)}</div>
       <div class="d-flex gap-2 justify-content-end">
-        <button type="button" class="btn btn-sm btn-outline-light" data-confirm-toast-cancel="true">${escapeHtml(cancelText)}</button>
-        <button type="button" class="btn btn-sm ${tone.btnClass}" data-confirm-toast-confirm="true">${escapeHtml(confirmText)}</button>
+        <button type="button" class="btn btn-sm btn-outline-light" data-confirm-toast-cancel="true">${escapeHtml(
+          cancelText
+        )}</button>
+        <button type="button" class="btn btn-sm ${
+          tone.btnClass
+        }" data-confirm-toast-confirm="true">${escapeHtml(confirmText)}</button>
       </div>
     </div>
   `
@@ -201,9 +207,7 @@ function showConfirmToast ({
     const confirmBtn = event.target.closest(
       '[data-confirm-toast-confirm="true"]'
     )
-    const cancelBtn = event.target.closest(
-      '[data-confirm-toast-cancel="true"]'
-    )
+    const cancelBtn = event.target.closest('[data-confirm-toast-cancel="true"]')
 
     if (confirmBtn) {
       onConfirm()
@@ -794,6 +798,18 @@ async function submitReservationForm () {
       body: JSON.stringify(reservationData)
     })
 
+    if (response.status === 401) {
+      showToast({
+        title: 'Session Expired',
+        message: 'Please log in again to make a reservation.',
+        variant: 'danger'
+      })
+      setTimeout(() => {
+        location.assign('/login')
+      }, 2500)
+      return
+    }
+
     if (response.ok) {
       await fetchMyReservations()
       await fetchBookedSlots()
@@ -818,11 +834,11 @@ async function submitReservationForm () {
       }, 400)
     } else {
       const errData = await response.json()
+
       showToast({
-        title: 'Reservation not saved',
-        message: 'Could not save: ' + (errData.error || 'Please try again.'),
-        variant: 'danger',
-        delay: 4500
+        title: 'Reservation failed',
+        message: data.message || 'Please try again.',
+        variant: 'danger'
       })
     }
   } catch (err) {
