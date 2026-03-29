@@ -19,7 +19,11 @@ const userSchema = new mongoose.Schema({
     default: 'Student'
   },
   profilePic: { type: String, default: '/img/def_avatar.jpg' },
-  description: { type: String, default: '' }
+  description: {
+    type: String,
+    default: '',
+    maxLength: [500, 'Description cannot exceed 500 characters.']
+  }
 })
 
 // password hashing middleware

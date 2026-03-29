@@ -464,10 +464,10 @@ app.get('/admin-dashboard', requireAdmin, async (req, res) => {
 app.get('/reserve', requireLogin, async (req, res) => {
   try {
     const labs = await Lab.find().lean()
-    res.render('rseat', { 
-  labs,
-  loggedInRole: req.session.user.role
-})
+    res.render('rseat', {
+      labs,
+      loggedInRole: req.session.user.role
+    })
   } catch (err) {
     console.error('Error loading labs:', err)
     res.status(500).send('Error loading labs')
@@ -487,7 +487,6 @@ app.get('/it-assist', requireLogin, async (req, res) => {
     res.status(500).send('Error loading it-assist')
   }
 })
-
 
 app.get('/api/students', requireAdmin, async (req, res) => {
   try {
@@ -675,8 +674,8 @@ app.post('/login', async (req, res) => {
 
   try {
     const user = await User.findOne({
-  email: email.toLowerCase()
-})
+      email: email.toLowerCase()
+    })
 
     if (!user) {
       return res.render('login', {
@@ -794,8 +793,26 @@ app.post(
       // Update the text fields
       user.firstName = (req.body.firstName || '').trim()
       user.lastName = (req.body.lastName || '').trim()
-      user.email = (req.body.email || '').trim().toLowerCase()
-      user.description = (req.body.description || '').trim()
+
+      const newEmail = (req.body.email || '').trim().toLowerCase()
+      if (!newEmail.endsWith('@dlsu.edu.ph')) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Error updating profile: Only DLSU email addresses are allowed.'
+        })
+      }
+      user.email = newEmail
+
+      const newDescription = (req.body.description || '').trim()
+      if (newDescription.length > 500) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Error updating profile: Description cannot exceed 500 characters.'
+        })
+      }
+      user.description = newDescription
 
       // Only update password if they typed a new one
       if (req.body.password && req.body.password.trim() !== '') {
@@ -1123,10 +1140,9 @@ app.post('/api/reservations', async (req, res) => {
       return res.status(400).json({ error: 'Time slot already booked' })
     }
 
-   
     const newReservation = new Reservation({
       user: userId,
-      createdBy: req.session.user.id, 
+      createdBy: req.session.user.id,
       lab: lab._id,
       labCode: labCode,
       seatNumber: seats,
@@ -1138,12 +1154,14 @@ app.post('/api/reservations', async (req, res) => {
     })
 
     await newReservation.save()
-       await createNotificationSafe({
+    await createNotificationSafe({
       recipient: userId,
       senderName: 'Reserve++ Team',
       senderRole: 'Reservation System',
       title: 'Reservation Created',
-      message: `Your reservation for Room ${lab.labCode},Seat ${Array.isArray(seats) ? seats.join(', ') : seats} on ${date} has been created successfully.`,
+      message: `Your reservation for Room ${lab.labCode},Seat ${
+        Array.isArray(seats) ? seats.join(', ') : seats
+      } on ${date} has been created successfully.`,
       type: 'Reservation'
     })
 
@@ -1153,10 +1171,6 @@ app.post('/api/reservations', async (req, res) => {
     res.status(500).json({ error: 'Failed to create reservation' })
   }
 })
-
-   
-
- 
 
 app.put('/api/reservations/:id', async (req, res) => {
   try {
@@ -1408,5 +1422,3 @@ const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
   console.log(`Running at http://localhost:${PORT}`)
 })
-
-
