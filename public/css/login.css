@@ -172,11 +172,9 @@ body{
 }
 
 .auth-link.bottom{
-  justify-self: start;
-  margin-top: 4px;
-}
-
-.auth-link.bottom.center{
+  display: block;
+  width: 100%;
+  text-align: center;
   justify-self: center;
   margin-top: 6px;
 }
@@ -339,5 +337,6 @@ body{
 
   .auth-link.bottom{
     font-size: 14px;
+    text-align: center;
   }
 }
