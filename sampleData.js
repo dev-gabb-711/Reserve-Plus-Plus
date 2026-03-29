@@ -102,110 +102,119 @@ async function seedDatabase () {
       return `${start} - ${end}`
     }
 
-    function makeReservationPayload ({
-      userId,
-      labId,
-      labCode,
-      seatNumbers,
-      date,
-      slotsArray,
-      isAnonymous = false,
-      status = 'Active'
-    }) {
-      return {
-        user: userId,
-        lab: labId,
-        labCode,
-        seatNumber: seatNumbers,
-        date,
-        timeSlot: JSON.stringify(slotsArray),
-        slotsArray,
-        timeRange: buildTimeRangeFromSlots(slotsArray),
-        isAnonymous,
-        status
-      }
-    }
+
+     function makeReservationPayload ({
+  userId,
+  labId,
+  labCode,
+  seatNumbers,
+  date,
+  slotsArray,
+  isAnonymous = false,
+  status = 'Active'
+}) {
+  return {
+    user: userId,
+    createdBy: userId,
+    lab: labId,
+    labCode,
+    seatNumber: seatNumbers,
+    date,
+    timeSlot: JSON.stringify(slotsArray),
+    slotsArray,
+    timeRange: buildTimeRangeFromSlots(slotsArray),
+    isAnonymous,
+    status
+  }
+}
 
     /* ==========================================
        2. SAMPLE USERS
        ========================================== */
-    const insertedUsers = await User.create([
-      {
-        firstName: 'Ross',
-        lastName: 'Manalang',
-        email: 'ross@dlsu.edu.ph',
-        password: '123',
-        role: 'Student',
-        profilePic: '/img/def_avatar.jpg',
-        description: 'Scenario account: no reservation for today.'
-      },
-      {
-        firstName: 'Gabriel',
-        lastName: 'Infante',
-        email: 'gabriel@dlsu.edu.ph',
-        password: '123',
-        role: 'Student',
-        profilePic: '/img/def_avatar.jpg',
-        description: 'Usually reserves seats for coding work.'
-      },
-      {
-        firstName: 'Gabby',
-        lastName: 'Martinez',
-        email: 'gabby@dlsu.edu.ph',
-        password: '123',
-        role: 'Student',
-        profilePic: '/img/def_avatar.jpg',
-        description:
-          'Scenario account: has one reservation in each building for color-coding tests.'
-      },
-      {
-        firstName: 'Marion',
-        lastName: 'Melanio',
-        email: 'marion@dlsu.edu.ph',
-        password: '123',
-        role: 'Student',
-        profilePic: '/img/def_avatar.jpg',
-        description:
-          'Scenario account: currently inside the active reservation window.'
-      },
-      {
-        firstName: 'Nicolo',
-        lastName: 'Tartaglia',
-        email: 'nicolo@dlsu.edu.ph',
-        password: '123',
-        role: 'Admin',
-        profilePic: '/img/def_avatar.jpg',
-        description: 'Reserve++ system administrator.'
-      },
-      {
-        firstName: 'Alyssa',
-        lastName: 'Cruz',
-        email: 'alyssa@dlsu.edu.ph',
-        password: '123',
-        role: 'Student',
-        profilePic: '/img/def_avatar.jpg',
-        description: 'Usually studies in Andrew Hall.'
-      },
-      {
-        firstName: 'Daniel',
-        lastName: 'Reyes',
-        email: 'daniel@dlsu.edu.ph',
-        password: '123',
-        role: 'Student',
-        profilePic: '/img/def_avatar.jpg',
-        description: 'Likes late afternoon reservation slots.'
-      },
-      {
-        firstName: 'Patricia',
-        lastName: 'Lopez',
-        email: 'patricia@dlsu.edu.ph',
-        password: '123',
-        role: 'Student',
-        profilePic: '/img/def_avatar.jpg',
-        description: 'Often uses multi-seat reservations for group work.'
-      }
-    ])
+   const usersData = [
+  {
+    firstName: 'Ross',
+    lastName: 'Manalang',
+    email: 'ross@dlsu.edu.ph',
+    password: '123',
+    role: 'Student',
+    profilePic: '/img/def_avatar.jpg',
+    description: 'Scenario account: no reservation for today.'
+  },
+  {
+    firstName: 'Gabriel',
+    lastName: 'Infante',
+    email: 'gabriel@dlsu.edu.ph',
+    password: '123',
+    role: 'Student',
+    profilePic: '/img/def_avatar.jpg',
+    description: 'Usually reserves seats for coding work.'
+  },
+  {
+    firstName: 'Gabby',
+    lastName: 'Martinez',
+    email: 'gabby@dlsu.edu.ph',
+    password: '123',
+    role: 'Student',
+    profilePic: '/img/def_avatar.jpg',
+    description:
+      'Scenario account: has one reservation in each building for color-coding tests.'
+  },
+  {
+    firstName: 'Marion',
+    lastName: 'Melanio',
+    email: 'marion@dlsu.edu.ph',
+    password: '123',
+    role: 'Student',
+    profilePic: '/img/def_avatar.jpg',
+    description:
+      'Scenario account: currently inside the active reservation window.'
+  },
+  {
+    firstName: 'Nicolo',
+    lastName: 'Tartaglia',
+    email: 'nicolo@dlsu.edu.ph',
+    password: '123',
+    role: 'Admin',
+    profilePic: '/img/def_avatar.jpg',
+    description: 'Reserve++ system administrator.'
+  },
+  {
+    firstName: 'Alyssa',
+    lastName: 'Cruz',
+    email: 'alyssa@dlsu.edu.ph',
+    password: '123',
+    role: 'Student',
+    profilePic: '/img/def_avatar.jpg',
+    description: 'Usually studies in Andrew Hall.'
+  },
+  {
+    firstName: 'Daniel',
+    lastName: 'Reyes',
+    email: 'daniel@dlsu.edu.ph',
+    password: '123',
+    role: 'Student',
+    profilePic: '/img/def_avatar.jpg',
+    description: 'Likes late afternoon reservation slots.'
+  },
+  {
+    firstName: 'Patricia',
+    lastName: 'Lopez',
+    email: 'patricia@dlsu.edu.ph',
+    password: '123',
+    role: 'Student',
+    profilePic: '/img/def_avatar.jpg',
+    description: 'Often uses multi-seat reservations for group work.'
+  }
+]
 
+const insertedUsers = []
+
+for (const userData of usersData) {
+  const user = new User(userData)
+  await user.save() // triggers bcrypt hashing
+  insertedUsers.push(user)
+}
     const userMap = {
       ross: insertedUsers.find(u => u.email === 'ross@dlsu.edu.ph'),
       gabriel: insertedUsers.find(u => u.email === 'gabriel@dlsu.edu.ph'),

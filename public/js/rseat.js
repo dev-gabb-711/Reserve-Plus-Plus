@@ -201,6 +201,7 @@ async function fetchMyReservations () {
 
       return {
         id: dbRes._id,
+         userId: dbRes.user?._id, 
         building: dbRes.lab
           ? normalizeBuildingName(dbRes.lab.building)
           : 'Unknown Building',
@@ -267,6 +268,13 @@ async function fetchBookedSlots () {
    ===================================================== */
 document.addEventListener('DOMContentLoaded', () => {
   syncLabsFromDatabase()
+
+ const role = document.body.dataset.role
+
+if (role !== 'Admin') {
+  const field = document.getElementById('adminStudentField')
+  if (field) field.style.display = 'none'
+}
 
   const buildings = Object.keys(appState.data)
   if (buildings.length > 0 && !appState.currentBld) {
@@ -371,42 +379,65 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   }
 
-  const openEditFlow = document.getElementById('openEditFlow')
-  if (openEditFlow) {
-    openEditFlow.onclick = async () => {
-      if (!appState.editingTargetId) {
-        alert('Please select a reservation from the list first.')
-        return
-      }
 
-      const targetId = appState.editingTargetId
-      const res = appState.reservations.find(r => r.id === targetId)
+  
+ const openEditFlow = document.getElementById('openEditFlow')
 
-      if (res) {
-        const targetBuilding = normalizeBuildingName(res.building || '')
-        const cleanLab = String(res.lab || '').trim()
+if (openEditFlow) {
+  openEditFlow.onclick = async () => {
+    if (!appState.editingTargetId) {
+      alert('Please select a reservation from the list first.')
+      return
+    }
 
-        appState.selectedSeats = parseSeatArray(res.seat)
-        appState.tempSlots = res.slots ? [...res.slots] : []
+    const targetId = appState.editingTargetId
+    const res = appState.reservations.find(r => r.id === targetId)
 
-        if (targetBuilding && cleanLab) {
-          appState.currentBld = targetBuilding
-          appState.currentLab = cleanLab
+    if (res) {
+      const targetBuilding = normalizeBuildingName(res.building || '')
+      const cleanLab = String(res.lab || '').trim()
 
-          const resDate = new Date(res.date)
-          if (!Number.isNaN(resDate.getTime())) {
-            appState.selectedDate = resDate
-            appState.viewDate = new Date(resDate)
-          }
+      //  load seats + slots
+      appState.selectedSeats = parseSeatArray(res.seat)
+      appState.tempSlots = res.slots ? [...res.slots] : []
 
-          refreshUI()
-          await fetchBookedSlots()
+      // ===================== STUDENT DROPDOWN SYNC =====================
+      const studentSelect = document.getElementById('studentSelect')
+
+      if (studentSelect) {
+        if (res.userId) {
+          if (studentSelect && typeof $ !== 'undefined') {
+           $('#studentSelect').val(res.userId).trigger('change') }
+        } else {
+          studentSelect.value = ''
         }
 
-        openBookingFlow()
+        // safe trigger (avoid error if jQuery missing)
+          if (studentSelect && typeof $ !== 'undefined') {
+        $('#studentSelect').trigger('change')
       }
+      }
+
+      // ===================== LOAD LAB + DATE =====================
+      if (targetBuilding && cleanLab) {
+        appState.currentBld = targetBuilding
+        appState.currentLab = cleanLab
+
+        const resDate = new Date(res.date)
+        if (!Number.isNaN(resDate.getTime())) {
+          appState.selectedDate = resDate
+          appState.viewDate = new Date(resDate)
+        }
+
+        refreshUI()
+        await fetchBookedSlots()
+      }
+
+      // ===================== OPEN MODAL =====================
+      openBookingFlow()
     }
   }
+}
 
   const executeDelete = document.getElementById('executeDelete')
   if (executeDelete) {
@@ -447,7 +478,50 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }
-})
+
+  // Ilagay ito sa loob ng DOMContentLoaded block
+if (typeof $ !== 'undefined' && $('#studentSelect').length > 0) {
+    $('#studentSelect').select2({
+  dropdownParent: $('#summaryModal'),
+  placeholder: "Search for a student...",
+  allowClear: true,
+  ajax: {
+    url: '/api/students',
+    dataType: 'json',
+    delay: 250,
+    data: function (params) {
+      return { term: params.term };
+    },
+    processResults: function (data) {
+      return {
+        results: data.map(user => ({
+          id: user._id,
+          text: `${user.firstName} ${user.lastName}`,
+          email: user.email
+        }))
+      };
+    },
+    cache: true
+  },
+  templateResult: function (user) {
+    if (!user.id) return user.text;
+
+    return $(`
+      <div>
+        <div>${user.text}</div>
+        <div style="font-style: italic; font-size: 0.85em; opacity: 0.7;">
+          ${user.email}
+        </div>
+      </div>
+    `);
+  },
+  templateSelection: function (user) {
+    return user.text || user.id;
+  }
+});
+}
+  })
+
 
 /* =====================================================
    Populate Reservation Form
@@ -491,6 +565,8 @@ async function submitReservationForm () {
 
   const labCodeStr = getFullLabCode()
   const existingResId = formData.get('reservation_id')
+  
+  const selectedStudent = document.getElementById('studentSelect')?.value
 
   const reservationData = {
     labId: formData.get('labId'),
@@ -499,7 +575,8 @@ async function submitReservationForm () {
     date: formData.get('date'),
     timeRange: formData.get('time'),
     slotsArray: JSON.parse(formData.get('slots')),
-    isAnonymous: document.getElementById('isAnonymous').checked
+    isAnonymous: document.getElementById('isAnonymous').checked,
+    user: selectedStudent || null
   }
 
   const fetchUrl = existingResId
@@ -986,7 +1063,7 @@ function showPopover (e, user) {
   if (popAvatar) popAvatar.src = user.avatar || '../img/default-avatar.png'
 
   if (popName) {
-    if (user.isAnonymous && localStorage.getItem('reserveRole') === 'Admin') {
+   if (user.isAnonymous && document.body.dataset.role === 'Admin') {
       popName.innerHTML = `${user.name} <span style="font-size:0.6rem; background:#ff6b4a; color:white; padding:2px 5px; border-radius:4px; margin-left:5px; vertical-align: middle;">ANONYMOUS</span>`
     } else {
       popName.innerText = user.name || 'Unknown User'
@@ -998,7 +1075,7 @@ function showPopover (e, user) {
     btnCancelNoShow.style.display = 'none'
     btnCancelNoShow.onclick = null
 
-    if (localStorage.getItem('reserveRole') === 'Admin' && user.resId) {
+    if (document.body.dataset.role === 'Admin' && user.resId) {
       try {
         const slotTimeStr = user.startTime || e.currentTarget.innerText.trim()
 

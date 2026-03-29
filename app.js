@@ -39,11 +39,15 @@ app.use((req, res, next) => {
 /* ==========================================
    1. DATABASE CONNECTION
    ========================================== */
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB! Slay Architect.'))
-  .catch(err => console.error('Database connection error:', err))
 
+console.log('ENV URI:', process.env.MONGODB_URI)
+
+mongoose
+  .connect(
+    process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/reserveplusplus'
+  )
+  .then(() => console.log(' MongoDB connected'))
+  .catch(err => console.error(' Database connection error:', err))
 /* ==========================================
    2. SETTINGS & MIDDLEWARE
    ========================================== */
@@ -455,7 +459,10 @@ app.get('/admin-dashboard', requireAdmin, async (req, res) => {
 app.get('/reserve', requireLogin, async (req, res) => {
   try {
     const labs = await Lab.find().lean()
-    res.render('rseat', { labs })
+    res.render('rseat', { 
+  labs,
+  loggedInRole: req.session.user.role
+})
   } catch (err) {
     console.error('Error loading labs:', err)
     res.status(500).send('Error loading labs')
@@ -473,6 +480,27 @@ app.get('/it-assist', requireLogin, async (req, res) => {
   } catch (err) {
     console.error('Error loading it-assist page:', err)
     res.status(500).send('Error loading it-assist')
+  }
+})
+
+
+app.get('/api/students', requireAdmin, async (req, res) => {
+  try {
+    const search = req.query.term || ''
+
+    const students = await User.find({
+      role: 'Student',
+      $or: [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ]
+    }).limit(10)
+
+    res.json(students)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Server error' })
   }
 })
 
@@ -641,7 +669,9 @@ app.post('/login', async (req, res) => {
   const { email, password, rememberMe } = req.body
 
   try {
-    const user = await User.findOne({ email })
+    const user = await User.findOne({
+  email: email.toLowerCase()
+})
 
     if (!user) {
       return res.render('login', {
@@ -1056,6 +1086,7 @@ app.post('/api/reservations', async (req, res) => {
     const { labId, labCode, seats, date, timeRange, slotsArray, isAnonymous } =
       req.body
 
+    // ✅ GET LAB
     let lab
     if (labId) {
       lab = await Lab.findById(labId)
@@ -1065,11 +1096,32 @@ app.post('/api/reservations', async (req, res) => {
     }
 
     if (!lab) {
-      return res.status(404).json({ error: 'Lab not found in database.' })
+      return res.status(404).json({ error: 'Lab not found' })
     }
 
+    // ADMIN CAN OVERRIDE USER
+    let userId = req.session.user.id
+    if (req.session.user.role === 'Admin' && req.body.user) {
+      userId = req.body.user
+    }
+
+    // CONFLICT CHECK
+    const conflict = await Reservation.findOne({
+      lab: lab._id,
+      date: date,
+      status: 'Active',
+      slotsArray: { $in: slotsArray },
+      seatNumber: { $in: seats }
+    })
+
+    if (conflict) {
+      return res.status(400).json({ error: 'Time slot already booked' })
+    }
+
+   
     const newReservation = new Reservation({
-      user: req.session.user.id,
+      user: userId,
+      createdBy: req.session.user.id, 
       lab: lab._id,
       labCode: labCode,
       seatNumber: seats,
@@ -1081,15 +1133,12 @@ app.post('/api/reservations', async (req, res) => {
     })
 
     await newReservation.save()
-
-    await createNotificationSafe({
-      recipient: req.session.user.id,
+       await createNotificationSafe({
+      recipient: userId,
       senderName: 'Reserve++ Team',
       senderRole: 'Reservation System',
       title: 'Reservation Created',
-      message: `Your reservation for Room ${lab.labCode}, Seat ${seats.join(
-        ', '
-      )} on ${date} has been created successfully.`,
+      message: `Your reservation for Room ${lab.labCode},Seat ${Array.isArray(seats) ? seats.join(', ') : seats} on ${date} has been created successfully.`,
       type: 'Reservation'
     })
 
@@ -1100,6 +1149,10 @@ app.post('/api/reservations', async (req, res) => {
   }
 })
 
+   
+
+ 
+
 app.put('/api/reservations/:id', async (req, res) => {
   try {
     if (!req.session.user) {
@@ -1109,6 +1162,7 @@ app.put('/api/reservations/:id', async (req, res) => {
     const { labId, labCode, seats, date, timeRange, slotsArray, isAnonymous } =
       req.body
 
+    // GET LAB
     let lab
     if (labId) {
       lab = await Lab.findById(labId)
@@ -1118,17 +1172,41 @@ app.put('/api/reservations/:id', async (req, res) => {
     }
 
     if (!lab) {
-      return res.status(404).json({ error: 'Lab not found in database.' })
+      return res.status(404).json({ error: 'Lab not found' })
     }
 
+    // ADMIN CAN CHANGE USER
+    let userId = req.session.user.id
+    if (req.session.user.role === 'Admin' && req.body.user) {
+      userId = req.body.user
+    }
+
+    // CONFLICT CHECK
+    const conflict = await Reservation.findOne({
+      _id: { $ne: req.params.id },
+      lab: lab._id,
+      date: date,
+      status: 'Active',
+      slotsArray: { $in: slotsArray },
+      seatNumber: { $in: seats }
+    })
+
+    if (conflict) {
+      return res.status(400).json({ error: 'Time slot already booked' })
+    }
+
+    // UPDATE
     const updatedReservation = await Reservation.findByIdAndUpdate(
       req.params.id,
       {
+        user: userId,
+        createdBy: req.session.user.id,
         lab: lab._id,
-        seatNumber: seats.join(', '),
+        seatNumber: seats,
         date: date,
         timeRange: timeRange,
         timeSlot: JSON.stringify(slotsArray),
+        slotsArray: slotsArray,
         isAnonymous: isAnonymous || false
       },
       { new: true }
@@ -1137,17 +1215,6 @@ app.put('/api/reservations/:id', async (req, res) => {
     if (!updatedReservation) {
       return res.status(404).json({ error: 'Reservation not found' })
     }
-
-    await createNotificationSafe({
-      recipient: req.session.user.id,
-      senderName: 'Reserve++ Team',
-      senderRole: 'Reservation System',
-      title: 'Reservation Updated',
-      message: `Your reservation for Room ${lab.labCode}, Seat ${seats.join(
-        ', '
-      )} on ${date} has been updated successfully.`,
-      type: 'Reservation'
-    })
 
     res.json(updatedReservation)
   } catch (error) {
@@ -1332,7 +1399,9 @@ app.delete('/api/reservations/:id', async (req, res) => {
 /* ==========================================
    7. SERVER START
    ========================================== */
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
   console.log(`Running at http://localhost:${PORT}`)
 })
+
+

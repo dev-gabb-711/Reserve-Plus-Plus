@@ -788,3 +788,45 @@ body {
   opacity: 0.35;
   cursor: not-allowed;
 }
+
+
+/* ================================================
+   SELECT2 DARK PURPLE THEME FIX
+   ================================================ */
+
+/* dropdown background */
+.select2-dropdown {
+  background-color: #0b0c10 !important;
+  border: 1px solid rgba(176, 124, 255, 0.3) !important;
+  border-radius: 12px;
+}
+
+/* options text */
+.select2-container--default .select2-results__option {
+  color: #fff !important;
+  background: transparent !important;
+}
+
+/*  highlight (HOVER / SELECT) */
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background-color: #6a0dad !important;
+  color: #fff !important;
+}
+
+/* selected option */
+.select2-container--default .select2-results__option[aria-selected=true] {
+  background-color: rgba(106, 13, 173, 0.3) !important;
+}
+
+/* input field */
+.select2-container--default .select2-selection--single {
+  background-color: rgba(106, 13, 173, 0.1) !important;
+  border: 1px solid rgba(106, 13, 173, 0.3) !important;
+  color: #fff !important;
+  border-radius: 10px;
+}
+
+/* arrow */
+.select2-container--default .select2-selection__arrow b {
+  border-color: #fff transparent transparent transparent !important;
+}
