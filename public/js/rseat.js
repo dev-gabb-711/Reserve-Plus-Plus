@@ -17,6 +17,213 @@ const appState = {
 }
 
 /* =====================================================
+   Toast Helpers
+   ===================================================== */
+function getToastContainer () {
+  let container = document.getElementById('toastContainer')
+
+  if (!container) {
+    container = document.createElement('div')
+    container.id = 'toastContainer'
+    container.className = 'toast-container position-fixed top-0 end-0 p-3'
+    container.style.zIndex = '1085'
+    document.body.appendChild(container)
+  }
+
+  return container
+}
+
+function escapeHtml (value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function showToast ({
+  title = 'Notice',
+  message = '',
+  variant = 'warning',
+  delay = 3500,
+  autohide = true
+} = {}) {
+  const container = getToastContainer()
+  const toastEl = document.createElement('div')
+
+  const variantMap = {
+    success: {
+      icon: 'check_circle',
+      border: 'rgba(46, 204, 113, 0.45)',
+      iconClass: 'text-success'
+    },
+    danger: {
+      icon: 'error',
+      border: 'rgba(255, 107, 74, 0.45)',
+      iconClass: 'text-danger'
+    },
+    warning: {
+      icon: 'warning',
+      border: 'rgba(255, 193, 7, 0.45)',
+      iconClass: 'text-warning'
+    },
+    info: {
+      icon: 'info',
+      border: 'rgba(90, 169, 255, 0.45)',
+      iconClass: 'text-info'
+    }
+  }
+
+  const tone = variantMap[variant] || variantMap.info
+
+  toastEl.className = 'toast border-0 text-white'
+  toastEl.setAttribute('role', 'alert')
+  toastEl.setAttribute('aria-live', 'assertive')
+  toastEl.setAttribute('aria-atomic', 'true')
+  toastEl.dataset.bsAutohide = String(autohide)
+  toastEl.dataset.bsDelay = String(delay)
+  toastEl.style.background = 'rgba(18,18,18,0.95)'
+  toastEl.style.backdropFilter = 'blur(12px)'
+  toastEl.style.border = `1px solid ${tone.border}`
+  toastEl.style.boxShadow = '0 8px 24px rgba(0,0,0,0.28)'
+
+  toastEl.innerHTML = `
+    <div
+      class="toast-header text-white border-0"
+      style="background:transparent; position:relative; padding-right:2.5rem;"
+    >
+      <span class="material-symbols-rounded me-2 mt-1 ${tone.iconClass}">${tone.icon}</span>
+      <strong class="me-auto mt-1">${escapeHtml(title)}</strong>
+      <button
+        type="button"
+        class="btn-close btn-close-white"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+        style="position:absolute; top:0.7rem; right:0.75rem; margin:0;"
+      ></button>
+    </div>
+    <div class="toast-body pt-0">${escapeHtml(message)}</div>
+  `
+
+  container.appendChild(toastEl)
+
+  const toast = bootstrap.Toast.getOrCreateInstance(toastEl, {
+    autohide,
+    delay
+  })
+
+  toastEl.addEventListener('hidden.bs.toast', () => {
+    toastEl.remove()
+  })
+
+  toast.show()
+  return toastEl
+}
+
+function showConfirmToast ({
+  title = 'Please confirm',
+  message = '',
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  variant = 'warning',
+  onConfirm = () => {}
+} = {}) {
+  const container = getToastContainer()
+  const toastEl = document.createElement('div')
+
+  const variantMap = {
+    success: {
+      icon: 'check_circle',
+      border: 'rgba(46, 204, 113, 0.45)',
+      btnClass: 'btn-success'
+    },
+    danger: {
+      icon: 'warning',
+      border: 'rgba(255, 107, 74, 0.45)',
+      btnClass: 'btn-danger'
+    },
+    warning: {
+      icon: 'help',
+      border: 'rgba(255, 193, 7, 0.45)',
+      btnClass: 'btn-warning'
+    },
+    info: {
+      icon: 'info',
+      border: 'rgba(90, 169, 255, 0.45)',
+      btnClass: 'btn-info'
+    }
+  }
+
+  const tone = variantMap[variant] || variantMap.warning
+
+  toastEl.className = 'toast border-0 text-white'
+  toastEl.setAttribute('role', 'alertdialog')
+  toastEl.setAttribute('aria-live', 'assertive')
+  toastEl.setAttribute('aria-atomic', 'true')
+  toastEl.dataset.bsAutohide = 'false'
+  toastEl.style.background = 'rgba(18,18,18,0.97)'
+  toastEl.style.backdropFilter = 'blur(12px)'
+  toastEl.style.border = `1px solid ${tone.border}`
+  toastEl.style.boxShadow = '0 8px 24px rgba(0,0,0,0.28)'
+
+  toastEl.innerHTML = `
+    <div
+      class="toast-header text-white border-0"
+      style="background:transparent; position:relative; padding-right:2.5rem;"
+    >
+      <span class="material-symbols-rounded me-2 mt-1">${tone.icon}</span>
+      <strong class="me-auto mt-1">${escapeHtml(title)}</strong>
+      <button
+        type="button"
+        class="btn-close btn-close-white"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+        style="position:absolute; top:0.7rem; right:0.75rem; margin:0;"
+      ></button>
+    </div>
+    <div class="toast-body">
+      <div class="mb-3">${escapeHtml(message)}</div>
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="btn btn-sm btn-outline-light" data-confirm-toast-cancel="true">${escapeHtml(cancelText)}</button>
+        <button type="button" class="btn btn-sm ${tone.btnClass}" data-confirm-toast-confirm="true">${escapeHtml(confirmText)}</button>
+      </div>
+    </div>
+  `
+
+  container.appendChild(toastEl)
+
+  const toast = bootstrap.Toast.getOrCreateInstance(toastEl, {
+    autohide: false
+  })
+
+  toastEl.addEventListener('click', event => {
+    const confirmBtn = event.target.closest(
+      '[data-confirm-toast-confirm="true"]'
+    )
+    const cancelBtn = event.target.closest(
+      '[data-confirm-toast-cancel="true"]'
+    )
+
+    if (confirmBtn) {
+      onConfirm()
+      toast.hide()
+    }
+
+    if (cancelBtn) {
+      toast.hide()
+    }
+  })
+
+  toastEl.addEventListener('hidden.bs.toast', () => {
+    toastEl.remove()
+  })
+
+  toast.show()
+  return toastEl
+}
+
+/* =====================================================
    Helpers
    ===================================================== */
 function getFullLabCode () {
@@ -201,7 +408,7 @@ async function fetchMyReservations () {
 
       return {
         id: dbRes._id,
-         userId: dbRes.user?._id, 
+        userId: dbRes.user?._id,
         building: dbRes.lab
           ? normalizeBuildingName(dbRes.lab.building)
           : 'Unknown Building',
@@ -269,12 +476,12 @@ async function fetchBookedSlots () {
 document.addEventListener('DOMContentLoaded', () => {
   syncLabsFromDatabase()
 
- const role = document.body.dataset.role
+  const role = document.body.dataset.role
 
-if (role !== 'Admin') {
-  const field = document.getElementById('adminStudentField')
-  if (field) field.style.display = 'none'
-}
+  if (role !== 'Admin') {
+    const field = document.getElementById('adminStudentField')
+    if (field) field.style.display = 'none'
+  }
 
   const buildings = Object.keys(appState.data)
   if (buildings.length > 0 && !appState.currentBld) {
@@ -379,65 +586,63 @@ if (role !== 'Admin') {
     })
   }
 
+  const openEditFlow = document.getElementById('openEditFlow')
 
-  
- const openEditFlow = document.getElementById('openEditFlow')
+  if (openEditFlow) {
+    openEditFlow.onclick = async () => {
+      if (!appState.editingTargetId) {
+        showToast({
+          title: 'No reservation selected',
+          message: 'Please select a reservation from the list first.',
+          variant: 'warning'
+        })
+        return
+      }
 
-if (openEditFlow) {
-  openEditFlow.onclick = async () => {
-    if (!appState.editingTargetId) {
-      alert('Please select a reservation from the list first.')
-      return
-    }
+      const targetId = appState.editingTargetId
+      const res = appState.reservations.find(r => r.id === targetId)
 
-    const targetId = appState.editingTargetId
-    const res = appState.reservations.find(r => r.id === targetId)
+      if (res) {
+        const targetBuilding = normalizeBuildingName(res.building || '')
+        const cleanLab = String(res.lab || '').trim()
 
-    if (res) {
-      const targetBuilding = normalizeBuildingName(res.building || '')
-      const cleanLab = String(res.lab || '').trim()
+        appState.selectedSeats = parseSeatArray(res.seat)
+        appState.tempSlots = res.slots ? [...res.slots] : []
 
-      //  load seats + slots
-      appState.selectedSeats = parseSeatArray(res.seat)
-      appState.tempSlots = res.slots ? [...res.slots] : []
+        const studentSelect = document.getElementById('studentSelect')
 
-      // ===================== STUDENT DROPDOWN SYNC =====================
-      const studentSelect = document.getElementById('studentSelect')
+        if (studentSelect) {
+          if (res.userId) {
+            if (studentSelect && typeof $ !== 'undefined') {
+              $('#studentSelect').val(res.userId).trigger('change')
+            }
+          } else {
+            studentSelect.value = ''
+          }
 
-      if (studentSelect) {
-        if (res.userId) {
           if (studentSelect && typeof $ !== 'undefined') {
-           $('#studentSelect').val(res.userId).trigger('change') }
-        } else {
-          studentSelect.value = ''
+            $('#studentSelect').trigger('change')
+          }
         }
 
-        // safe trigger (avoid error if jQuery missing)
-          if (studentSelect && typeof $ !== 'undefined') {
-        $('#studentSelect').trigger('change')
-      }
-      }
+        if (targetBuilding && cleanLab) {
+          appState.currentBld = targetBuilding
+          appState.currentLab = cleanLab
 
-      // ===================== LOAD LAB + DATE =====================
-      if (targetBuilding && cleanLab) {
-        appState.currentBld = targetBuilding
-        appState.currentLab = cleanLab
+          const resDate = new Date(res.date)
+          if (!Number.isNaN(resDate.getTime())) {
+            appState.selectedDate = resDate
+            appState.viewDate = new Date(resDate)
+          }
 
-        const resDate = new Date(res.date)
-        if (!Number.isNaN(resDate.getTime())) {
-          appState.selectedDate = resDate
-          appState.viewDate = new Date(resDate)
+          refreshUI()
+          await fetchBookedSlots()
         }
 
-        refreshUI()
-        await fetchBookedSlots()
+        openBookingFlow()
       }
-
-      // ===================== OPEN MODAL =====================
-      openBookingFlow()
     }
   }
-}
 
   const executeDelete = document.getElementById('executeDelete')
   if (executeDelete) {
@@ -479,49 +684,47 @@ if (openEditFlow) {
     }
   }
 
-  // Ilagay ito sa loob ng DOMContentLoaded block
-if (typeof $ !== 'undefined' && $('#studentSelect').length > 0) {
+  if (typeof $ !== 'undefined' && $('#studentSelect').length > 0) {
     $('#studentSelect').select2({
-  dropdownParent: $('#summaryModal'),
-  placeholder: "Search for a student...",
-  allowClear: true,
-  ajax: {
-    url: '/api/students',
-    dataType: 'json',
-    delay: 250,
-    data: function (params) {
-      return { term: params.term };
-    },
-    processResults: function (data) {
-      return {
-        results: data.map(user => ({
-          id: user._id,
-          text: `${user.firstName} ${user.lastName}`,
-          email: user.email
-        }))
-      };
-    },
-    cache: true
-  },
-  templateResult: function (user) {
-    if (!user.id) return user.text;
+      dropdownParent: $('#summaryModal'),
+      placeholder: 'Search for a student...',
+      allowClear: true,
+      ajax: {
+        url: '/api/students',
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+          return { term: params.term }
+        },
+        processResults: function (data) {
+          return {
+            results: data.map(user => ({
+              id: user._id,
+              text: `${user.firstName} ${user.lastName}`,
+              email: user.email
+            }))
+          }
+        },
+        cache: true
+      },
+      templateResult: function (user) {
+        if (!user.id) return user.text
 
-    return $(`
-      <div>
-        <div>${user.text}</div>
-        <div style="font-style: italic; font-size: 0.85em; opacity: 0.7;">
-          ${user.email}
-        </div>
-      </div>
-    `);
-  },
-  templateSelection: function (user) {
-    return user.text || user.id;
+        return $(`
+          <div>
+            <div>${user.text}</div>
+            <div style="font-style: italic; font-size: 0.85em; opacity: 0.7;">
+              ${user.email}
+            </div>
+          </div>
+        `)
+      },
+      templateSelection: function (user) {
+        return user.text || user.id
+      }
+    })
   }
-});
-}
-  })
-
+})
 
 /* =====================================================
    Populate Reservation Form
@@ -565,7 +768,7 @@ async function submitReservationForm () {
 
   const labCodeStr = getFullLabCode()
   const existingResId = formData.get('reservation_id')
-  
+
   const selectedStudent = document.getElementById('studentSelect')?.value
 
   const reservationData = {
@@ -615,10 +818,21 @@ async function submitReservationForm () {
       }, 400)
     } else {
       const errData = await response.json()
-      alert('Could not save: ' + errData.error)
+      showToast({
+        title: 'Reservation not saved',
+        message: 'Could not save: ' + (errData.error || 'Please try again.'),
+        variant: 'danger',
+        delay: 4500
+      })
     }
   } catch (err) {
     console.error('Database save failed:', err)
+    showToast({
+      title: 'Reservation not saved',
+      message: 'Something went wrong while saving your reservation.',
+      variant: 'danger',
+      delay: 4500
+    })
   }
 }
 
@@ -1063,7 +1277,7 @@ function showPopover (e, user) {
   if (popAvatar) popAvatar.src = user.avatar || '../img/default-avatar.png'
 
   if (popName) {
-   if (user.isAnonymous && document.body.dataset.role === 'Admin') {
+    if (user.isAnonymous && document.body.dataset.role === 'Admin') {
       popName.innerHTML = `${user.name} <span style="font-size:0.6rem; background:#ff6b4a; color:white; padding:2px 5px; border-radius:4px; margin-left:5px; vertical-align: middle;">ANONYMOUS</span>`
     } else {
       popName.innerText = user.name || 'Unknown User'
@@ -1111,32 +1325,47 @@ function showPopover (e, user) {
 }
 
 async function executeNoShowCancel (reservationId) {
-  const isConfirmed = confirm('Mark student as No-Show and cancel reservation?')
-  if (!isConfirmed) return
+  showConfirmToast({
+    title: 'Cancel reservation?',
+    message: 'Mark this student as a no-show and cancel the reservation?',
+    confirmText: 'Yes, cancel',
+    cancelText: 'Keep reservation',
+    variant: 'danger',
+    onConfirm: async () => {
+      try {
+        const res = await fetch(
+          `/api/reservations/${reservationId}?reason=noshow`,
+          {
+            method: 'DELETE'
+          }
+        )
 
-  try {
-    const res = await fetch(
-      `/api/reservations/${reservationId}?reason=noshow`,
-      {
-        method: 'DELETE'
+        if (res.ok) {
+          hidePopover()
+          appState.bookedSlots = []
+          await fetchBookedSlots()
+          await fetchMyReservations()
+
+          bootstrap.Modal.getOrCreateInstance(
+            document.getElementById('cancelSuccessModal')
+          ).show()
+        } else {
+          showToast({
+            title: 'Cancellation failed',
+            message: 'Failed to cancel the reservation.',
+            variant: 'danger'
+          })
+        }
+      } catch (err) {
+        console.error('No-Show Cancel Error:', err)
+        showToast({
+          title: 'Cancellation failed',
+          message: 'Something went wrong while cancelling the reservation.',
+          variant: 'danger'
+        })
       }
-    )
-
-    if (res.ok) {
-      hidePopover()
-      appState.bookedSlots = []
-      await fetchBookedSlots()
-      await fetchMyReservations()
-
-      bootstrap.Modal.getOrCreateInstance(
-        document.getElementById('cancelSuccessModal')
-      ).show()
-    } else {
-      alert('Failed to cancel the reservation.')
     }
-  } catch (err) {
-    console.error('No-Show Cancel Error:', err)
-  }
+  })
 }
 
 function hidePopover () {
