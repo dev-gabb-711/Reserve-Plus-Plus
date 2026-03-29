@@ -24,6 +24,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const file = event.target.files?.[0]
       if (!file) return
 
+      const allowedTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/jpg',
+        'image/gif'
+      ]
+      
+      if (!allowedTypes.includes(file.type)) {
+        alert('Invalid file type. Please upload an image (JPG, PNG, GIF).')
+        return
+      }
+
+      const maxSize = 2 * 1024 * 1024 // 2mb max
+      if (file.size > maxSize) {
+        alert('File is too large. Max size is 5MB.')
+        return
+      }
+
       const previewUrl = URL.createObjectURL(file)
       avatarPreview.src = previewUrl
     })
