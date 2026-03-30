@@ -317,6 +317,38 @@ function calculateTimeRangeServer (slots) {
   }
 }
 
+function getReservationColorClass (buildingName) {
+  const building = String(buildingName || '')
+    .toLowerCase()
+    .trim()
+
+  if (
+    building.includes('andrew') ||
+    building.includes('br. andrew') ||
+    building.includes('br andrew')
+  ) {
+    return 'green'
+  }
+
+  if (building.includes('gokongwei')) {
+    return 'orange'
+  }
+
+  if (building.includes('velasco')) {
+    return 'blue'
+  }
+
+  if (
+    building.includes('st. la salle') ||
+    building.includes('st la salle') ||
+    building.includes('la salle')
+  ) {
+    return 'purple'
+  }
+
+  return 'green'
+}
+
 /* ==========================================
    5. GET ROUTES
    ========================================== */
@@ -586,7 +618,8 @@ app.get('/profile/:id', requireLogin, async (req, res) => {
           ? `Room ${reservation.lab.labCode} • Seat ${reservation.seatNumber}`
           : `Seat ${reservation.seatNumber}`,
         dateLabel: reservation.date || '',
-        timeLabel: calculatedTime || ''
+        timeLabel: calculatedTime || '',
+        buildingClass: getReservationColorClass(reservation.lab?.building)
       }
     })
 

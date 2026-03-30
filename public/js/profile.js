@@ -12,7 +12,8 @@ function getToastContainer () {
   if (!container) {
     container = document.createElement('div')
     container.id = 'toastContainer'
-    container.className = 'toast-container position-fixed top-0 end-0 p-3'
+    container.className =
+      'toast-container position-fixed top-0 start-50 translate-middle-x p-3'
     container.style.zIndex = '1085'
     document.body.appendChild(container)
   }
@@ -179,72 +180,69 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
   if (editForm) {
-    editForm.addEventListener('submit', function (e) {
+    editForm.addEventListener('submit', async function (e) {
       e.preventDefault()
 
       const formData = new FormData(editForm)
 
-      fetch(editForm.action, {
-        method: 'POST',
-        body: formData
-      })
-        .then(async res => {
-          if (res.status === 401) {
-            showToast({
-              title: 'Session Expired',
-              message: 'You have been logged out. Redirecting to login...',
-              variant: 'danger'
-            })
-            setTimeout(() => {
-              location.assign('/login')
-            }, 2500)
-            return
-          }
-
-          let data = {}
-
-          try {
-            data = await res.json()
-          } catch (err) {
-            data = {}
-          }
-
-          return { ok: res.ok, data }
+      try {
+        const res = await fetch(editForm.action, {
+          method: 'POST',
+          body: formData
         })
-        .then(({ ok, data }) => {
-          if (ok && data.success) {
-            if (data.profilePic && avatarPreview) {
-              avatarPreview.src = `${data.profilePic}?t=${new Date().getTime()}`
-            }
 
-            showToast({
-              title: 'Profile updated',
-              message: 'Your profile was updated successfully.',
-              variant: 'success',
-              delay: 2200
-            })
-
-            setTimeout(() => {
-              location.assign(`/profile/${data.userId || ''}`)
-            }, 900)
-          } else {
-            showToast({
-              title: 'Update failed',
-              message: data.message || 'Error updating profile.',
-              variant: 'danger',
-              delay: 4500
-            })
-          }
-        })
-        .catch(err => {
-          console.error(err)
+        if (res.status === 401) {
           showToast({
-            title: 'Connection error',
-            message: 'An error occurred. Please check your connection.',
+            title: 'Session Expired',
+            message: 'You have been logged out. Redirecting to login...',
+            variant: 'danger'
+          })
+
+          setTimeout(() => {
+            location.assign('/login')
+          }, 2500)
+          return
+        }
+
+        let data = {}
+        try {
+          data = await res.json()
+        } catch (err) {
+          data = {}
+        }
+
+        if (res.ok && data.success) {
+          if (data.profilePic && avatarPreview) {
+            avatarPreview.src = `${data.profilePic}?t=${new Date().getTime()}`
+          }
+
+          showToast({
+            title: 'Profile updated',
+            message: 'Your profile was updated successfully.',
+            variant: 'success',
+            delay: 2200
+          })
+
+          setTimeout(() => {
+            location.assign(`/profile/${data.userId || ''}`)
+          }, 900)
+        } else {
+          showToast({
+            title: 'Update failed',
+            message: data.message || 'Error updating profile.',
             variant: 'danger',
             delay: 4500
           })
+        }
+      } catch (err) {
+        console.error(err)
+        showToast({
+          title: 'Connection error',
+          message: 'An error occurred. Please check your connection.',
+          variant: 'danger',
+          delay: 4500
         })
+      }
     })
   }
 })

@@ -144,7 +144,7 @@
                   {{#if reservations.length}}
                   <div class="reservations-grid edit-reservations-grid">
                     {{#each reservations}}
-                    <div class="reservation-card">
+                    <div class="reservation-card {{buildingClass}}">
                       <div class="reservation-accent"></div>
                       <div class="reservation-info">
                         <div class="reservation-room">{{roomLabel}}</div>
@@ -254,7 +254,7 @@
               {{#if reservations.length}}
               <div class="reservations-grid reservations-grid--owner">
                 {{#each reservations}}
-                <div class="reservation-card">
+                <div class="reservation-card {{buildingClass}}">
                   <div class="reservation-accent"></div>
                   <div class="reservation-info">
                     <div class="reservation-room">{{roomLabel}}</div>
@@ -319,7 +319,7 @@
               {{#if reservations.length}}
               <div class="reservations-grid reservations-grid--outsider">
                 {{#each reservations}}
-                <div class="reservation-card">
+                <div class="reservation-card {{buildingClass}}">
                   <div class="reservation-accent"></div>
                   <div class="reservation-info">
                     <div class="reservation-room">{{roomLabel}}</div>

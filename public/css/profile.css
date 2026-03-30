@@ -281,6 +281,26 @@ body{
   flex-shrink:0;
 }
 
+/* ============================================
+   BUILDING COLOR CODING
+   ============================================ */
+
+.reservation-card.green .reservation-accent{
+  background:linear-gradient(180deg,#2ecc71,#27c468);
+}
+
+.reservation-card.orange .reservation-accent{
+  background:linear-gradient(180deg,#ff9b54,#f08d47);
+}
+
+.reservation-card.blue .reservation-accent{
+  background:linear-gradient(180deg,#5aa9ff,#4698f5);
+}
+
+.reservation-card.purple .reservation-accent{
+  background:linear-gradient(180deg,#b07cff,#9d68f2);
+}
+
 .reservation-info{
   display:flex;
   flex-direction:column;
