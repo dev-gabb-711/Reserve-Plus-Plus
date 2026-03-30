@@ -1218,7 +1218,16 @@ function renderTimeGrid () {
     year: 'numeric'
   })
 
+  // 1. Get current time and check if the selected date on the calendar is today
+  const now = new Date()
+  const isToday = appState.selectedDate.toDateString() === now.toDateString()
+
   slots.forEach(s => {
+    // 2. Create a Date object for this exact time slot to check if it has passed
+    const slotDateTimeStr = `${appState.selectedDate.toDateString()} ${s}`
+    const slotDateTime = new Date(slotDateTimeStr)
+    const isPastTime = isToday && slotDateTime < now
+
     const editingRes =
       appState.activeEditReservation &&
       appState.activeEditReservation.id === appState.editingTargetId
@@ -1253,7 +1262,8 @@ function renderTimeGrid () {
       )
     })
 
-    const isUnavailable = isGlobalOccupied || isUserReserved
+    // 3. Include `isPastTime` so the system knows this chip shouldn't be selectable
+    const isUnavailable = isGlobalOccupied || isUserReserved || isPastTime
 
     const chip = document.createElement('div')
     chip.className = `chip-time ${
@@ -1261,7 +1271,14 @@ function renderTimeGrid () {
     } ${isUnavailable ? 'unavailable' : ''}`
     chip.innerText = s
 
-    if (!isUnavailable) {
+    // 4. Handle the visual state and clicks based on availability
+    if (isPastTime) {
+      // Visual styling for past times
+      chip.style.opacity = '0.4'
+      chip.style.cursor = 'not-allowed'
+      chip.title = 'This time has already passed'
+    } else if (!isUnavailable) {
+      // Time is available! Bind the click event.
       chip.onclick = () => {
         chip.classList.toggle('active')
         const idx = appState.tempSlots.indexOf(s)
@@ -1272,6 +1289,7 @@ function renderTimeGrid () {
         }
       }
     } else if (isGlobalOccupied) {
+      // Time is booked! Bind the hover popover.
       const userInfo = appState.bookedSlotsData[s]
 
       if (userInfo) {

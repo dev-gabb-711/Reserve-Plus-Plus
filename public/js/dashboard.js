@@ -28,7 +28,8 @@ let activeBuildingFilters = new Set([
   'andrew',
   'gokongwei',
   'velasco',
-  'lasalle'
+  'lasalle',
+  'miguel'
 ])
 
 let viewDate = new Date()

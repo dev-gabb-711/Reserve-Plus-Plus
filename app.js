@@ -91,6 +91,41 @@ const Notification = require('./models/Notification')
    4. HELPER FUNCTIONS
    ========================================== */
 
+// Run this check every 60 seconds
+setInterval(async () => {
+  try {
+    // Get current time in Manila
+    const manilaNowStr = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Manila'
+    })
+    const now = new Date(manilaNowStr)
+
+    // Find all Active reservations
+    const activeReservations = await mongoose
+      .model('Reservation')
+      .find({ status: 'Active' })
+
+    for (let res of activeReservations) {
+      if (!res.date || !res.timeRange) continue
+
+      // Extract the end time
+      const endTimeStr = res.timeRange.split(' - ')[1]
+
+      // Combine them: "Mar 31, 2026 02:00 PM"
+      const expirationString = `${res.date} ${endTimeStr}`
+      const expirationDate = new Date(expirationString)
+
+      // Compare -> If the expiration Date is earlier than right now, mark as completed.
+      if (expirationDate < now) {
+        res.status = 'Completed'
+        await res.save()
+      }
+    }
+  } catch (error) {
+    console.error('Error auto-completing reservations:', error)
+  }
+}, 60000)
+
 function normalizeRoomCode (value) {
   return String(value || '').replace(/^[A-Za-z]+/, '')
 }
