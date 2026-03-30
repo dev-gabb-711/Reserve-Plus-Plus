@@ -75,7 +75,9 @@ function showToast ({
       class="toast-header text-white border-0"
       style="background:transparent; position:relative; padding-right:2.5rem;"
     >
-      <span class="material-symbols-rounded me-2 mt-1 ${tone.iconClass}">${tone.icon}</span>
+      <span class="material-symbols-rounded me-2 mt-1 ${tone.iconClass}">${
+    tone.icon
+  }</span>
       <strong class="me-auto mt-1">${escapeHtmlToast(title)}</strong>
       <button
         type="button"
@@ -251,9 +253,11 @@ function renderNotifications (list) {
     `
 
     item.onclick = async function () {
-      await fetch(`/api/notifications/${n.id}/read`, { method: 'PATCH' })
-      n.isRead = true
+      const success = await markNotificationAsRead(n.id)
 
+      if (success === 'ZOMBIE') return
+
+      n.isRead = true
       selectNotification(n.id)
       renderNotifications(getFilteredNotifications())
     }
@@ -276,6 +280,7 @@ function selectNotification (id) {
 
   if (!n) return
 
+  // NOTE: Removed the markNotificationAsRead() call from inside showDetail()
   showDetail(n)
 }
 
@@ -288,7 +293,23 @@ function selectNotification (id) {
  */
 async function fetchNotifications () {
   try {
-    const response = await fetch('/api/notifications/me')
+    const response = await fetch('/api/notifications/me', {
+      headers: { Accept: 'application/json' }
+    })
+
+    if (
+      response.status === 401 ||
+      (response.redirected && response.url.includes('/login'))
+    ) {
+      showToast({
+        title: 'Session Expired',
+        message: 'You need to re-log in. Redirecting...',
+        variant: 'danger'
+      })
+      setTimeout(() => location.replace('/login'), 2500)
+      return
+    }
+
     const data = await response.json()
 
     if (!response.ok) {
@@ -300,10 +321,11 @@ async function fetchNotifications () {
     showEmptyDetail()
   } catch (error) {
     console.error('Error fetching notifications:', error)
-
-    notifications = []
-    renderNotifications([])
-    showEmptyDetail()
+    if (error.message !== 'Session Expired') {
+      notifications = []
+      renderNotifications([])
+      showEmptyDetail()
+    }
   }
 }
 
@@ -313,8 +335,23 @@ async function fetchNotifications () {
 async function deleteNotification (id) {
   try {
     const response = await fetch(`/api/notifications/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: { Accept: 'application/json' }
     })
+
+    // ZOMBIE TAB CHECK
+    if (
+      response.status === 401 ||
+      (response.redirected && response.url.includes('/login'))
+    ) {
+      showToast({
+        title: 'Session Expired',
+        message: 'You need to re-log in. Redirecting...',
+        variant: 'danger'
+      })
+      setTimeout(() => location.replace('/login'), 2500)
+      return
+    }
 
     const data = await response.json()
 
@@ -328,13 +365,20 @@ async function deleteNotification (id) {
 
     renderNotifications(getFilteredNotifications())
     showEmptyDetail()
+    showToast({
+      title: 'Deleted',
+      message: 'Notification removed.',
+      variant: 'success'
+    })
   } catch (error) {
     console.error('Error deleting notification:', error)
-    showToast({
-      title: 'Delete failed',
-      message: 'Failed to delete notification.',
-      variant: 'danger'
-    })
+    if (error.message !== 'Session Expired') {
+      showToast({
+        title: 'Delete failed',
+        message: 'Failed to delete notification.',
+        variant: 'danger'
+      })
+    }
   }
 }
 
@@ -343,11 +387,28 @@ async function deleteNotification (id) {
  */
 async function markNotificationAsRead (id) {
   try {
-    await fetch(`/api/notifications/${id}/read`, {
-      method: 'PATCH'
+    const response = await fetch(`/api/notifications/${id}/read`, {
+      method: 'PATCH',
+      headers: { Accept: 'application/json' }
     })
+
+    if (
+      response.status === 401 ||
+      (response.redirected && response.url.includes('/login'))
+    ) {
+      showToast({
+        title: 'Session Expired',
+        message: 'You need to re-log in. Redirecting...',
+        variant: 'danger'
+      })
+      setTimeout(() => location.replace('/login'), 2500)
+      return 'ZOMBIE'
+    }
+
+    return response.ok
   } catch (error) {
     console.error('Error marking notification as read:', error)
+    return false
   }
 }
 

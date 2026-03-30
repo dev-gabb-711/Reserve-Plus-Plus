@@ -673,8 +673,8 @@ function startLiveStatusTimer () {
    ===================================================== */
 
 function getCalendarGradientForBuildings (buildingSet) {
-  const orderedKeys = ['andrew', 'gokongwei', 'velasco', 'lasalle'].filter(key =>
-    buildingSet.has(key)
+  const orderedKeys = ['andrew', 'gokongwei', 'velasco', 'lasalle'].filter(
+    key => buildingSet.has(key)
   )
 
   const colorMap = {
@@ -752,7 +752,9 @@ function renderCalendar () {
         classes.push('today')
       }
 
-      return `<span class="${classes.join(' ')}" data-date="${cell.key}">${cell.day}</span>`
+      return `<span class="${classes.join(' ')}" data-date="${cell.key}">${
+        cell.day
+      }</span>`
     })
     .join('')
 

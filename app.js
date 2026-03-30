@@ -44,9 +44,6 @@ app.use((req, res, next) => {
 /* ==========================================
    1. DATABASE CONNECTION
    ========================================== */
-
-console.log('ENV URI:', process.env.MONGODB_URI)
-
 mongoose
   .connect(
     process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/reserveplusplus'
@@ -100,10 +97,10 @@ function normalizeRoomCode (value) {
 
 function requireLogin (req, res, next) {
   if (!req.session.user) {
-    if (
-      req.xhr ||
-      (req.headers.accept && req.headers.accept.includes('json'))
-    ) {
+    const isAjax =
+      req.xhr || (req.headers.accept && req.headers.accept.includes('json'))
+
+    if (isAjax) {
       return res.status(401).json({
         success: false,
         message: 'Session expired. Redirecting...',
@@ -116,18 +113,18 @@ function requireLogin (req, res, next) {
 }
 
 function requireAdmin (req, res, next) {
-  if (!req.session.user) {
+  if (!req.session.user || req.session.user.role !== 'Admin') {
+    // Check if the frontend specifically asked for JSON
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      // Send the 401 status so our JS catch block triggers
+      return res
+        .status(401)
+        .json({ success: false, message: 'Admin session expired.' })
+    }
+
+    // Otherwise, it's a normal browser visit, so safely redirect
     return res.redirect('/login')
   }
-
-  if (req.session.user.role !== 'Admin') {
-    return res.status(403).send('Unauthorized')
-  }
-
-  res.set(
-    'Cache-Control',
-    'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0'
-  )
   next()
 }
 
@@ -353,11 +350,17 @@ function getReservationColorClass (buildingName) {
    5. GET ROUTES
    ========================================== */
 
-app.get('/', (req, res) => res.render('index'))
+app.get('/', (req, res) => {
+  res.render('index')
+})
 
 app.get('/login', (req, res) => {
   if (req.session.user) {
-    return res.redirect('/dashboard')
+    if (req.session.user.role === 'Admin') {
+      return res.redirect('/admin-dashboard')
+    } else {
+      return res.redirect('/dashboard')
+    }
   }
   res.render('login')
 })
@@ -365,18 +368,8 @@ app.get('/login', (req, res) => {
 app.get('/signup', (req, res) => res.render('signup'))
 
 app.get('/logout', (req, res) => {
-  console.log('BEFORE DESTROY:', req.session)
-
   req.session.destroy(err => {
-    if (err) {
-      console.error('Destroy error:', err)
-      return res.redirect('/dashboard')
-    }
-
-    console.log('AFTER DESTROY (should be gone)')
-
-    res.clearCookie('connect.sid', { path: '/' })
-
+    if (err) console.error('Error destroying session:', err)
     res.redirect('/login')
   })
 })
@@ -1131,28 +1124,36 @@ aside from the seatslot key and additional try-catch logic, the procedure is the
 */
 app.post('/api/reservations', async (req, res) => {
   // mongodb transac sesh init
-  const dbSession = await mongoose.startSession();
+  const dbSession = await mongoose.startSession()
 
   try {
-    let resultReservation;
+    let resultReservation
 
     await dbSession.withTransaction(async () => {
-      console.log("DEBUG: Transaction started for request...");
+      console.log('DEBUG: Transaction started for request...')
 
       if (!req.session.user) {
-        throw new Error('UNAUTHORIZED');
+        throw new Error('UNAUTHORIZED')
       }
 
-      const { labId, labCode, seats, date, timeRange, slotsArray, isAnonymous } = req.body;
+      const {
+        labId,
+        labCode,
+        seats,
+        date,
+        timeRange,
+        slotsArray,
+        isAnonymous
+      } = req.body
 
-      let lab;
+      let lab
       if (labId) {
-        lab = await Lab.findById(labId).session(dbSession);
+        lab = await Lab.findById(labId).session(dbSession)
       } else {
-        lab = await Lab.findOne({ labCode: labCode }).session(dbSession);
+        lab = await Lab.findOne({ labCode: labCode }).session(dbSession)
       }
 
-      if (!lab) throw new Error('LAB_NOT_FOUND');
+      if (!lab) throw new Error('LAB_NOT_FOUND')
 
       let userId = req.session.user.id
       if (req.session.user.role === 'Admin' && req.body.user) {
@@ -1183,7 +1184,7 @@ app.post('/api/reservations', async (req, res) => {
         timeSlot: JSON.stringify(slotsArray),
         seatSlotKeys: seatSlotKeys,
         isAnonymous: isAnonymous || false
-      });
+      })
 
       try {
         await newReservation.save({ session: dbSession })
@@ -1193,10 +1194,10 @@ app.post('/api/reservations', async (req, res) => {
         }
         throw err
       }
-      
+
       // Store the result to send after commit
-      resultReservation = newReservation;
-    });
+      resultReservation = newReservation
+    })
 
     // Run post reservation functions like notifications AFTER the transaction succeeds
     await createNotificationSafe({
@@ -1205,31 +1206,32 @@ app.post('/api/reservations', async (req, res) => {
       senderRole: 'Reservation System',
       title: 'Reservation Created',
       message: `Your reservation for Room ${resultReservation.labCode}, Seat ${
-        Array.isArray(resultReservation.seatNumber) ? resultReservation.seatNumber.join(', ') : resultReservation.seatNumber
+        Array.isArray(resultReservation.seatNumber)
+          ? resultReservation.seatNumber.join(', ')
+          : resultReservation.seatNumber
       } on ${resultReservation.date} has been created successfully.`,
       type: 'Reservation'
-    });
+    })
 
-    res.status(201).json(resultReservation);
-
+    res.status(201).json(resultReservation)
   } catch (error) {
     // Handling specific errors thrown inside the transaction
     if (error.message === 'CONFLICT') {
-      return res.status(400).json({ error: 'Time slot already booked' });
+      return res.status(400).json({ error: 'Time slot already booked' })
     }
     if (error.message === 'UNAUTHORIZED') {
-      return res.status(401).json({ error: 'Please log in first.' });
+      return res.status(401).json({ error: 'Please log in first.' })
     }
     if (error.message === 'LAB_NOT_FOUND') {
-      return res.status(404).json({ error: 'Lab not found' });
+      return res.status(404).json({ error: 'Lab not found' })
     }
 
-    console.error('Reservation Transaction Error:', error);
-    res.status(500).json({ error: 'Failed to create reservation' });
+    console.error('Reservation Transaction Error:', error)
+    res.status(500).json({ error: 'Failed to create reservation' })
   } finally {
-    await dbSession.endSession();
+    await dbSession.endSession()
   }
-});
+})
 
 app.get('/api/reservations/me', async (req, res) => {
   try {

@@ -3,7 +3,7 @@
    - Handles ticket UI, database-driven dropdowns,
      submission, and loading from backend
    ===================================================== */
-(function () {
+;(function () {
   /* =====================================================
      Toast Helpers
      ===================================================== */
@@ -81,7 +81,9 @@
         class="toast-header text-white border-0"
         style="background:transparent; position:relative; padding-right:2.5rem;"
       >
-        <span class="material-symbols-rounded me-2 mt-1 ${tone.iconClass}">${tone.icon}</span>
+        <span class="material-symbols-rounded me-2 mt-1 ${tone.iconClass}">${
+      tone.icon
+    }</span>
         <strong class="me-auto mt-1">${escapeHtmlToast(title)}</strong>
         <button
           type="button"
@@ -193,10 +195,14 @@
     return `
       <div class="mini-card ${cls}">
         <div class="info">
-          <strong>${escapeHtml(building)} • ${escapeHtml(room)} • Seat ${escapeHtml(seat)}</strong>
+          <strong>${escapeHtml(building)} • ${escapeHtml(
+      room
+    )} • Seat ${escapeHtml(seat)}</strong>
           <p><span class="mini-label">Issue:</span> ${escapeHtml(issue)}</p>
           <p><span class="mini-label">Status:</span> ${escapeHtml(status)}</p>
-          <p><span class="mini-label">Submitted:</span> ${escapeHtml(submitted)}</p>
+          <p><span class="mini-label">Submitted:</span> ${escapeHtml(
+            submitted
+          )}</p>
         </div>
       </div>
     `.trim()
@@ -294,7 +300,25 @@
 
   async function fetchLabs () {
     try {
-      const response = await fetch('/api/labs')
+      const response = await fetch('/api/labs', {
+        headers: {
+          Accept: 'application/json'
+        }
+      })
+
+      if (
+        response.status === 401 ||
+        (response.redirected && response.url.includes('/login'))
+      ) {
+        showToast({
+          title: 'Session Expired',
+          message: 'You need to re-log in. Redirecting...',
+          variant: 'danger'
+        })
+        setTimeout(() => location.replace('/login'), 2500)
+        return
+      }
+
       const data = await response.json()
 
       if (!response.ok) {
@@ -306,15 +330,37 @@
     } catch (error) {
       console.error('Error fetching labs:', error)
 
-      if (buildingEl) buildingEl.disabled = true
-      if (roomEl) roomEl.disabled = true
-      if (seatEl) seatEl.disabled = true
+      // Only disable if it wasn't a session expiration
+      if (error.message !== 'Session Expired') {
+        if (buildingEl) buildingEl.disabled = true
+        if (roomEl) roomEl.disabled = true
+        if (seatEl) seatEl.disabled = true
+      }
     }
   }
 
   async function fetchTickets () {
     try {
-      const response = await fetch('/api/tickets/me')
+      const response = await fetch('/api/tickets/me', {
+        headers: {
+          Accept: 'application/json'
+        }
+      })
+
+      // ZOMBIE TAB CHECK
+      if (
+        response.status === 401 ||
+        (response.redirected && response.url.includes('/login'))
+      ) {
+        showToast({
+          title: 'Session Expired',
+          message: 'You need to re-log in. Redirecting...',
+          variant: 'danger'
+        })
+        setTimeout(() => location.replace('/login'), 2500)
+        return
+      }
+
       const data = await response.json()
 
       if (!response.ok) {
@@ -326,7 +372,7 @@
     } catch (error) {
       console.error('Error fetching tickets:', error)
 
-      if (ticketsPane) {
+      if (ticketsPane && error.message !== 'Session Expired') {
         ticketsPane.innerHTML = `<p class="mb-0" style="opacity:.75;">Failed to load tickets.</p>`
       }
     }
@@ -336,10 +382,27 @@
     const response = await fetch('/submit-ticket', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
       },
       body: JSON.stringify(payload)
     })
+
+    // ZOMBIE TAB CHECK
+    if (
+      response.status === 401 ||
+      (response.redirected && response.url.includes('/login'))
+    ) {
+      showToast({
+        title: 'Session Expired',
+        message: 'You need to re-log in. Redirecting...',
+        variant: 'danger'
+      })
+      setTimeout(() => location.replace('/login'), 2500)
+
+      // Throw an error so the outer form submit handler stops processing
+      throw new Error('Session Expired')
+    }
 
     const data = await response.json()
 

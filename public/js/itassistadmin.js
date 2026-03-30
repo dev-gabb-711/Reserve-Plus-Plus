@@ -95,6 +95,136 @@ function getDescription (ticket) {
 }
 
 /* =====================================================
+   Resolve Ticket (Fetch Check)
+   ===================================================== */
+document.addEventListener('click', async e => {
+  if (e.target.classList.contains('resolve-btn')) {
+    const btn = e.target
+    const ticketId = btn.getAttribute('data-ticket-id')
+
+    // Optional: disable button to prevent double-clicks
+    btn.disabled = true
+    btn.textContent = 'Resolving...'
+
+    try {
+      const response = await fetch(
+        `/resolve-ticket/${encodeURIComponent(ticketId)}`,
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json'
+          }
+        }
+      )
+
+      if (
+        response.status === 401 ||
+        (response.redirected && response.url.includes('/login'))
+      ) {
+        showToast({
+          title: 'Session Expired',
+          message: 'You need to re-log in. Redirecting...',
+          variant: 'danger'
+        })
+        setTimeout(() => location.replace('/logout'), 2500)
+        return
+      }
+
+      if (response.ok) {
+        showToast({
+          title: 'Success',
+          message: 'Ticket marked as resolved!',
+          variant: 'success'
+        })
+        setTimeout(() => location.reload(), 1000)
+      } else {
+        showToast({
+          title: 'Error',
+          message: 'Failed to resolve ticket.',
+          variant: 'danger'
+        })
+        btn.disabled = false
+        btn.textContent = 'Resolved'
+      }
+    } catch (err) {
+      console.error(err)
+      showToast({
+        title: 'Error',
+        message: 'Server error occurred.',
+        variant: 'danger'
+      })
+      btn.disabled = false
+      btn.textContent = 'Resolved'
+    }
+  }
+})
+
+/* =====================================================
+   Toast Helpers
+   ===================================================== */
+function getToastContainer () {
+  let container = document.getElementById('toastContainer')
+  if (!container) {
+    container = document.createElement('div')
+    container.id = 'toastContainer'
+    container.className = 'toast-container position-fixed top-0 end-0 p-3'
+    container.style.zIndex = '1085'
+    document.body.appendChild(container)
+  }
+  return container
+}
+
+function showToast ({
+  title = 'Notice',
+  message = '',
+  variant = 'warning',
+  delay = 3500
+} = {}) {
+  const container = getToastContainer()
+  const toastEl = document.createElement('div')
+  const variantMap = {
+    success: {
+      icon: 'check_circle',
+      border: 'rgba(46, 204, 113, 0.45)',
+      iconClass: 'text-success'
+    },
+    danger: {
+      icon: 'error',
+      border: 'rgba(231, 76, 60, 0.45)',
+      iconClass: 'text-danger'
+    },
+    warning: {
+      icon: 'warning',
+      border: 'rgba(241, 196, 15, 0.45)',
+      iconClass: 'text-warning'
+    }
+  }
+  const conf = variantMap[variant] || variantMap.warning
+
+  toastEl.className =
+    'toast align-items-center text-white bg-dark border-0 mb-2'
+  toastEl.style.borderLeft = `4px solid ${conf.border}`
+  toastEl.style.minWidth = '250px'
+  toastEl.setAttribute('role', 'alert')
+  toastEl.setAttribute('aria-live', 'assertive')
+  toastEl.setAttribute('aria-atomic', 'true')
+
+  toastEl.innerHTML = `
+    <div class="toast-header bg-dark text-white" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+      <span class="material-symbols-rounded ${conf.iconClass} me-2" style="font-size: 1.2rem;">${conf.icon}</span>
+      <strong class="me-auto">${title}</strong>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body" style="font-size: 0.9rem;">${message}</div>
+  `
+
+  container.appendChild(toastEl)
+  const bsToast = new bootstrap.Toast(toastEl, { delay })
+  bsToast.show()
+  toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove())
+}
+
+/* =====================================================
    Ticket Data Source
    ===================================================== */
 
@@ -237,11 +367,9 @@ function renderTickets () {
           </div>
 
           <div class="ticket-actions">
-            <form action="/resolve-ticket/${encodeURIComponent(
+            <button class="pill-btn resolve-btn" data-ticket-id="${
               ticket._id
-            )}" method="POST">
-              <button class="pill-btn" type="submit">Resolved</button>
-            </form>
+            }">Resolved</button>
           </div>
 
         </div>
