@@ -342,22 +342,37 @@
       </div>
     </div>
 
-    <button id="btnCancelNoShow" class="btn btn-sm" style="
-        display:none;
-        background:#ff3b3b;
-        color:white;
-        font-weight:600;
-        border:none;
-        border-radius:4px;
-        padding:6px 12px;
-        white-space:nowrap;
-      ">
-      Cancel (No-Show)
-    </button>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <button id="btnEditReservation" class="btn btn-sm" style="
+          display:none;
+          background:#2ecc71;
+          color:white;
+          font-weight:600;
+          border:none;
+          border-radius:4px;
+          padding:6px 12px;
+          white-space:nowrap;
+        ">
+        Edit
+      </button>
+
+      <button id="btnCancelNoShow" class="btn btn-sm" style="
+          display:none;
+          background:#ff3b3b;
+          color:white;
+          font-weight:600;
+          border:none;
+          border-radius:4px;
+          padding:6px 12px;
+          white-space:nowrap;
+        ">
+        Cancel (No-Show)
+      </button>
+    </div>
   </div>
 
   <!--========================= TOAST CONTAINER =========================-->
-  <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1085;"></div>
+  <div id="toastContainer" class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index:1085;"></div>
 
   <!--========================= SCRIPTS =========================-->
   <script>

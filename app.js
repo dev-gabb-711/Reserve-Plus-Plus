@@ -33,8 +33,8 @@ app.use(
 
 app.use((req, res, next) => {
   console.log('===== SESSION DEBUG =====')
-  console.log('Session ID:', req.sessionID) // Express's internal session ID
-  console.log('Session data:', req.session) // Your stored user info
+  console.log('Session ID:', req.sessionID)
+  console.log('Session data:', req.session)
   console.log('Incoming request:', req.method, req.url)
   console.log('-------------------------\n')
 
@@ -53,6 +53,7 @@ mongoose
   )
   .then(() => console.log(' MongoDB connected'))
   .catch(err => console.error(' Database connection error:', err))
+
 /* ==========================================
    2. SETTINGS & MIDDLEWARE
    ========================================== */
@@ -283,10 +284,6 @@ function buildStudentNotifications (notifications) {
   }))
 }
 
-/**
- * Calculates a user-friendly time range (e.g., "09:00 AM - 10:30 AM")
- * from an array of 30-min time slots for the dashboard.
- */
 function calculateTimeRangeServer (slots) {
   if (!slots || slots.length === 0) return ''
 
@@ -336,7 +333,6 @@ app.get('/login', (req, res) => {
 app.get('/signup', (req, res) => res.render('signup'))
 
 app.get('/logout', (req, res) => {
-  // pwede na idelete yung debug comments sa clean up, pero for u guys' verification/info nalang din ill leave the debug prints here
   console.log('BEFORE DESTROY:', req.session)
 
   req.session.destroy(err => {
@@ -397,9 +393,7 @@ app.get('/dashboard', requireLogin, async (req, res) => {
         if (Array.isArray(parsedSlots)) {
           calculatedTime = calculateTimeRangeServer(parsedSlots)
         }
-      } catch (e) {
-        // Ignore old format
-      }
+      } catch (e) {}
 
       return {
         ...reservation,
@@ -584,9 +578,7 @@ app.get('/profile/:id', requireLogin, async (req, res) => {
         if (Array.isArray(parsedSlots)) {
           calculatedTime = calculateTimeRangeServer(parsedSlots)
         }
-      } catch (e) {
-        // Ignore old format
-      }
+      } catch (e) {}
 
       return {
         ...reservation,
@@ -704,9 +696,9 @@ app.post('/login', async (req, res) => {
       }
 
       if (rememberMe) {
-        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000 // 30 days
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000
       } else {
-        req.session.cookie.maxAge = 60 * 60 * 1000 // 1 hour
+        req.session.cookie.maxAge = 60 * 60 * 1000
       }
 
       if (user.role === 'Admin') {
@@ -765,14 +757,12 @@ app.post('/signup', async (req, res) => {
   }
 })
 
-// Fix error with multer not finding storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'public/uploads/')
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
-    // Example: avatar-168432901.jpg
     cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname))
   }
 })
@@ -792,10 +782,8 @@ app.post(
         return res.status(403).json({ success: false, message: 'Unauthorized' })
       }
 
-      // Find the user first so we can use .save() later
       const user = await User.findById(viewedUserId)
 
-      // Update the text fields
       user.firstName = (req.body.firstName || '').trim()
       user.lastName = (req.body.lastName || '').trim()
 
@@ -819,7 +807,6 @@ app.post(
       }
       user.description = newDescription
 
-      // Only update password if they typed a new one
       if (req.body.password && req.body.password.trim() !== '') {
         user.password = req.body.password.trim()
       }
@@ -1113,7 +1100,6 @@ app.post('/api/reservations', async (req, res) => {
     const { labId, labCode, seats, date, timeRange, slotsArray, isAnonymous } =
       req.body
 
-    // ✅ GET LAB
     let lab
     if (labId) {
       lab = await Lab.findById(labId)
@@ -1126,13 +1112,11 @@ app.post('/api/reservations', async (req, res) => {
       return res.status(404).json({ error: 'Lab not found' })
     }
 
-    // ADMIN CAN OVERRIDE USER
     let userId = req.session.user.id
     if (req.session.user.role === 'Admin' && req.body.user) {
       userId = req.body.user
     }
 
-    // CONFLICT CHECK
     const conflict = await Reservation.findOne({
       lab: lab._id,
       date: date,
@@ -1159,6 +1143,7 @@ app.post('/api/reservations', async (req, res) => {
     })
 
     await newReservation.save()
+
     await createNotificationSafe({
       recipient: userId,
       senderName: 'Reserve++ Team',
@@ -1177,76 +1162,6 @@ app.post('/api/reservations', async (req, res) => {
   }
 })
 
-app.put('/api/reservations/:id', async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.status(401).json({ error: 'Please log in first.' })
-    }
-
-    const { labId, labCode, seats, date, timeRange, slotsArray, isAnonymous } =
-      req.body
-
-    // GET LAB
-    let lab
-    if (labId) {
-      lab = await Lab.findById(labId)
-    } else {
-      const cleanCode = normalizeRoomCode(labCode)
-      lab = await Lab.findOne({ labCode: cleanCode })
-    }
-
-    if (!lab) {
-      return res.status(404).json({ error: 'Lab not found' })
-    }
-
-    // ADMIN CAN CHANGE USER
-    let userId = req.session.user.id
-    if (req.session.user.role === 'Admin' && req.body.user) {
-      userId = req.body.user
-    }
-
-    // CONFLICT CHECK
-    const conflict = await Reservation.findOne({
-      _id: { $ne: req.params.id },
-      lab: lab._id,
-      date: date,
-      status: 'Active',
-      slotsArray: { $in: slotsArray },
-      seatNumber: { $in: seats }
-    })
-
-    if (conflict) {
-      return res.status(400).json({ error: 'Time slot already booked' })
-    }
-
-    // UPDATE
-    const updatedReservation = await Reservation.findByIdAndUpdate(
-      req.params.id,
-      {
-        user: userId,
-        createdBy: req.session.user.id,
-        lab: lab._id,
-        seatNumber: seats,
-        date: date,
-        timeRange: timeRange,
-        timeSlot: JSON.stringify(slotsArray),
-        slotsArray: slotsArray,
-        isAnonymous: isAnonymous || false
-      },
-      { new: true }
-    )
-
-    if (!updatedReservation) {
-      return res.status(404).json({ error: 'Reservation not found' })
-    }
-
-    res.json(updatedReservation)
-  } catch (error) {
-    console.error('Update Error:', error)
-    res.status(500).json({ error: 'Failed to update reservation' })
-  }
-})
-
 app.get('/api/reservations/me', async (req, res) => {
   try {
     if (!req.session.user) {
@@ -1258,6 +1173,7 @@ app.get('/api/reservations/me', async (req, res) => {
       status: 'Active'
     })
       .populate('lab')
+      .populate('user', 'firstName lastName email profilePic role')
       .sort({ createdAt: -1 })
 
     res.json(reservations)
@@ -1272,7 +1188,6 @@ app.get('/api/reservations/booked', async (req, res) => {
     const { labId, date, seats } = req.query
     if (!labId || !date) return res.json({})
 
-    // 1. Safely parse the seats requested by the frontend into Strings
     let selectedSeats = []
     if (seats) {
       try {
@@ -1282,7 +1197,6 @@ app.get('/api/reservations/booked', async (req, res) => {
       }
     }
 
-    // 2. Fetch all active reservations for this room and date
     const bookings = await Reservation.find({
       lab: labId,
       date: date,
@@ -1292,7 +1206,6 @@ app.get('/api/reservations/booked', async (req, res) => {
     const bookedData = {}
     const isAdmin = req.session.user && req.session.user.role === 'Admin'
 
-    // 3. Time converter for accurate 12:00 PM No-Show sorting
     const timeToMinutes = timeStr => {
       if (!timeStr) return 0
       const [time, modifier] = timeStr.trim().split(' ')
@@ -1304,7 +1217,6 @@ app.get('/api/reservations/booked', async (req, res) => {
     }
 
     bookings.forEach(booking => {
-      // 4. Standardize the database's seat format into a String Array
       let bookingSeats = []
       if (Array.isArray(booking.seatNumber)) {
         bookingSeats = booking.seatNumber.map(String)
@@ -1317,22 +1229,19 @@ app.get('/api/reservations/booked', async (req, res) => {
         bookingSeats = [String(booking.seatNumber)]
       }
 
-      // 5. CRITICAL FIX: Check if the database seats overlap with the UI selected seats
       let overlaps = false
       if (selectedSeats.length === 0) {
-        overlaps = true // If no seats selected, return everything (useful for full-room map rendering)
+        overlaps = true
       } else {
         overlaps = selectedSeats.some(s => bookingSeats.includes(s))
       }
 
-      // 6. Only process and lock the slot IF there is an overlap!
       if (
         overlaps &&
         booking.slotsArray &&
         booking.slotsArray.length > 0 &&
         booking.user
       ) {
-        // Find the absolute earliest start time of the reservation block
         const sortedSlots = [...booking.slotsArray].sort(
           (a, b) => timeToMinutes(a) - timeToMinutes(b)
         )
@@ -1370,11 +1279,133 @@ app.get('/api/reservations/booked', async (req, res) => {
   }
 })
 
-// 4. Cancel a reservation
+app.get('/api/reservations/:id', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    const reservation = await Reservation.findById(req.params.id)
+      .populate('user', 'firstName lastName email profilePic role')
+      .populate('lab')
+
+    if (!reservation) {
+      return res.status(404).json({ error: 'Reservation not found' })
+    }
+
+    const isAdmin = req.session.user.role === 'Admin'
+    const isOwner =
+      String(reservation.user?._id) === String(req.session.user.id)
+
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({ error: 'Forbidden' })
+    }
+
+    res.json(reservation)
+  } catch (error) {
+    console.error('Fetch reservation by id error:', error)
+    res.status(500).json({ error: 'Failed to fetch reservation' })
+  }
+})
+
+app.put('/api/reservations/:id', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: 'Please log in first.' })
+    }
+
+    const existingReservation = await Reservation.findById(req.params.id)
+
+    if (!existingReservation) {
+      return res.status(404).json({ error: 'Reservation not found' })
+    }
+
+    const isAdmin = req.session.user.role === 'Admin'
+    const isOwner =
+      String(existingReservation.user) === String(req.session.user.id)
+
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({ error: 'Forbidden' })
+    }
+
+    const { labId, labCode, seats, date, timeRange, slotsArray, isAnonymous } =
+      req.body
+
+    let lab
+    if (labId) {
+      lab = await Lab.findById(labId)
+    } else {
+      const cleanCode = normalizeRoomCode(labCode)
+      lab = await Lab.findOne({ labCode: cleanCode })
+    }
+
+    if (!lab) {
+      return res.status(404).json({ error: 'Lab not found' })
+    }
+
+    let userId = existingReservation.user
+    if (req.session.user.role === 'Admin' && req.body.user) {
+      userId = req.body.user
+    }
+
+    const conflict = await Reservation.findOne({
+      _id: { $ne: req.params.id },
+      lab: lab._id,
+      date: date,
+      status: 'Active',
+      slotsArray: { $in: slotsArray },
+      seatNumber: { $in: seats }
+    })
+
+    if (conflict) {
+      return res.status(400).json({ error: 'Time slot already booked' })
+    }
+
+    const updatedReservation = await Reservation.findByIdAndUpdate(
+      req.params.id,
+      {
+        user: userId,
+        createdBy: req.session.user.id,
+        lab: lab._id,
+        seatNumber: seats,
+        date: date,
+        timeRange: timeRange,
+        timeSlot: JSON.stringify(slotsArray),
+        slotsArray: slotsArray,
+        isAnonymous: isAnonymous || false
+      },
+      { new: true }
+    )
+
+    if (!updatedReservation) {
+      return res.status(404).json({ error: 'Reservation not found' })
+    }
+
+    res.json(updatedReservation)
+  } catch (error) {
+    console.error('Update Error:', error)
+    res.status(500).json({ error: 'Failed to update reservation' })
+  }
+})
+
 app.delete('/api/reservations/:id', async (req, res) => {
   try {
     if (!req.session.user) {
       return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    const existingReservation = await Reservation.findById(req.params.id)
+
+    if (!existingReservation) {
+      return res.status(404).json({ error: 'Reservation not found' })
+    }
+
+    const isAdmin = req.session.user.role === 'Admin'
+    const isOwner =
+      String(existingReservation.user) === String(req.session.user.id)
+
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({ error: 'Forbidden' })
     }
 
     const cancelledReservation = await Reservation.findByIdAndUpdate(

@@ -7,6 +7,7 @@ const appState = {
   selectedSeats: [],
   reservations: [],
   editingTargetId: null,
+  activeEditReservation: null,
   viewDate: new Date(),
   selectedDate: new Date(),
   tempSlots: [],
@@ -25,7 +26,8 @@ function getToastContainer () {
   if (!container) {
     container = document.createElement('div')
     container.id = 'toastContainer'
-    container.className = 'toast-container position-fixed top-0 end-0 p-3'
+    container.className =
+      'toast-container position-fixed top-0 start-50 translate-middle-x p-3'
     container.style.zIndex = '1085'
     document.body.appendChild(container)
   }
@@ -313,6 +315,13 @@ function parseSeatArray (seatValue) {
     .filter(n => !Number.isNaN(n))
 }
 
+function parseReservationDate (dateStr) {
+  if (!dateStr) return null
+  const parsed = new Date(dateStr)
+  if (!Number.isNaN(parsed.getTime())) return parsed
+  return null
+}
+
 function applyCurrentBuildingTheme (buildingName) {
   const root = document.documentElement
   const building = String(buildingName || '').toLowerCase()
@@ -410,9 +419,14 @@ async function fetchMyReservations () {
         slotsArr = dbRes.timeSlot ? [dbRes.timeSlot] : []
       }
 
+      const userFirst = dbRes.user?.firstName || ''
+      const userLast = dbRes.user?.lastName || ''
+      const fullStudentName = `${userFirst} ${userLast}`.trim()
+
       return {
         id: dbRes._id,
-        userId: dbRes.user?._id,
+        userId: dbRes.user?._id || '',
+        studentName: fullStudentName || dbRes.user?.email || 'Selected Student',
         building: dbRes.lab
           ? normalizeBuildingName(dbRes.lab.building)
           : 'Unknown Building',
@@ -471,6 +485,168 @@ async function fetchBookedSlots () {
     }
   } catch (err) {
     console.error('Error loading slots:', err)
+  }
+}
+
+async function fetchReservationById (reservationId) {
+  const response = await fetch(`/api/reservations/${reservationId}`)
+  if (!response.ok) {
+    throw new Error('Failed to fetch reservation details')
+  }
+
+  const dbRes = await response.json()
+
+  let slotsArr = []
+  try {
+    slotsArr = JSON.parse(dbRes.timeSlot || '[]')
+  } catch (e) {
+    slotsArr = dbRes.timeSlot ? [dbRes.timeSlot] : []
+  }
+
+  const userFirst = dbRes.user?.firstName || ''
+  const userLast = dbRes.user?.lastName || ''
+  const fullStudentName = `${userFirst} ${userLast}`.trim()
+
+  return {
+    id: dbRes._id,
+    userId: dbRes.user?._id || '',
+    studentName: fullStudentName || dbRes.user?.email || 'Selected Student',
+    building: dbRes.lab
+      ? normalizeBuildingName(dbRes.lab.building)
+      : 'Unknown Building',
+    lab: dbRes.lab ? dbRes.lab.labCode : 'Unknown Lab',
+    seat: dbRes.seatNumber,
+    date: dbRes.date,
+    time:
+      Array.isArray(slotsArr) && slotsArr.length > 0
+        ? calculateTimeRange(slotsArr)
+        : dbRes.timeSlot,
+    slots: slotsArr
+  }
+}
+
+async function openReservationForEdit (reservationData) {
+  if (!reservationData) {
+    showToast({
+      title: 'Reservation not found',
+      message: 'Could not load the reservation for editing.',
+      variant: 'danger'
+    })
+    return
+  }
+
+  appState.editingTargetId = reservationData.id
+  appState.activeEditReservation = reservationData
+
+  const editDesc = document.querySelector('.edit-desc')
+  if (editDesc) {
+    editDesc.innerText = `Editing: ${reservationData.lab} Seat(s) ${
+      Array.isArray(reservationData.seat)
+        ? reservationData.seat.join(', ')
+        : reservationData.seat
+    }`
+  }
+
+  const targetBuilding = normalizeBuildingName(reservationData.building || '')
+  const cleanLab = String(reservationData.lab || '').trim()
+
+  appState.selectedSeats = parseSeatArray(reservationData.seat)
+  appState.tempSlots = Array.isArray(reservationData.slots)
+    ? [...reservationData.slots]
+    : []
+
+  const studentSelect = document.getElementById('studentSelect')
+  if (studentSelect) {
+    if (reservationData.userId && typeof $ !== 'undefined') {
+      const existingOption = Array.from(studentSelect.options).find(
+        option => option.value === reservationData.userId
+      )
+
+      if (!existingOption) {
+        const option = new Option(
+          reservationData.studentName || 'Selected Student',
+          reservationData.userId,
+          true,
+          true
+        )
+        studentSelect.add(option)
+      }
+
+      $('#studentSelect').val(reservationData.userId).trigger('change')
+    } else {
+      studentSelect.value = ''
+      if (typeof $ !== 'undefined') {
+        $('#studentSelect').val(null).trigger('change')
+      }
+    }
+  }
+
+  if (targetBuilding && cleanLab) {
+    appState.currentBld = targetBuilding
+    appState.currentLab = cleanLab
+
+    const resDate = parseReservationDate(reservationData.date)
+    if (resDate) {
+      appState.selectedDate = new Date(resDate)
+      appState.viewDate = new Date(resDate)
+    }
+
+    refreshUI()
+    await fetchBookedSlots()
+  }
+
+  const modalEl = document.getElementById('reservationModal')
+  const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl)
+
+  if (modalEl.classList.contains('show')) {
+    renderCalendar()
+    renderTimeGrid()
+    hidePopover()
+  } else {
+    openBookingFlow()
+  }
+}
+
+async function openAdminEditReservation (reservationId) {
+  if (!reservationId) {
+    showToast({
+      title: 'Reservation not found',
+      message: 'The selected reservation could not be loaded for editing.',
+      variant: 'danger'
+    })
+    return
+  }
+
+  try {
+    hidePopover()
+
+    let target = appState.reservations.find(r => r.id === reservationId)
+
+    if (!target) {
+      try {
+        target = await fetchReservationById(reservationId)
+      } catch (err) {
+        console.error('Direct reservation fetch failed:', err)
+      }
+    }
+
+    if (!target) {
+      showToast({
+        title: 'Reservation not found',
+        message: 'Could not find the reservation in the current list.',
+        variant: 'danger'
+      })
+      return
+    }
+
+    await openReservationForEdit(target)
+  } catch (err) {
+    console.error('Admin edit open failed:', err)
+    showToast({
+      title: 'Unable to open edit mode',
+      message: 'Something went wrong while loading the reservation.',
+      variant: 'danger'
+    })
   }
 }
 
@@ -604,46 +780,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const targetId = appState.editingTargetId
-      const res = appState.reservations.find(r => r.id === targetId)
+      const res =
+        appState.activeEditReservation &&
+        appState.activeEditReservation.id === targetId
+          ? appState.activeEditReservation
+          : appState.reservations.find(r => r.id === targetId)
 
       if (res) {
-        const targetBuilding = normalizeBuildingName(res.building || '')
-        const cleanLab = String(res.lab || '').trim()
-
-        appState.selectedSeats = parseSeatArray(res.seat)
-        appState.tempSlots = res.slots ? [...res.slots] : []
-
-        const studentSelect = document.getElementById('studentSelect')
-
-        if (studentSelect) {
-          if (res.userId) {
-            if (studentSelect && typeof $ !== 'undefined') {
-              $('#studentSelect').val(res.userId).trigger('change')
-            }
-          } else {
-            studentSelect.value = ''
-          }
-
-          if (studentSelect && typeof $ !== 'undefined') {
-            $('#studentSelect').trigger('change')
-          }
-        }
-
-        if (targetBuilding && cleanLab) {
-          appState.currentBld = targetBuilding
-          appState.currentLab = cleanLab
-
-          const resDate = new Date(res.date)
-          if (!Number.isNaN(resDate.getTime())) {
-            appState.selectedDate = resDate
-            appState.viewDate = new Date(resDate)
-          }
-
-          refreshUI()
-          await fetchBookedSlots()
-        }
-
-        openBookingFlow()
+        await openReservationForEdit(res)
       }
     }
   }
@@ -664,6 +808,7 @@ document.addEventListener('DOMContentLoaded', () => {
             r => r.id !== targetId
           )
           appState.editingTargetId = null
+          appState.activeEditReservation = null
           renderReservations()
           fetchBookedSlots()
 
@@ -760,7 +905,6 @@ function populateReservationForm (dateStr, timeRange) {
   ).innerText = `${labCode} • Seat(s) ${appState.selectedSeats.join(', ')}`
   document.getElementById('sumDate').innerText = dateStr
   document.getElementById('sumTime').innerText = timeRange
-  document.getElementById('isAnonymous').checked = false
 }
 
 /* =====================================================
@@ -815,6 +959,7 @@ async function submitReservationForm () {
       await fetchBookedSlots()
 
       appState.editingTargetId = null
+      appState.activeEditReservation = null
 
       const editDesc = document.querySelector('.edit-desc')
       if (editDesc) {
@@ -833,11 +978,16 @@ async function submitReservationForm () {
         renderSeats()
       }, 400)
     } else {
-      const errData = await response.json()
+      let errData = {}
+      try {
+        errData = await response.json()
+      } catch (e) {
+        errData = {}
+      }
 
       showToast({
         title: 'Reservation failed',
-        message: data.message || 'Please try again.',
+        message: errData.message || 'Please try again.',
         variant: 'danger'
       })
     }
@@ -1069,9 +1219,13 @@ function renderTimeGrid () {
   })
 
   slots.forEach(s => {
-    const editingRes = appState.editingTargetId
-      ? appState.reservations.find(r => r.id === appState.editingTargetId)
-      : null
+    const editingRes =
+      appState.activeEditReservation &&
+      appState.activeEditReservation.id === appState.editingTargetId
+        ? appState.activeEditReservation
+        : appState.editingTargetId
+        ? appState.reservations.find(r => r.id === appState.editingTargetId)
+        : null
 
     const isCurrentEditSlot =
       editingRes &&
@@ -1232,6 +1386,8 @@ window.selectForEdit = (e, id) => {
   const res = appState.reservations.find(r => r.id === id)
   if (!res) return
 
+  appState.activeEditReservation = res
+
   const editDesc = document.querySelector('.edit-desc')
   if (editDesc) {
     editDesc.innerText = `Editing: ${res.lab} Seat(s) ${
@@ -1265,6 +1421,8 @@ window.selectForEdit = (e, id) => {
    ===================================================== */
 function clearEditMode () {
   appState.editingTargetId = null
+  appState.activeEditReservation = null
+
   const desc = document.querySelector('.edit-desc')
   if (desc) desc.innerText = 'Select a reservation to edit.'
 
@@ -1289,6 +1447,7 @@ function showPopover (e, user) {
   const popAvatar = document.getElementById('popAvatar')
   const popName = document.getElementById('popName')
   const btnCancelNoShow = document.getElementById('btnCancelNoShow')
+  const btnEditReservation = document.getElementById('btnEditReservation')
 
   if (popAvatar) popAvatar.src = user.avatar || '../img/default-avatar.png'
 
@@ -1299,6 +1458,16 @@ function showPopover (e, user) {
       popName.innerText = user.name || 'Unknown User'
     }
     popName.href = user.userId ? `/profile/${user.userId}` : '#'
+  }
+
+  if (btnEditReservation) {
+    btnEditReservation.style.display = 'none'
+    btnEditReservation.onclick = null
+
+    if (document.body.dataset.role === 'Admin' && user.resId) {
+      btnEditReservation.style.display = 'block'
+      btnEditReservation.onclick = () => openAdminEditReservation(user.resId)
+    }
   }
 
   if (btnCancelNoShow) {
