@@ -1123,77 +1123,113 @@ app.patch('/api/notifications/:id/read', requireLogin, async (req, res) => {
 /* ==========================================
    API ROUTES (RESERVATIONS)
    ========================================== */
+/*
+REVISION: encapsulated the reservation process inside a transaction session (para matapos in one go yung reservation before another post for the same slot can interrupt)
 
+aside from the seatslot key and additional try-catch logic, the procedure is the same as before.
+
+*/
 app.post('/api/reservations', async (req, res) => {
+  // mongodb transac sesh init
+  const dbSession = await mongoose.startSession();
+
   try {
-    if (!req.session.user) {
-      return res.status(401).json({ error: 'Please log in first.' })
-    }
+    let resultReservation;
 
-    const { labId, labCode, seats, date, timeRange, slotsArray, isAnonymous } =
-      req.body
+    await dbSession.withTransaction(async () => {
+      console.log("DEBUG: Transaction started for request...");
 
-    let lab
-    if (labId) {
-      lab = await Lab.findById(labId)
-    } else {
-      const cleanCode = normalizeRoomCode(labCode)
-      lab = await Lab.findOne({ labCode: cleanCode })
-    }
+      if (!req.session.user) {
+        throw new Error('UNAUTHORIZED');
+      }
 
-    if (!lab) {
-      return res.status(404).json({ error: 'Lab not found' })
-    }
+      const { labId, labCode, seats, date, timeRange, slotsArray, isAnonymous } = req.body;
 
-    let userId = req.session.user.id
-    if (req.session.user.role === 'Admin' && req.body.user) {
-      userId = req.body.user
-    }
+      let lab;
+      if (labId) {
+        lab = await Lab.findById(labId).session(dbSession);
+      } else {
+        lab = await Lab.findOne({ labCode: labCode }).session(dbSession);
+      }
 
-    const conflict = await Reservation.findOne({
-      lab: lab._id,
-      date: date,
-      status: 'Active',
-      slotsArray: { $in: slotsArray },
-      seatNumber: { $in: seats }
-    })
+      if (!lab) throw new Error('LAB_NOT_FOUND');
 
-    if (conflict) {
-      return res.status(400).json({ error: 'Time slot already booked' })
-    }
+      let userId = req.session.user.id
+      if (req.session.user.role === 'Admin' && req.body.user) {
+        userId = req.body.user
+      }
 
-    const newReservation = new Reservation({
-      user: userId,
-      createdBy: req.session.user.id,
-      lab: lab._id,
-      labCode: labCode,
-      seatNumber: seats,
-      date: date,
-      timeRange: timeRange,
-      slotsArray: slotsArray,
-      timeSlot: JSON.stringify(slotsArray),
-      isAnonymous: isAnonymous || false
-    })
+      // normalize seats into array
+      const seatArray = Array.isArray(seats) ? seats : [seats]
 
-    await newReservation.save()
+      // generate atomic keys
+      const seatSlotKeys = []
 
+      seatArray.forEach(seat => {
+        slotsArray.forEach(slot => {
+          seatSlotKeys.push(`${seat}_${slot}`)
+        })
+      })
+
+      const newReservation = new Reservation({
+        user: userId,
+        createdBy: req.session.user.id,
+        lab: lab._id,
+        labCode: labCode,
+        seatNumber: seats,
+        date: date,
+        timeRange: timeRange,
+        slotsArray: slotsArray,
+        timeSlot: JSON.stringify(slotsArray),
+        seatSlotKeys: seatSlotKeys,
+        isAnonymous: isAnonymous || false
+      });
+
+      try {
+        await newReservation.save({ session: dbSession })
+      } catch (err) {
+        if (err.code === 11000) {
+          throw new Error('CONFLICT')
+        }
+        throw err
+      }
+      
+      // Store the result to send after commit
+      resultReservation = newReservation;
+    });
+
+    // Run post reservation functions like notifications AFTER the transaction succeeds
     await createNotificationSafe({
-      recipient: userId,
+      recipient: resultReservation.user,
       senderName: 'Reserve++ Team',
       senderRole: 'Reservation System',
       title: 'Reservation Created',
-      message: `Your reservation for Room ${lab.labCode},Seat ${
-        Array.isArray(seats) ? seats.join(', ') : seats
-      } on ${date} has been created successfully.`,
+      message: `Your reservation for Room ${resultReservation.labCode}, Seat ${
+        Array.isArray(resultReservation.seatNumber) ? resultReservation.seatNumber.join(', ') : resultReservation.seatNumber
+      } on ${resultReservation.date} has been created successfully.`,
       type: 'Reservation'
-    })
+    });
 
-    res.status(201).json(newReservation)
+    res.status(201).json(resultReservation);
+
   } catch (error) {
-    console.error('Reservation Error:', error)
-    res.status(500).json({ error: 'Failed to create reservation' })
+    // Handling specific errors thrown inside the transaction
+    if (error.message === 'CONFLICT') {
+      return res.status(400).json({ error: 'Time slot already booked' });
+    }
+    if (error.message === 'UNAUTHORIZED') {
+      return res.status(401).json({ error: 'Please log in first.' });
+    }
+    if (error.message === 'LAB_NOT_FOUND') {
+      return res.status(404).json({ error: 'Lab not found' });
+    }
+
+    console.error('Reservation Transaction Error:', error);
+    res.status(500).json({ error: 'Failed to create reservation' });
+  } finally {
+    await dbSession.endSession();
   }
-})
+});
 
 app.get('/api/reservations/me', async (req, res) => {
   try {
