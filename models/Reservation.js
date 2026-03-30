@@ -34,6 +34,12 @@ const reservationSchema = new mongoose.Schema(
       required: true
     },
 
+    // Mini primary key to flatten time slots + seat
+    seatSlotKeys: {
+      type: [String],
+      required: true
+    },
+
     isAnonymous: { type: Boolean, default: false },
 
     status: {
@@ -43,6 +49,11 @@ const reservationSchema = new mongoose.Schema(
     }
   },
   { timestamps: true }
+)
+
+reservationSchema.index(
+  { lab: 1, date: 1, seatSlotKeys: 1 },
+  { unique: true }
 )
 
 module.exports = mongoose.model('Reservation', reservationSchema)
